@@ -1,6 +1,6 @@
 {
   "proyecto": "SIGEDOC",
-  "actualizado": "2026-11-17",
+  "actualizado": "2026-11-21",
   "nodos": [
     {
       "id": "PRY",
@@ -119,7 +119,7 @@
       "id": "RF-02",
       "tipo": "Requerimiento",
       "nombre": "Varios identificadores y detección de duplicados",
-      "descripcion": "Varios identificadores y detección de duplicados.",
+      "descripcion": "Número del emisor, folio de recepción y UUID; detección de duplicados por número, emisor y año de fecha_documento.",
       "estado": "activo"
     },
     {
@@ -182,7 +182,7 @@
       "id": "RF-11",
       "tipo": "Requerimiento",
       "nombre": "Detectar rebotes",
-      "descripcion": "Detectar rebotes.",
+      "descripcion": "Detectar rebotes distinguiéndolos de devoluciones con motivo concreto.",
       "estado": "activo"
     },
     {
@@ -216,45 +216,50 @@
     {
       "id": "RF-16",
       "tipo": "Requerimiento",
-      "nombre": "Control de acceso por rol y área",
-      "descripcion": "Control de acceso por rol y área.",
+      "nombre": "Control de acceso por rol, área y persona",
+      "descripcion": "Cada área ve lo suyo completo y de lo demás solo estado y responsable; los confidenciales solo el titular y quien tiene movimiento sobre ellos.",
       "estado": "activo"
     },
     {
       "id": "C1",
       "tipo": "Consulta",
       "nombre": "Recorrido de un documento",
-      "descripcion": "Dónde está, quién lo tiene y por qué áreas pasó, con tiempos."
+      "descripcion": "Ubicación vigente desde PostgreSQL (D-42) y recorrido con ramas desde Neo4j.",
+      "bases": "PG+NJ"
     },
     {
       "id": "C2",
       "tipo": "Consulta",
       "nombre": "Hilo de un asunto",
-      "descripcion": "Documentos relacionados a cualquier profundidad y cuáles no están concluidos."
+      "descripcion": "Documentos relacionados hasta 6 saltos (D-50) y su estado de conclusión.",
+      "bases": "NJ+PG"
     },
     {
       "id": "C3",
       "tipo": "Consulta",
       "nombre": "Rebotes entre áreas",
-      "descripcion": "Documentos devueltos o returnados dos o más veces, o que regresan a un área ya visitada."
+      "descripcion": "Devoluciones sin motivo, 'no competencia' sin área sugerida, tres o más devoluciones o tres o más áreas distintas (D-32).",
+      "bases": "NJ"
     },
     {
       "id": "C4",
       "tipo": "Consulta",
       "nombre": "Pendientes por responsable",
-      "descripcion": "Pendientes por área responsable, titular actual y recibidos por personas ya no adscritas. Consulta integrada."
+      "descripcion": "Se resuelve en PostgreSQL (D-51); la expone O-14.",
+      "bases": "PG"
     },
     {
       "id": "C5",
       "tipo": "Consulta",
       "nombre": "Alcance de un asunto",
-      "descripcion": "Áreas y personas que tuvieron contacto con algún documento del asunto."
+      "descripcion": "Áreas y personas con contacto con algún documento del asunto, filtradas por visibilidad.",
+      "bases": "NJ"
     },
     {
       "id": "DB-PG",
       "tipo": "Base",
       "nombre": "PostgreSQL",
-      "descripcion": "Relacional. Registro oficial del documento, folios, áreas, personas, actores externos, bitácora de movimientos y outbox. Transacciones e integridad.",
+      "descripcion": "Relacional. Registro oficial del documento, folios, áreas, personas, actores externos, bitácora de movimientos y outbox. Se elige por garantías (folios sin huecos con escritura concurrente, bitácora inmutable, llaves foráneas, outbox en la misma transacción), no por escala.",
       "paradigma": "relacional"
     },
     {
@@ -268,14 +273,14 @@
       "id": "DB-NJ",
       "tipo": "Base",
       "nombre": "Neo4j",
-      "descripcion": "Grafos. Recorrido, referencias entre documentos y asuntos. 5 etiquetas y 16 relaciones.",
+      "descripcion": "Grafos. Recorrido, referencias entre documentos, asuntos y documentos no registrados. 6 etiquetas; las relaciones organizacionales viven solo en PostgreSQL (D-52).",
       "paradigma": "grafos"
     },
     {
       "id": "K-DOC",
       "tipo": "Concepto",
       "nombre": "Documento",
-      "descripcion": "Registro oficial: número, tipo (7), origen, estado, confidencialidad. Neo4j guarda id, tipo, estado y confidencial; MongoDB solo el id."
+      "descripcion": "Registro oficial: número, tipo (7), origen, estado, confidencial, síntesis, canal y fechas de recepción inicial y oficial. Neo4j guarda id, tipo, estado y confidencial; MongoDB guarda id y tipo."
     },
     {
       "id": "K-EXP",
@@ -293,7 +298,7 @@
       "id": "K-MOV",
       "tipo": "Concepto",
       "nombre": "Movimiento",
-      "descripcion": "Cada paso del recorrido. Bitácora inmutable en PostgreSQL, réplica completa en Neo4j."
+      "descripcion": "Cada paso del recorrido, con motivo de devolución e id del titular del área destino al turnar. Bitácora inmutable en PostgreSQL, réplica completa en Neo4j."
     },
     {
       "id": "K-ASU",
@@ -305,7 +310,7 @@
       "id": "K-ARE",
       "tipo": "Concepto",
       "nombre": "Área",
-      "descripcion": "Unidad organizacional con titular, dependencia y vigencia. Neo4j solo guarda id y siglas."
+      "descripcion": "Unidad organizacional con titular, dependencia y estado (activa o inactiva), sin sucesión. La jerarquía vive solo en PostgreSQL; Neo4j guarda id y siglas."
     },
     {
       "id": "K-PER",
@@ -323,61 +328,142 @@
       "id": "K-REF",
       "tipo": "Concepto",
       "nombre": "Referencias entre documentos",
-      "descripcion": "RESPONDE_A, DA_SEGUIMIENTO_A, EN_ALCANCE_A, SUSTITUYE_A. Fuente de verdad en Neo4j."
+      "descripcion": "RESPONDE_A, DA_SEGUIMIENTO_A, EN_ALCANCE_A, SUSTITUYE_A; pueden apuntar a un documento no registrado. Fuente de verdad en Neo4j."
     },
     {
       "id": "O-01",
       "tipo": "Operacion",
       "nombre": "Registrar documento recibido y asignar folio",
-      "descripcion": "Registrar documento recibido y asignar folio."
+      "descripcion": "Una sola transacción: folio con contador bloqueado por área y año de registro (D-21, D-34); si número, emisor y año de la fecha del documento ya existen, no crea nada y ofrece O-19 (D-27); sin número o sin fecha se marca posible_duplicado; todo documento tiene emisor (RI-06); encola el expediente y el nodo en el outbox (D-13)",
+      "seccion": "Recepción, registro y corrección",
+      "roles": "OF",
+      "recibe": "Tipo, número del emisor (opcional), emisor (área o actor externo), fecha del documento, canal (correo o papel), fecha y hora de recepción, síntesis, confidencial, contenido según el tipo, marca de extemporáneo",
+      "devuelve": "Id, folio y, si aplica, el documento que ya existe con el mismo número",
+      "reglas": "Una sola transacción: folio con contador bloqueado por área y año de registro (D-21, D-34); si número, emisor y año de la fecha del documento ya existen, no crea nada y ofrece O-19 (D-27); sin número o sin fecha se marca posible_duplicado; todo documento tiene emisor (RI-06); encola el expediente y el nodo en el outbox (D-13)",
+      "tipo_operacion": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true
     },
     {
       "id": "O-03",
       "tipo": "Operacion",
       "nombre": "Turnar a una o varias áreas",
-      "descripcion": "Turnar a una o varias áreas."
+      "descripcion": "Exactamente un responsable por grupo (RI-10); guarda el titular del área destino al turnar, nulo si está vacante (D-31); oficialía y dirección turnan cualquier documento, el titular solo los que tiene pendientes en su área (turno directo) (D-44); no se turnan documentos concluidos ni cancelados",
+      "seccion": "Recorrido del documento",
+      "roles": "OF, DI, TI",
+      "recibe": "Id del documento y, por área destino, su rol (responsable, apoyo o conocimiento) e instrucción",
+      "devuelve": "Movimientos creados con su id_grupo_turno",
+      "reglas": "Exactamente un responsable por grupo (RI-10); guarda el titular del área destino al turnar, nulo si está vacante (D-31); oficialía y dirección turnan cualquier documento, el titular solo los que tiene pendientes en su área (turno directo) (D-44); no se turnan documentos concluidos ni cancelados",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true
     },
     {
       "id": "O-05",
       "tipo": "Operacion",
-      "nombre": "Concluir un documento",
-      "descripcion": "Concluir un documento."
+      "nombre": "Concluir documento",
+      "descripcion": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14); la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
+      "seccion": "Recorrido del documento",
+      "roles": "TI, PE",
+      "recibe": "Id del documento, forma de conclusión, documento de respuesta (opcional), evidencia (si fue sin oficio)",
+      "devuelve": "Documento concluido",
+      "reglas": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14); la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ+MG",
+      "frecuencia": "Alta",
+      "nucleo": true
     },
     {
       "id": "O-07",
       "tipo": "Operacion",
       "nombre": "Relacionar documentos",
-      "descripcion": "Relacionar documentos."
+      "descripcion": "Sin autorreferencia; destino no registrado crea o reutiliza un DocumentoNoRegistrado con el mismo número y emisor (D-33); SUSTITUYE_A solo entre registrados y deja al sustituido sin_efecto en PostgreSQL con reconciliación (D-14); requiere visibilidad sobre el origen",
+      "seccion": "Relaciones y asuntos",
+      "roles": "OF, TI, PE",
+      "recibe": "Documento origen, destino (id, o número y emisor en texto si no está registrado) y tipo de relación",
+      "devuelve": "Relación creada",
+      "reglas": "Sin autorreferencia; destino no registrado crea o reutiliza un DocumentoNoRegistrado con el mismo número y emisor (D-33); SUSTITUYE_A solo entre registrados y deja al sustituido sin_efecto en PostgreSQL con reconciliación (D-14); requiere visibilidad sobre el origen",
+      "tipo_operacion": "E",
+      "bases": "NJ+PG",
+      "frecuencia": "Media",
+      "nucleo": true
     },
     {
       "id": "O-09",
       "tipo": "Operacion",
-      "nombre": "Consultar y actualizar expediente",
-      "descripcion": "Consultar y actualizar expediente."
+      "nombre": "Consultar y actualizar contenido del expediente",
+      "descripcion": "Validación por tipo con $jsonSchema; el tipo no cambia (D-26); lo confidencial solo lo ven el titular y quien tiene movimiento (D-29); los documentos cancelados son de solo lectura",
+      "seccion": "Expediente",
+      "roles": "OF, TI, PE",
+      "recibe": "Id del documento y campos del contenido",
+      "devuelve": "Expediente actualizado",
+      "reglas": "Validación por tipo con $jsonSchema; el tipo no cambia (D-26); lo confidencial solo lo ven el titular y quien tiene movimiento (D-29); los documentos cancelados son de solo lectura",
+      "tipo_operacion": "L+E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": true
     },
     {
       "id": "O-11",
       "tipo": "Operacion",
-      "nombre": "Ficha completa de un documento (flujo integrado)",
-      "descripcion": "Ficha completa de un documento (flujo integrado)."
+      "nombre": "Ficha completa de un documento",
+      "descripcion": "Flujo integrado de las tres bases; si MongoDB o Neo4j no responden, devuelve lo disponible y marca la sección faltante (D-53); contenido confidencial oculto según D-29",
+      "seccion": "Consultas",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Id del documento",
+      "devuelve": "Registro, folios y acuses; expediente; recorrido con tiempos (C1); relaciones y asuntos",
+      "reglas": "Flujo integrado de las tres bases; si MongoDB o Neo4j no responden, devuelve lo disponible y marca la sección faltante (D-53); contenido confidencial oculto según D-29",
+      "tipo_operacion": "L",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true
     },
     {
       "id": "O-14",
       "tipo": "Operacion",
-      "nombre": "Pendientes por área y responsable",
-      "descripcion": "Pendientes por área y responsable."
+      "nombre": "Pendientes por área y responsable (bandeja)",
+      "descripcion": "Regla de pendiente de D-42, calculada en PostgreSQL para que refleje un turno al instante; implementa C4 (D-51)",
+      "seccion": "Consultas",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Área (o todas, según el rol), filtros por tipo y antigüedad",
+      "devuelve": "Documentos pendientes con rol, antigüedad en días naturales, titular al turnar y si quien lo recibió ya no está adscrito",
+      "reglas": "Regla de pendiente de D-42, calculada en PostgreSQL para que refleje un turno al instante; implementa C4 (D-51)",
+      "tipo_operacion": "L",
+      "bases": "PG",
+      "frecuencia": "Alta",
+      "nucleo": true
     },
     {
       "id": "O-17",
       "tipo": "Operacion",
-      "nombre": "Eliminar anexo o nota del expediente",
-      "descripcion": "Eliminar anexo o nota del expediente."
+      "nombre": "Eliminar anexo o nota",
+      "descripcion": "Solo capturas por error, por su autor u oficialía (D-20); la nota evidencia_atencion de una conclusión no se elimina, porque dejaría sin evidencia a RF-10",
+      "seccion": "Expediente",
+      "roles": "OF, PE",
+      "recibe": "Id del documento e id del anexo o la nota",
+      "devuelve": "Confirmación",
+      "reglas": "Solo capturas por error, por su autor u oficialía (D-20); la nota evidencia_atencion de una conclusión no se elimina, porque dejaría sin evidencia a RF-10",
+      "tipo_operacion": "E",
+      "bases": "MG",
+      "frecuencia": "Baja",
+      "nucleo": false
     },
     {
       "id": "O-18",
       "tipo": "Operacion",
-      "nombre": "Eliminar referencia o sacar documento de un asunto",
-      "descripcion": "Eliminar referencia o sacar documento de un asunto."
+      "nombre": "Quitar referencia o sacar de un asunto",
+      "descripcion": "Solo capturas por error (D-20); quitar SUSTITUYE_A devuelve al documento su estado anterior con la misma reconciliación de D-14",
+      "seccion": "Relaciones y asuntos",
+      "roles": "OF, TI, PE",
+      "recibe": "Id de la relación o de la pertenencia",
+      "devuelve": "Confirmación",
+      "reglas": "Solo capturas por error (D-20); quitar SUSTITUYE_A devuelve al documento su estado anterior con la misma reconciliación de D-14",
+      "tipo_operacion": "E",
+      "bases": "NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
     },
     {
       "id": "D-01",
@@ -445,8 +531,8 @@
     {
       "id": "D-10",
       "tipo": "Decision",
-      "nombre": "Motores: PostgreSQL, MongoDB y Neo4j",
-      "descripcion": "Drivers oficiales en cualquier backend; comunes en el curso.",
+      "nombre": "Motores: PostgreSQL, MongoDB y Neo4j, cada uno por una necesidad",
+      "descripcion": "PostgreSQL: folios sin huecos, bitácora inmutable e integridad con escritura concurrente (D-35). MongoDB: contenido que cambia según el tipo de documento (H-07), con anexos y notas anidados y validación por tipo. Neo4j: recorridos y patrones de C1 a C3, referencias entre documentos y asuntos. Si se quita PostgreSQL se pierde la integridad transaccional; si se quita MongoDB el contenido iría en JSONB, sin validación declarativa por tipo y mezclado con el registro transaccional; si se quita Neo4j los recorridos serían consultas recursivas en SQL, menos legibles.",
       "estado": "tomada"
     },
     {
@@ -551,7 +637,7 @@
       "id": "HU-A2",
       "tipo": "Hueco",
       "nombre": "Varios identificadores y número no único",
-      "descripcion": "UUID propio más folio por área; UNIQUE parcial de número con emisor.",
+      "descripcion": "UUID propio más folio por área; UNIQUE parcial sobre número, emisor y año de fecha_documento.",
       "estado": "resuelto"
     },
     {
@@ -600,14 +686,14 @@
       "id": "HU-C1",
       "tipo": "Hueco",
       "nombre": "Reestructuraciones y vigencias",
-      "descripcion": "Áreas con vigencia y sucesión; titulares y adscripciones sin historial.",
-      "estado": "parcial"
+      "descripcion": "Reestructuraciones fuera de alcance: áreas solo con estado actual, sin sucesión. El titular al momento del turno se guarda en el movimiento.",
+      "estado": "aceptado"
     },
     {
       "id": "HU-C3",
       "tipo": "Hueco",
       "nombre": "Varias fechas por documento",
-      "descripcion": "fecha_documento, fecha_hora_recepcion, fecha_hora y fecha_registro.",
+      "descripcion": "fecha_documento, fecha_recepcion_inicial, fecha_recepcion_oficial, fecha_hora del movimiento y fecha_registro.",
       "estado": "resuelto"
     },
     {
@@ -649,8 +735,8 @@
       "id": "HU-D6",
       "tipo": "Hueco",
       "nombre": "Ciclos legítimos frente a rebotes",
-      "descripcion": "C3 define rebote por devoluciones repetidas o regreso a un área; falta excluir ciclos legítimos (pedir y devolver información).",
-      "estado": "parcial"
+      "descripcion": "Devolución legítima con motivo del catálogo; rebote sin motivo, 'no competencia' sin área sugerida o tres o más áreas.",
+      "estado": "resuelto"
     },
     {
       "id": "HU-E2",
@@ -663,29 +749,29 @@
       "id": "HU-E3",
       "tipo": "Hueco",
       "nombre": "Referencias a documentos fuera del sistema",
-      "descripcion": "No está definido si se crea un nodo fantasma o se pierde la referencia.",
-      "estado": "abierto"
+      "descripcion": "Nodo DocumentoNoRegistrado con número y emisor en texto.",
+      "estado": "resuelto"
     },
     {
       "id": "HU-E4",
       "tipo": "Hueco",
       "nombre": "Cómo se forma un asunto",
-      "descripcion": "Asignación manual (O-08) y corrección con O-18.",
+      "descripcion": "Asignación manual por quien atiende, en cualquier momento (O-08), y corrección con O-18.",
       "estado": "resuelto"
     },
     {
       "id": "HU-F1",
       "tipo": "Hueco",
       "nombre": "Supernodos (oficialía, secretarías particulares)",
-      "descripcion": "Pendiente en diseño físico: límites de profundidad e índices.",
-      "estado": "abierto"
+      "descripcion": "Las consultas se anclan en documento, asunto o fecha; las áreas de alto grado solo aparecen como destino.",
+      "estado": "resuelto"
     },
     {
       "id": "HU-F4",
       "tipo": "Hueco",
       "nombre": "Explosión de caminos en consultas variables",
-      "descripcion": "Se acordó limitar profundidad; falta fijarla en el catálogo Cypher.",
-      "estado": "parcial"
+      "descripcion": "Recorridos variables limitados a 6 saltos.",
+      "estado": "resuelto"
     },
     {
       "id": "HU-G1",
@@ -698,14 +784,14 @@
       "id": "HU-G2",
       "tipo": "Hueco",
       "nombre": "Duplicados por correo y papel",
-      "descripcion": "UNIQUE parcial de número con emisor y marca posible_duplicado.",
+      "descripcion": "UNIQUE parcial sobre número, emisor y año de fecha_documento, y marca posible_duplicado.",
       "estado": "resuelto"
     },
     {
       "id": "HU-H1",
       "tipo": "Hueco",
       "nombre": "Visibilidad entre áreas",
-      "descripcion": "RF-16: cada área ve lo suyo; oficialía y dirección todo.",
+      "descripcion": "Tres niveles de visibilidad aplicados en el backend (D-29).",
       "estado": "resuelto"
     },
     {
@@ -747,22 +833,22 @@
       "id": "HU-INT",
       "tipo": "Hueco",
       "nombre": "¿La interfaz es obligatoria?",
-      "descripcion": "Confirmar con el profesor.",
-      "estado": "abierto"
+      "descripcion": "Obligatoria (confirmado). Aplicación web que consume la API (D-36).",
+      "estado": "resuelto"
     },
     {
       "id": "HU-STK",
       "tipo": "Hueco",
       "nombre": "Lenguaje y framework del backend",
-      "descripcion": "Decisión pendiente para la Fase 3.",
-      "estado": "abierto"
+      "descripcion": "Python con FastAPI en el backend y React con Vite en la interfaz (D-37, D-38).",
+      "estado": "resuelto"
     },
     {
       "id": "DT-01",
       "tipo": "DeudaTecnica",
       "nombre": "Sin historial de titulares y adscripciones",
-      "descripcion": "No se sabe quién ocupaba un puesto cuando se turnó un documento.",
-      "estado": "aceptada"
+      "descripcion": "Sin historial completo; quién era titular al turnar queda guardado en el movimiento.",
+      "estado": "parchada"
     },
     {
       "id": "DT-02",
@@ -802,9 +888,9 @@
     {
       "id": "DT-07",
       "tipo": "DeudaTecnica",
-      "nombre": "Ciclos en DEPENDE_DE validados en el backend",
-      "descripcion": "No hay restricción del motor que impida ciclos jerárquicos.",
-      "estado": "aceptada"
+      "nombre": "Ciclos en la jerarquía validados por consulta",
+      "descripcion": "Ninguna restricción del motor impide ciclos; se validan con consulta recursiva y bloqueo dentro de la transacción.",
+      "estado": "parchada"
     },
     {
       "id": "DT-08",
@@ -867,7 +953,7 @@
       "tipo": "Entregable",
       "nombre": "Catálogo de operaciones y consultas",
       "descripcion": "Entregable 5 de la guía.",
-      "estado": "pendiente"
+      "estado": "redactado (en revisión)"
     },
     {
       "id": "E-6",
@@ -889,6 +975,1218 @@
       "nombre": "Pruebas, documentación y despliegue",
       "descripcion": "Entregable 8 de la guía.",
       "estado": "pendiente"
+    },
+    {
+      "id": "CTX-05",
+      "tipo": "Contexto",
+      "nombre": "Entrevista complementaria",
+      "descripcion": "Seis preguntas de seguimiento a la encargada de la Oficialía de Partes. Las referencias como 2c-1 remiten a sus respuestas."
+    },
+    {
+      "id": "CTX-06",
+      "tipo": "Contexto",
+      "nombre": "Retroalimentación del profesor",
+      "descripcion": "Pidió casos de uso con sus flujos, distinguir qué consulta es de grafo y qué es de documento, y justificar PostgreSQL con volumen y frecuencia."
+    },
+    {
+      "id": "H-11",
+      "tipo": "Hallazgo",
+      "nombre": "Documentos confidenciales y visibilidad entre áreas",
+      "descripcion": "Personal, quejas y denuncias, jurídicos y algunos de auditoría solo los ven el jefe y quien atiende. De otras áreas basta saber estado y responsable (2c-3).",
+      "referencia_entrevista": "2c-3"
+    },
+    {
+      "id": "H-12",
+      "tipo": "Hallazgo",
+      "nombre": "Registro doble por correo y papel",
+      "descripcion": "El escaneado se registra al llegar por correo y el original otra vez en ventanilla; el sello del papel debería ser la fecha oficial. La numeración del emisor suele reiniciar cada año, con excepciones (2c-1).",
+      "referencia_entrevista": "2c-1"
+    },
+    {
+      "id": "H-13",
+      "tipo": "Hallazgo",
+      "nombre": "Pendientes heredados y responsabilidad en el tiempo",
+      "descripcion": "Al cambiar el titular, los pendientes se quedan sin dueño; para quejas importa quién era titular cuando se turnó, no quién lo es hoy (2c-2).",
+      "referencia_entrevista": "2c-2"
+    },
+    {
+      "id": "H-14",
+      "tipo": "Hallazgo",
+      "nombre": "Asuntos ligados al responder, no al registrar",
+      "descripcion": "Nadie decide formalmente qué documentos forman un asunto; lo hace quien atiende, casi siempre al contestar (2c-4).",
+      "referencia_entrevista": "2c-4"
+    },
+    {
+      "id": "H-15",
+      "tipo": "Hallazgo",
+      "nombre": "Devoluciones legítimas frente a rebotes",
+      "descripcion": "Devolución normal: motivo concreto y regresa a quien envió. Rebote: sin motivo, 'no es de nuestra competencia' sin redirigir o tres o más áreas (2c-5).",
+      "referencia_entrevista": "2c-5"
+    },
+    {
+      "id": "H-16",
+      "tipo": "Hallazgo",
+      "nombre": "Citas a documentos no registrados y registros tardíos",
+      "descripcion": "Es común citar oficios de otras instituciones, de administraciones anteriores o mal numerados; al localizarlos se registran tarde con la fecha de hoy (2c-6).",
+      "referencia_entrevista": "2c-6"
+    },
+    {
+      "id": "K-DNR",
+      "tipo": "Concepto",
+      "nombre": "Documento no registrado",
+      "descripcion": "Documento citado que no está en el sistema: número y emisor en texto. Solo existe en Neo4j."
+    },
+    {
+      "id": "O-08",
+      "tipo": "Operacion",
+      "nombre": "Asignar documento a un asunto",
+      "descripcion": "En cualquier momento, no en ventanilla (D-30); un documento puede pertenecer a varios asuntos",
+      "seccion": "Relaciones y asuntos",
+      "roles": "TI, PE",
+      "recibe": "Id del documento e id del asunto",
+      "devuelve": "Pertenencia creada",
+      "reglas": "En cualquier momento, no en ventanilla (D-30); un documento puede pertenecer a varios asuntos",
+      "tipo_operacion": "E",
+      "bases": "NJ",
+      "frecuencia": "Media",
+      "nucleo": true
+    },
+    {
+      "id": "RI-06",
+      "tipo": "Regla",
+      "nombre": "Todo documento tiene emisor",
+      "descripcion": "Un área emisora o un actor externo. Redacción reconstruida desde HU-EMI; confirmar contra E-2.",
+      "imposicion": "PostgreSQL"
+    },
+    {
+      "id": "RI-10",
+      "tipo": "Regla",
+      "nombre": "Un solo responsable por grupo de turno",
+      "descripcion": "'A lo más uno' con índice único parcial sobre id_grupo_turno; 'al menos uno' en el servicio (DT-06).",
+      "imposicion": "PostgreSQL y backend"
+    },
+    {
+      "id": "RI-14",
+      "tipo": "Regla",
+      "nombre": "Conclusión explícita",
+      "descripcion": "Un documento solo se concluye con forma_conclusion registrada. Redacción reconstruida desde HU-D3; confirmar contra E-2.",
+      "imposicion": "PostgreSQL y backend"
+    },
+    {
+      "id": "D-24",
+      "tipo": "Decision",
+      "nombre": "Asunto y referencias con fuente en Neo4j",
+      "descripcion": "Son los únicos datos propios del grafo; justifican el paradigma.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-25",
+      "tipo": "Decision",
+      "nombre": "Protección de los datos propios del grafo",
+      "descripcion": "Unicidad en id, réplica con MERGE que nunca borra Asunto ni referencias, y respaldo con neo4j-admin database dump.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-26",
+      "tipo": "Decision",
+      "nombre": "Tipo inmutable verificado por reconciliación",
+      "descripcion": "El backend nunca actualiza el tipo; una consulta compara el tipo en PostgreSQL y en MongoDB.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-27",
+      "tipo": "Decision",
+      "nombre": "Clave de duplicados con año",
+      "descripcion": "UNIQUE parcial sobre número, emisor (área o actor externo) y año de fecha_documento; así no hace falta interpretar el número y funcionan los oficios sin año o con consecutivo continuado. Sin número o sin fecha_documento se marca posible_duplicado y lo revisa una persona.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-28",
+      "tipo": "Decision",
+      "nombre": "Correo y papel en un solo documento",
+      "descripcion": "canal_inicial, fecha_recepcion_inicial y fecha_recepcion_oficial (sello). El folio se asigna en la primera recepción.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-29",
+      "tipo": "Decision",
+      "nombre": "Visibilidad en tres niveles aplicada en el backend",
+      "descripcion": "Lo suyo completo; de otras áreas estado y responsable; dirección y oficialía todo el recorrido. Confidencial por documento, marcado por oficialía, visible al titular y a quien tiene movimiento. Una función central pasa $areasVisibles a cada consulta.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-30",
+      "tipo": "Decision",
+      "nombre": "Asignación de asuntos por quien atiende",
+      "descripcion": "Manual, en cualquier momento, con O-08; no se exige en el registro. Un documento puede pertenecer a varios asuntos.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-31",
+      "tipo": "Decision",
+      "nombre": "Titular al turnar en el movimiento",
+      "descripcion": "id_titular_al_turnar se guarda al turnar (nulo si el puesto está vacante); como el movimiento es inmutable, el dato queda fijo.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-32",
+      "tipo": "Decision",
+      "nombre": "Motivos de devolución y regla de rebote",
+      "descripcion": "Catálogo cerrado: falta_informacion, falta_firma, falta_anexo, corregir_dato, no_competencia (área sugerida opcional; sin ella cuenta como rebote). C3 usa la regla de H-15.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-33",
+      "tipo": "Decision",
+      "nombre": "Nodo DocumentoNoRegistrado",
+      "descripcion": "RESPONDE_A, DA_SEGUIMIENTO_A y EN_ALCANCE_A pueden apuntar a un nodo con número y emisor en texto; SUSTITUYE_A no, porque cambia el estado en PostgreSQL. El ligado al documento real, si se registra después, es manual.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-34",
+      "tipo": "Decision",
+      "nombre": "Registro extemporáneo",
+      "descripcion": "El folio sigue el orden y el año de registro; se captura la fecha real de recepción y la marca extemporaneo.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-35",
+      "tipo": "Decision",
+      "nombre": "Justificar PostgreSQL por garantías, no por escala",
+      "descripcion": "Unos 300 documentos por semana en temporada alta es poco volumen; el argumento es la integridad transaccional.",
+      "estado": "tomada"
+    },
+    {
+      "id": "HU-G3",
+      "tipo": "Hueco",
+      "nombre": "Mismo documento por correo y papel",
+      "descripcion": "Un solo documento con dos fechas de recepción.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-G4",
+      "tipo": "Hueco",
+      "nombre": "Numeración sin año o consecutivo continuado",
+      "descripcion": "Cubierta al usar el año de fecha_documento; sin número o sin fecha se marca posible_duplicado.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-H4",
+      "tipo": "Hueco",
+      "nombre": "Acceso a confidenciales por persona",
+      "descripcion": "Titular del área y personas con movimiento sobre el documento, calculado de los movimientos.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-H5",
+      "tipo": "Hueco",
+      "nombre": "Confidencialidad por documento, no por tipo",
+      "descripcion": "Campo confidencial marcado por oficialía al registrar.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-C5",
+      "tipo": "Hueco",
+      "nombre": "Registro extemporáneo y orden de folios",
+      "descripcion": "Folio por orden de registro con fecha real de recepción.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-MG1",
+      "tipo": "Hueco",
+      "nombre": "Tipo en MongoDB contradictorio",
+      "descripcion": "MongoDB guarda id y tipo; el tipo es inmutable y se reconcilia.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-NJ1",
+      "tipo": "Hueco",
+      "nombre": "Asunto y referencias sin respaldo",
+      "descripcion": "Unicidad, réplica que no borra y respaldo periódico.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-PG",
+      "tipo": "Hueco",
+      "nombre": "Justificación de PostgreSQL por volumen",
+      "descripcion": "Se justifica por garantías transaccionales, no por escala.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-VIS",
+      "tipo": "Hueco",
+      "nombre": "Reglas de visibilidad sin validar por dirección y Jurídico",
+      "descripcion": "Se toma lo descrito por la entrevistada como supuesto declarado.",
+      "estado": "aceptado"
+    },
+    {
+      "id": "AL-01",
+      "tipo": "Alcance",
+      "nombre": "Fuera de alcance y limitaciones declaradas",
+      "descripcion": "Plazos y días hábiles; historial de titulares, adscripciones y reestructuraciones; sugerencia automática de asuntos; extracción automática de referencias; archivos binarios de anexos; permisos configurables por persona. El sistema refleja registros, no la realidad."
+    },
+    {
+      "id": "DT-12",
+      "tipo": "DeudaTecnica",
+      "nombre": "Asunto y referencias sin réplica",
+      "descripcion": "Solo viven en Neo4j; mitigada con unicidad, réplica que no borra y respaldo.",
+      "estado": "parchada"
+    },
+    {
+      "id": "DT-13",
+      "tipo": "DeudaTecnica",
+      "nombre": "Visibilidad solo en el servicio",
+      "descripcion": "Ningún motor impone la visibilidad; un error en una consulta expone datos.",
+      "estado": "aceptada"
+    },
+    {
+      "id": "DT-14",
+      "tipo": "DeudaTecnica",
+      "nombre": "Ligado manual de documentos no registrados",
+      "descripcion": "Si el documento citado se registra después, alguien debe ligarlo a mano.",
+      "estado": "aceptada"
+    },
+    {
+      "id": "DT-15",
+      "tipo": "DeudaTecnica",
+      "nombre": "Folios fuera de orden cronológico",
+      "descripcion": "Los registros extemporáneos reciben folio con fecha de registro posterior a la recepción.",
+      "estado": "aceptada"
+    },
+    {
+      "id": "DT-16",
+      "tipo": "DeudaTecnica",
+      "nombre": "Duplicados sin número o sin fecha con revisión manual",
+      "descripcion": "La marca posible_duplicado depende de que alguien la revise.",
+      "estado": "aceptada"
+    },
+    {
+      "id": "D-36",
+      "tipo": "Decision",
+      "nombre": "Aplicación web",
+      "descripcion": "La interfaz es obligatoria (confirmado). Es una aplicación web que consume solo la API y nunca se conecta a las bases (guía, sección 2.4 y entregable 6). La guía acepta web, móvil o escritorio; se elige web.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-37",
+      "tipo": "Decision",
+      "nombre": "Backend en Python con FastAPI",
+      "descripcion": "Routers, servicios y repositorios separados. Se elige porque la guía pide contrato de API documentado y validación de entradas (OpenAPI y Pydantic vienen incluidos), el esquema vive en scripts SQL sin ORM y se tiene experiencia previa con Python. Descartados NestJS y .NET (más código de estructura y un lenguaje nuevo) y Django (su ORM solo cubre una de las tres bases y duplica el DDL).",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-38",
+      "tipo": "Decision",
+      "nombre": "Frontend en React, Vite y TypeScript",
+      "descripcion": "Aplicación de una sola página sin servidor propio, para que la interfaz no pueda conectarse a las bases ni alojar lógica de negocio. Cliente de la API generado desde el OpenAPI de FastAPI; sesión en cookie httpOnly y CORS limitado al origen del frontend. Descartado Next.js: su parte de servidor duplicaría el backend y arriesga el criterio 7 de la guía.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-39",
+      "tipo": "Decision",
+      "nombre": "API REST",
+      "descripcion": "C1 a C5 y las operaciones se exponen como endpoints fijos; no hace falta la consulta flexible de GraphQL.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-40",
+      "tipo": "Decision",
+      "nombre": "Repositorios con drivers oficiales y sin ORM",
+      "descripcion": "psycopg 3 para PostgreSQL, PyMongo con su API asíncrona para MongoDB (Motor está en desuso) y el driver oficial de Neo4j. Un repositorio por base, consultas parametrizadas y credenciales en variables de entorno.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-41",
+      "tipo": "Decision",
+      "nombre": "Despliegue con docker-compose",
+      "descripcion": "Las tres bases, la API, el proceso del outbox y el frontend compilado como archivos estáticos se levantan con un solo docker-compose; cubre la instalación reproducible del entregable 8.",
+      "estado": "tomada"
+    },
+    {
+      "id": "HU-OP14",
+      "tipo": "Hueco",
+      "nombre": "RF-14 sin operación asignada",
+      "descripcion": "RF-14 queda cubierto por O-20 y O-21.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "DT-17",
+      "tipo": "DeudaTecnica",
+      "nombre": "Autenticación y roles construidos a mano",
+      "descripcion": "FastAPI no trae usuarios ni roles: se implementan con sesiones en PostgreSQL (D-49) y la función central de visibilidad (D-29).",
+      "estado": "aceptada"
+    },
+    {
+      "id": "ROL-OF",
+      "tipo": "Rol",
+      "nombre": "Oficialía de partes",
+      "descripcion": "Registra entradas y salidas, turna, cancela, corrige y resuelve duplicados. Ve el recorrido de todo, sin el contenido de lo confidencial ajeno.",
+      "clave": "OF"
+    },
+    {
+      "id": "ROL-DI",
+      "tipo": "Rol",
+      "nombre": "Dirección",
+      "descripcion": "Turna y consulta el recorrido de todo, sin el contenido de lo confidencial ajeno.",
+      "clave": "DI"
+    },
+    {
+      "id": "ROL-TI",
+      "tipo": "Rol",
+      "nombre": "Titular de área",
+      "descripcion": "Turna de forma directa desde su área, devuelve, returna, atrae y concluye. Ve lo suyo completo.",
+      "clave": "TI"
+    },
+    {
+      "id": "ROL-PE",
+      "tipo": "Rol",
+      "nombre": "Personal del área",
+      "descripcion": "Atiende y concluye solo cuando su área es la responsable; agrega notas y anexos.",
+      "clave": "PE"
+    },
+    {
+      "id": "ROL-AD",
+      "tipo": "Rol",
+      "nombre": "Administrador",
+      "descripcion": "Gestiona áreas, personas, usuarios y roles.",
+      "clave": "AD"
+    },
+    {
+      "id": "O-19",
+      "tipo": "Operacion",
+      "nombre": "Registrar segunda recepción",
+      "descripcion": "Si el segundo canal es papel, su sello fija la fecha oficial; el folio no cambia (D-28); un segundo registro por el mismo canal se rechaza",
+      "seccion": "Recepción, registro y corrección",
+      "roles": "OF",
+      "recibe": "Id del documento, canal, fecha y hora del sello",
+      "devuelve": "Documento con sus dos fechas de recepción",
+      "reglas": "Si el segundo canal es papel, su sello fija la fecha oficial; el folio no cambia (D-28); un segundo registro por el mismo canal se rechaza",
+      "tipo_operacion": "E",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-26",
+      "tipo": "Operacion",
+      "nombre": "Resolver posible duplicado",
+      "descripcion": "Si son el mismo, el posterior pasa a cancelado con duplicado_de; sus movimientos se conservan en la bitácora (D-20); si son distintos, se retira la marca posible_duplicado",
+      "seccion": "Recepción, registro y corrección",
+      "roles": "OF",
+      "recibe": "Ids de los dos documentos y la decisión: son el mismo o son distintos",
+      "devuelve": "Marca retirada, o documento posterior cancelado",
+      "reglas": "Si son el mismo, el posterior pasa a cancelado con duplicado_de; sus movimientos se conservan en la bitácora (D-20); si son distintos, se retira la marca posible_duplicado",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-24",
+      "tipo": "Operacion",
+      "nombre": "Cancelar documento",
+      "descripcion": "Nunca se borra (D-20); deja de aparecer en pendientes; el estado se replica a Neo4j por el outbox",
+      "seccion": "Recepción, registro y corrección",
+      "roles": "OF",
+      "recibe": "Id del documento y motivo",
+      "devuelve": "Documento cancelado",
+      "reglas": "Nunca se borra (D-20); deja de aparecer en pendientes; el estado se replica a Neo4j por el outbox",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-25",
+      "tipo": "Operacion",
+      "nombre": "Corregir un movimiento",
+      "descripcion": "Inserta un movimiento nuevo con CORRIGE; el original queda intacto porque la bitácora no se edita (HU-H3, RF-15)",
+      "seccion": "Recepción, registro y corrección",
+      "roles": "OF",
+      "recibe": "Id del movimiento, datos corregidos y motivo",
+      "devuelve": "Movimiento de corrección",
+      "reglas": "Inserta un movimiento nuevo con CORRIGE; el original queda intacto porque la bitácora no se edita (HU-H3, RF-15)",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-22",
+      "tipo": "Operacion",
+      "nombre": "Devolver o returnar con motivo",
+      "descripcion": "Motivo obligatorio (D-32); devolver regresa al área que lo envió y returnar lo manda a otra; 'no_competencia' sin área sugerida cuenta como rebote en C3",
+      "seccion": "Recorrido del documento",
+      "roles": "TI",
+      "recibe": "Id del documento, motivo del catálogo, área sugerida (opcional), nota",
+      "devuelve": "Movimiento de devolución o returno",
+      "reglas": "Motivo obligatorio (D-32); devolver regresa al área que lo envió y returnar lo manda a otra; 'no_competencia' sin área sugerida cuenta como rebote en C3",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Media",
+      "nucleo": true
+    },
+    {
+      "id": "O-23",
+      "tipo": "Operacion",
+      "nombre": "Atraer documento",
+      "descripcion": "El área que atrae queda como responsable y el área anterior deja de tenerlo pendiente; requiere visibilidad sobre el documento",
+      "seccion": "Recorrido del documento",
+      "roles": "TI",
+      "recibe": "Id del documento y justificación",
+      "devuelve": "Movimiento de atracción",
+      "reglas": "El área que atrae queda como responsable y el área anterior deja de tenerlo pendiente; requiere visibilidad sobre el documento",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-20",
+      "tipo": "Operacion",
+      "nombre": "Registrar salida externa",
+      "descripcion": "Emisor interno y destinatario externo; si responde a otro documento crea RESPONDE_A; encola expediente y nodo en el outbox",
+      "seccion": "Salidas externas",
+      "roles": "OF",
+      "recibe": "Tipo, número, área emisora, actor externo destinatario, síntesis, contenido, documento al que responde (opcional)",
+      "devuelve": "Id del documento de salida",
+      "reglas": "Emisor interno y destinatario externo; si responde a otro documento crea RESPONDE_A; encola expediente y nodo en el outbox",
+      "tipo_operacion": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-21",
+      "tipo": "Operacion",
+      "nombre": "Registrar acuse de salida",
+      "descripcion": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, ofrece concluirlo (O-05)",
+      "seccion": "Salidas externas",
+      "roles": "OF",
+      "recibe": "Id del documento de salida, fecha y hora del acuse, quién recibió",
+      "devuelve": "Salida con acuse",
+      "reglas": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, ofrece concluirlo (O-05)",
+      "tipo_operacion": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-27",
+      "tipo": "Operacion",
+      "nombre": "Crear asunto",
+      "descripcion": "Id único con restricción de unicidad en Neo4j (D-25)",
+      "seccion": "Relaciones y asuntos",
+      "roles": "OF, TI, PE",
+      "recibe": "Nombre y descripción",
+      "devuelve": "Id del asunto",
+      "reglas": "Id único con restricción de unicidad en Neo4j (D-25)",
+      "tipo_operacion": "E",
+      "bases": "NJ",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-28",
+      "tipo": "Operacion",
+      "nombre": "Agregar anexo",
+      "descripcion": "Solo datos descriptivos, sin archivo (DT-03)",
+      "seccion": "Expediente",
+      "roles": "OF, PE",
+      "recibe": "Id del documento, descripción, número de hojas, ubicación física",
+      "devuelve": "Anexo agregado",
+      "reglas": "Solo datos descriptivos, sin archivo (DT-03)",
+      "tipo_operacion": "E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-29",
+      "tipo": "Operacion",
+      "nombre": "Agregar nota",
+      "descripcion": "Autor y fecha los pone el servidor; requiere visibilidad sobre el documento",
+      "seccion": "Expediente",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Id del documento, tipo de nota y texto",
+      "devuelve": "Nota agregada",
+      "reglas": "Autor y fecha los pone el servidor; requiere visibilidad sobre el documento",
+      "tipo_operacion": "E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-30",
+      "tipo": "Operacion",
+      "nombre": "Buscar documentos",
+      "descripcion": "Paginación obligatoria; de los documentos fuera de su visibilidad solo muestra estado y responsable (D-29); el filtro por campo propio del tipo consulta MongoDB y filtra la visibilidad en PostgreSQL (D-46)",
+      "seccion": "Consultas",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Filtros: folio, número, emisor, tipo, estado, fechas, texto de la síntesis, campo propio del tipo",
+      "devuelve": "Lista paginada: folio, número, síntesis, tipo, estado y área responsable",
+      "reglas": "Paginación obligatoria; de los documentos fuera de su visibilidad solo muestra estado y responsable (D-29); el filtro por campo propio del tipo consulta MongoDB y filtra la visibilidad en PostgreSQL (D-46)",
+      "tipo_operacion": "L",
+      "bases": "PG+MG",
+      "frecuencia": "Alta",
+      "nucleo": true
+    },
+    {
+      "id": "O-31",
+      "tipo": "Operacion",
+      "nombre": "Consultar catálogos",
+      "descripcion": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos",
+      "seccion": "Consultas",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Catálogo: áreas, tipos, motivos de devolución, formas de conclusión, actores externos",
+      "devuelve": "Elementos activos del catálogo",
+      "reglas": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos",
+      "tipo_operacion": "L",
+      "bases": "PG",
+      "frecuencia": "Alta",
+      "nucleo": false
+    },
+    {
+      "id": "O-32",
+      "tipo": "Operacion",
+      "nombre": "Consultar estructura organizacional",
+      "descripcion": "Solo el estado actual (D-08)",
+      "seccion": "Consultas",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Área (opcional)",
+      "devuelve": "Áreas con dependencia, titular y personas adscritas",
+      "reglas": "Solo el estado actual (D-08)",
+      "tipo_operacion": "L",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-33",
+      "tipo": "Operacion",
+      "nombre": "Gestionar áreas",
+      "descripcion": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área",
+      "seccion": "Administración",
+      "roles": "AD",
+      "recibe": "Siglas, nombre, área de la que depende, titular; o id para desactivar",
+      "devuelve": "Área creada o actualizada",
+      "reglas": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-34",
+      "tipo": "Operacion",
+      "nombre": "Gestionar personas y usuarios",
+      "descripcion": "Correo único; contraseña guardada con hash; baja lógica que conserva sus movimientos; si era titular, el área queda vacante",
+      "seccion": "Administración",
+      "roles": "AD",
+      "recibe": "Nombre, correo, área de adscripción, rol; o id para dar de baja",
+      "devuelve": "Persona y usuario creados o actualizados",
+      "reglas": "Correo único; contraseña guardada con hash; baja lógica que conserva sus movimientos; si era titular, el área queda vacante",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-35",
+      "tipo": "Operacion",
+      "nombre": "Gestionar actores externos",
+      "descripcion": "No se eliminan si ya tienen documentos; se desactivan",
+      "seccion": "Administración",
+      "roles": "OF, AD",
+      "recibe": "Nombre, tipo (institución, municipio, proveedor, ciudadano), datos de contacto",
+      "devuelve": "Actor creado o actualizado",
+      "reglas": "No se eliminan si ya tienen documentos; se desactivan",
+      "tipo_operacion": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-36",
+      "tipo": "Operacion",
+      "nombre": "Iniciar sesión",
+      "descripcion": "Mensaje genérico ante credenciales incorrectas; bloqueo temporal tras varios intentos fallidos; sesión en PostgreSQL (D-49)",
+      "seccion": "Sesión y seguridad",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Correo y contraseña",
+      "devuelve": "Sesión en cookie httpOnly, nombre, rol y área",
+      "reglas": "Mensaje genérico ante credenciales incorrectas; bloqueo temporal tras varios intentos fallidos; sesión en PostgreSQL (D-49)",
+      "tipo_operacion": "L+E",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false
+    },
+    {
+      "id": "O-37",
+      "tipo": "Operacion",
+      "nombre": "Cerrar sesión",
+      "descripcion": "Revoca la sesión en la base, efectivo de inmediato (D-49)",
+      "seccion": "Sesión y seguridad",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Sesión actual",
+      "devuelve": "Pantalla de inicio de sesión",
+      "reglas": "Revoca la sesión en la base, efectivo de inmediato (D-49)",
+      "tipo_operacion": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-38",
+      "tipo": "Operacion",
+      "nombre": "Validar sesión y calcular visibilidad",
+      "descripcion": "En cada petición; caduca por inactividad; la función central de visibilidad pasa las áreas visibles a cada consulta (D-29)",
+      "seccion": "Sesión y seguridad",
+      "roles": "Sistema",
+      "recibe": "Código de sesión (cookie)",
+      "devuelve": "Usuario, rol, área y conjunto de áreas visibles",
+      "reglas": "En cada petición; caduca por inactividad; la función central de visibilidad pasa las áreas visibles a cada consulta (D-29)",
+      "tipo_operacion": "L+E",
+      "bases": "PG",
+      "frecuencia": "Muy alta",
+      "nucleo": true
+    },
+    {
+      "id": "O-39",
+      "tipo": "Operacion",
+      "nombre": "Sincronizar el outbox",
+      "descripcion": "Un solo proceso, en orden de id (D-48); escrituras idempotentes con MERGE en Neo4j y upsert en MongoDB; reintentos con espera creciente y marca de error tras varios fallos",
+      "seccion": "Procesos del sistema y del equipo",
+      "roles": "Sistema",
+      "recibe": "Registros pendientes del outbox",
+      "devuelve": "Registros marcados como enviados o con error",
+      "reglas": "Un solo proceso, en orden de id (D-48); escrituras idempotentes con MERGE en Neo4j y upsert en MongoDB; reintentos con espera creciente y marca de error tras varios fallos",
+      "tipo_operacion": "E",
+      "bases": "PG+NJ+MG",
+      "frecuencia": "Alta",
+      "nucleo": true
+    },
+    {
+      "id": "O-40",
+      "tipo": "Operacion",
+      "nombre": "Reconciliar entre bases",
+      "descripcion": "Compara existencia, estado y tipo entre las tres bases y las sustituciones a medias (D-14, D-26); reencola en el outbox lo que falte",
+      "seccion": "Procesos del sistema y del equipo",
+      "roles": "Sistema, equipo",
+      "recibe": "Lote de ids o rango de fechas",
+      "devuelve": "Reporte de diferencias y registros reencolados",
+      "reglas": "Compara existencia, estado y tipo entre las tres bases y las sustituciones a medias (D-14, D-26); reencola en el outbox lo que falte",
+      "tipo_operacion": "L",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false
+    },
+    {
+      "id": "O-41",
+      "tipo": "Operacion",
+      "nombre": "Respaldo y carga de datos de prueba",
+      "descripcion": "pg_dump, mongodump y neo4j-admin database dump (D-25); carga reproducible desde cero (entregable 4)",
+      "seccion": "Procesos del sistema y del equipo",
+      "roles": "Equipo",
+      "recibe": "Scripts versionados",
+      "devuelve": "Respaldos y bases cargadas",
+      "reglas": "pg_dump, mongodump y neo4j-admin database dump (D-25); carga reproducible desde cero (entregable 4)",
+      "tipo_operacion": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Ocasional",
+      "nucleo": false
+    },
+    {
+      "id": "AR-01",
+      "tipo": "Patron",
+      "nombre": "Asignar folio sin huecos",
+      "descripcion": "SELECT ... FOR UPDATE sobre contador_folio y UPDATE en la misma transacción del INSERT (D-21)",
+      "base": "PG",
+      "tipo_acceso": "E",
+      "datos": "área receptora, año de registro",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-02",
+      "tipo": "Patron",
+      "nombre": "Detectar duplicado",
+      "descripcion": "UNIQUE parcial donde número y fecha_documento no son nulos; el conflicto devuelve el documento existente (D-27)",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "número, emisor, año de fecha_documento",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-03",
+      "tipo": "Patron",
+      "nombre": "Insertar movimiento en la bitácora",
+      "descripcion": "Solo INSERT; un disparador impide UPDATE y DELETE; índice único parcial por id_grupo_turno para el responsable (RI-10)",
+      "base": "PG",
+      "tipo_acceso": "E",
+      "datos": "documento, áreas, persona, rol, motivo, titular al turnar",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-04",
+      "tipo": "Patron",
+      "nombre": "Encolar en el outbox",
+      "descripcion": "INSERT en la misma transacción que el cambio (D-13)",
+      "base": "PG",
+      "tipo_acceso": "E",
+      "datos": "destino, tipo de evento, datos",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-05",
+      "tipo": "Patron",
+      "nombre": "Tomar lote del outbox",
+      "descripcion": "ORDER BY id con FOR UPDATE SKIP LOCKED y LIMIT; un solo proceso (D-48)",
+      "base": "PG",
+      "tipo_acceso": "L+E",
+      "datos": "registros pendientes",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-06",
+      "tipo": "Patron",
+      "nombre": "Bandeja de pendientes",
+      "descripcion": "Último movimiento por documento y área con función de ventana; índice (id_documento, id_area_destino, fecha_hora) (D-42)",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "área, áreas visibles",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-07",
+      "tipo": "Patron",
+      "nombre": "Búsqueda paginada con visibilidad",
+      "descripcion": "Índices por folio, número y emisor, estado y fechas; búsqueda en síntesis con ILIKE",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "filtros, áreas visibles, página",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-08",
+      "tipo": "Patron",
+      "nombre": "Validar sesión",
+      "descripcion": "Búsqueda por huella SHA-256 y renovación de la última actividad (D-49)",
+      "base": "PG",
+      "tipo_acceso": "L+E",
+      "datos": "huella del código de sesión",
+      "frecuencia": "Muy alta"
+    },
+    {
+      "id": "AR-09",
+      "tipo": "Patron",
+      "nombre": "Validar jerarquía sin ciclos",
+      "descripcion": "Consulta recursiva (WITH RECURSIVE) con bloqueo de la tabla de áreas en la transacción (D-47)",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "área, área padre",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AR-10",
+      "tipo": "Patron",
+      "nombre": "Ficha: registro, folios y acuses",
+      "descripcion": "Lectura por llave primaria con sus folios, acuses y ubicación vigente",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "id del documento",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-11",
+      "tipo": "Patron",
+      "nombre": "Lote para reconciliar",
+      "descripcion": "Ids, estado y tipo por lote, ordenados por id",
+      "base": "PG",
+      "tipo_acceso": "L",
+      "datos": "rango de fechas",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-01",
+      "tipo": "Patron",
+      "nombre": "Crear expediente validado por tipo",
+      "descripcion": "Upsert desde el outbox; $jsonSchema con una rama por cada uno de los 7 tipos",
+      "base": "MG",
+      "tipo_acceso": "E",
+      "datos": "_id = id_documento, tipo, contenido, referencias citadas",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AD-02",
+      "tipo": "Patron",
+      "nombre": "Leer expediente por _id",
+      "descripcion": "Búsqueda por _id",
+      "base": "MG",
+      "tipo_acceso": "L",
+      "datos": "id_documento",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AD-03",
+      "tipo": "Patron",
+      "nombre": "Actualizar contenido según el tipo",
+      "descripcion": "$set sobre campos del contenido; el tipo nunca se modifica (D-26)",
+      "base": "MG",
+      "tipo_acceso": "E",
+      "datos": "id, campos",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-04",
+      "tipo": "Patron",
+      "nombre": "Agregar anexo",
+      "descripcion": "$push al arreglo anexos con id propio",
+      "base": "MG",
+      "tipo_acceso": "E",
+      "datos": "id, descripción, hojas, ubicación física",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-05",
+      "tipo": "Patron",
+      "nombre": "Agregar nota o evidencia",
+      "descripcion": "$push al arreglo notas; la evidencia de conclusión llega por el outbox (D-19)",
+      "base": "MG",
+      "tipo_acceso": "E",
+      "datos": "id, tipo de nota, texto, autor, id_movimiento",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-06",
+      "tipo": "Patron",
+      "nombre": "Quitar anexo o nota",
+      "descripcion": "$pull por id del elemento, excepto evidencia_atencion",
+      "base": "MG",
+      "tipo_acceso": "E",
+      "datos": "id, id del elemento",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-07",
+      "tipo": "Patron",
+      "nombre": "Buscar por campo propio del tipo",
+      "descripcion": "Índices parciales por tipo (partialFilterExpression); devuelve ids que se filtran por visibilidad en PostgreSQL (D-46)",
+      "base": "MG",
+      "tipo_acceso": "L",
+      "datos": "tipo, campo, valor",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-08",
+      "tipo": "Patron",
+      "nombre": "Verificar expedientes por lote",
+      "descripcion": "$in sobre _id proyectando solo el tipo",
+      "base": "MG",
+      "tipo_acceso": "L",
+      "datos": "lista de ids",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-01",
+      "tipo": "Patron",
+      "nombre": "Recorrido de un documento con ramas",
+      "descripcion": "Desde el nodo Documento por SIGUIENTE entre movimientos (D-09)",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "id_documento",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-02",
+      "tipo": "Patron",
+      "nombre": "Hilo de un asunto",
+      "descripcion": "Las cuatro referencias en ambos sentidos, hasta 6 saltos (D-50)",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "id del documento o del asunto",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-03",
+      "tipo": "Patron",
+      "nombre": "Rebotes",
+      "descripcion": "Parte de movimientos filtrados por fecha con índice; cuenta devoluciones y áreas distintas por documento (D-32, D-50)",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "periodo, área",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-04",
+      "tipo": "Patron",
+      "nombre": "Alcance de un asunto",
+      "descripcion": "Desde el Asunto a sus documentos y de ahí a áreas y personas de sus movimientos (D-50)",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "id del asunto, áreas visibles",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-05",
+      "tipo": "Patron",
+      "nombre": "Relaciones y asuntos de un documento",
+      "descripcion": "Referencias entrantes y salientes a un salto y asuntos a los que pertenece",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "id_documento",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-06",
+      "tipo": "Patron",
+      "nombre": "Replicar desde el outbox",
+      "descripcion": "MERGE por id; nunca borra Asunto ni referencias (D-25)",
+      "base": "NJ",
+      "tipo_acceso": "E",
+      "datos": "documento, movimiento, área, persona",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-07",
+      "tipo": "Patron",
+      "nombre": "Crear referencia",
+      "descripcion": "MERGE de la relación; MERGE del DocumentoNoRegistrado por número y emisor (D-33)",
+      "base": "NJ",
+      "tipo_acceso": "E",
+      "datos": "origen, destino, tipo",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-08",
+      "tipo": "Patron",
+      "nombre": "Crear asunto y asignar documento",
+      "descripcion": "CREATE del Asunto con restricción de unicidad; MERGE de PERTENECE_A",
+      "base": "NJ",
+      "tipo_acceso": "E",
+      "datos": "id_asunto, id_documento",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-09",
+      "tipo": "Patron",
+      "nombre": "Quitar referencia o pertenencia",
+      "descripcion": "DELETE de la relación, nunca de nodos",
+      "base": "NJ",
+      "tipo_acceso": "E",
+      "datos": "ids",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-10",
+      "tipo": "Patron",
+      "nombre": "Detectar faltantes para reconciliar",
+      "descripcion": "UNWIND de ids y OPTIONAL MATCH para reportar nodos o estados faltantes",
+      "base": "NJ",
+      "tipo_acceso": "L",
+      "datos": "lote de ids",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "D-42",
+      "tipo": "Decision",
+      "nombre": "Regla de pendiente calculada en PostgreSQL",
+      "descripcion": "Un documento está pendiente en un área cuando esa área recibió un movimiento como responsable o apoyo y no hay después un movimiento de salida desde ella ni la conclusión o cancelación del documento. Se calcula de la bitácora en PostgreSQL, sin tabla de estado, para que la bandeja refleje un turno al instante sin esperar la réplica.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-43",
+      "tipo": "Decision",
+      "nombre": "Síntesis del documento en PostgreSQL",
+      "descripcion": "Columna sintesis (texto corto) en el registro oficial para listados y búsqueda; MongoDB guarda el contenido completo. Se llama sintesis y no asunto para no confundirla con el nodo Asunto.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-44",
+      "tipo": "Decision",
+      "nombre": "Cinco roles y permisos de turno",
+      "descripcion": "Oficialía, dirección, titular de área, personal del área y administrador. Oficialía y dirección turnan cualquier documento; el titular hace turnos directos de lo que tiene pendiente, devuelve, returna y atrae; el personal atiende y concluye solo si su área es responsable.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-45",
+      "tipo": "Decision",
+      "nombre": "Catálogo de operaciones con ids que no se reutilizan",
+      "descripcion": "Se conservan los ids existentes; los números que faltan (O-02, O-04, O-06, O-10, O-12, O-13, O-15, O-16) se consideran eliminados y las operaciones nuevas empiezan en O-19.",
+      "estado": "tomada",
+      "supuesto": true,
+      "ids_eliminados": [
+        "O-02",
+        "O-04",
+        "O-06",
+        "O-10",
+        "O-12",
+        "O-13",
+        "O-15",
+        "O-16"
+      ]
+    },
+    {
+      "id": "D-46",
+      "tipo": "Decision",
+      "nombre": "Búsqueda por campos propios del tipo en MongoDB",
+      "descripcion": "Índices parciales por tipo para buscar por datos que solo tiene un tipo (solicitante de transparencia, ente auditor). MongoDB devuelve ids y la visibilidad se filtra en PostgreSQL. Es la operación que distingue a la base documental de una columna JSONB.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-47",
+      "tipo": "Decision",
+      "nombre": "Jerarquía de áreas validada en PostgreSQL",
+      "descripcion": "Los ciclos se detectan con una consulta recursiva dentro de la misma transacción, con la tabla de áreas bloqueada, y no contra la réplica, que puede ir atrasada.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-48",
+      "tipo": "Decision",
+      "nombre": "Outbox con un solo proceso y en orden",
+      "descripcion": "Un único proceso toma los registros en orden de id, porque un movimiento debe llegar después del anterior para unirlos con SIGUIENTE. SKIP LOCKED queda como protección si alguien levanta dos procesos.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-49",
+      "tipo": "Decision",
+      "nombre": "Sesiones guardadas en PostgreSQL",
+      "descripcion": "Código aleatorio en cookie httpOnly y solo su huella SHA-256 en la base; caducan por inactividad. Cerrar sesión revoca de inmediato, cosa que un JWT sin estado no permite.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-50",
+      "tipo": "Decision",
+      "nombre": "Consultas de grafo ancladas y con profundidad máxima",
+      "descripcion": "Toda consulta parte de un Documento, un Asunto o de movimientos filtrados por fecha con índice, nunca de un Área; las áreas de alto grado (oficialía, secretarías particulares) solo aparecen como destino. Los recorridos variables se limitan a 6 saltos.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-51",
+      "tipo": "Decision",
+      "nombre": "C4 se resuelve en PostgreSQL",
+      "descripcion": "Pendientes por responsable no recorre caminos: todo lo que necesita (movimientos, titular al turnar, adscripción) está en PostgreSQL. Presentarla como consulta de grafo debilitaba la justificación de Neo4j. El flujo integrado de la guía lo cubre O-11.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-52",
+      "tipo": "Decision",
+      "nombre": "Relaciones organizacionales solo en PostgreSQL",
+      "descripcion": "Aplica D-22: DEPENDE_DE, TITULAR_DE y ADSCRITA_A no las recorre ninguna consulta de grafo, así que salen de Neo4j; Área y Persona quedan como nodos de id y nombre para los movimientos.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-53",
+      "tipo": "Decision",
+      "nombre": "Ficha completa con degradación controlada",
+      "descripcion": "Si MongoDB o Neo4j no responden, la ficha devuelve lo disponible y marca la sección faltante, como pide la guía en el flujo integrado.",
+      "estado": "tomada"
+    },
+    {
+      "id": "HU-PEN",
+      "tipo": "Hueco",
+      "nombre": "Regla de pendiente y ubicación vigente con ramas",
+      "descripcion": "Calculada de la bitácora en PostgreSQL.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-SIN",
+      "tipo": "Hueco",
+      "nombre": "Descripción corta para listados",
+      "descripcion": "Columna sintesis en PostgreSQL.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-ROL",
+      "tipo": "Hueco",
+      "nombre": "Roles y permisos de turno sin definir",
+      "descripcion": "Cinco roles con permisos de turno.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-NUM",
+      "tipo": "Hueco",
+      "nombre": "Ids de operaciones faltantes",
+      "descripcion": "No se reutilizan; se consideran eliminados.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-MG2",
+      "tipo": "Hueco",
+      "nombre": "Justificación de MongoDB débil frente a JSONB",
+      "descripcion": "Búsqueda por campos propios del tipo con índices parciales.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-JER",
+      "tipo": "Hueco",
+      "nombre": "Ciclos validados contra una réplica atrasada",
+      "descripcion": "Validación en PostgreSQL dentro de la transacción.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-ORD",
+      "tipo": "Hueco",
+      "nombre": "Orden de replicación de movimientos",
+      "descripcion": "Un solo proceso en orden de id.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-SES",
+      "tipo": "Hueco",
+      "nombre": "Revocación de sesiones",
+      "descripcion": "Sesiones en PostgreSQL, revocables al instante.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-CON4",
+      "tipo": "Hueco",
+      "nombre": "C4 presentada como consulta de grafo sin recorrido",
+      "descripcion": "Se resuelve en PostgreSQL.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-NJ2",
+      "tipo": "Hueco",
+      "nombre": "Relaciones organizacionales que ninguna consulta recorre",
+      "descripcion": "Salen de Neo4j por D-22.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-DEG",
+      "tipo": "Hueco",
+      "nombre": "Falla parcial al leer la ficha integrada",
+      "descripcion": "Devuelve lo disponible y marca lo faltante.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-ASU2",
+      "tipo": "Hueco",
+      "nombre": "Documento en varios asuntos",
+      "descripcion": "Permitido.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "HU-EVI",
+      "tipo": "Hueco",
+      "nombre": "Borrar la evidencia de una conclusión",
+      "descripcion": "La nota evidencia_atencion no se elimina con O-17.",
+      "estado": "resuelto"
+    },
+    {
+      "id": "DT-18",
+      "tipo": "DeudaTecnica",
+      "nombre": "Un solo proceso de outbox",
+      "descripcion": "Limita el ritmo de réplica; suficiente para el volumen de la oficialía.",
+      "estado": "aceptada"
+    },
+    {
+      "id": "DT-19",
+      "tipo": "DeudaTecnica",
+      "nombre": "Pendientes calculados en cada consulta",
+      "descripcion": "Sin tabla de estado; depende de un índice sobre la bitácora.",
+      "estado": "aceptada"
     }
   ],
   "relaciones": [
@@ -1203,16 +2501,6 @@
       "destino": "RF-07"
     },
     {
-      "origen": "C1",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "C1",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
       "origen": "C2",
       "relacion": "IMPLEMENTA",
       "destino": "RF-05"
@@ -1233,16 +2521,6 @@
       "destino": "RF-10"
     },
     {
-      "origen": "C2",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "C2",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
       "origen": "C3",
       "relacion": "IMPLEMENTA",
       "destino": "RF-04"
@@ -1251,11 +2529,6 @@
       "origen": "C3",
       "relacion": "IMPLEMENTA",
       "destino": "RF-11"
-    },
-    {
-      "origen": "C3",
-      "relacion": "USA",
-      "destino": "DB-NJ"
     },
     {
       "origen": "C4",
@@ -1278,16 +2551,6 @@
       "destino": "RF-13"
     },
     {
-      "origen": "C4",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "C4",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
       "origen": "C5",
       "relacion": "IMPLEMENTA",
       "destino": "RF-03"
@@ -1301,11 +2564,6 @@
       "origen": "C5",
       "relacion": "IMPLEMENTA",
       "destino": "RF-16"
-    },
-    {
-      "origen": "C5",
-      "relacion": "USA",
-      "destino": "DB-NJ"
     },
     {
       "origen": "PRY",
@@ -1434,21 +2692,6 @@
     },
     {
       "origen": "O-01",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-01",
-      "relacion": "USA",
-      "destino": "DB-MG"
-    },
-    {
-      "origen": "O-01",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "O-01",
       "relacion": "IMPLEMENTA",
       "destino": "RF-01"
     },
@@ -1459,33 +2702,8 @@
     },
     {
       "origen": "O-03",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-03",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "O-03",
       "relacion": "IMPLEMENTA",
       "destino": "RF-03"
-    },
-    {
-      "origen": "O-05",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-05",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "O-05",
-      "relacion": "USA",
-      "destino": "DB-MG"
     },
     {
       "origen": "O-05",
@@ -1494,43 +2712,13 @@
     },
     {
       "origen": "O-07",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "O-07",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-07",
       "relacion": "IMPLEMENTA",
       "destino": "RF-05"
     },
     {
       "origen": "O-09",
-      "relacion": "USA",
-      "destino": "DB-MG"
-    },
-    {
-      "origen": "O-09",
       "relacion": "IMPLEMENTA",
       "destino": "RF-01"
-    },
-    {
-      "origen": "O-11",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-11",
-      "relacion": "USA",
-      "destino": "DB-MG"
-    },
-    {
-      "origen": "O-11",
-      "relacion": "USA",
-      "destino": "DB-NJ"
     },
     {
       "origen": "O-11",
@@ -1539,33 +2727,13 @@
     },
     {
       "origen": "O-14",
-      "relacion": "USA",
-      "destino": "DB-NJ"
-    },
-    {
-      "origen": "O-14",
-      "relacion": "USA",
-      "destino": "DB-PG"
-    },
-    {
-      "origen": "O-14",
       "relacion": "IMPLEMENTA",
       "destino": "RF-12"
     },
     {
       "origen": "O-17",
-      "relacion": "USA",
-      "destino": "DB-MG"
-    },
-    {
-      "origen": "O-17",
       "relacion": "IMPLEMENTA",
       "destino": "RF-01"
-    },
-    {
-      "origen": "O-18",
-      "relacion": "USA",
-      "destino": "DB-NJ"
     },
     {
       "origen": "O-18",
@@ -1948,11 +3116,6 @@
       "destino": "HU-B4"
     },
     {
-      "origen": "D-08",
-      "relacion": "PARCHA",
-      "destino": "HU-C1"
-    },
-    {
       "origen": "PRY",
       "relacion": "TIENE_HUECO",
       "destino": "HU-C1"
@@ -2061,11 +3224,6 @@
       "origen": "PRY",
       "relacion": "TIENE_HUECO",
       "destino": "HU-G1"
-    },
-    {
-      "origen": "D-21",
-      "relacion": "PARCHA",
-      "destino": "HU-G2"
     },
     {
       "origen": "PRY",
@@ -2243,11 +3401,6 @@
       "destino": "DT-09"
     },
     {
-      "origen": "D-17",
-      "relacion": "MITIGA",
-      "destino": "DT-09"
-    },
-    {
       "origen": "PRY",
       "relacion": "TIENE_DEUDA",
       "destino": "DT-09"
@@ -2388,11 +3541,6 @@
       "destino": "E-8"
     },
     {
-      "origen": "HU-STK",
-      "relacion": "BLOQUEA",
-      "destino": "E-3"
-    },
-    {
       "origen": "HU-INT",
       "relacion": "AFECTA",
       "destino": "E-7"
@@ -2416,6 +3564,2926 @@
       "origen": "O-11",
       "relacion": "SE_DOCUMENTA_EN",
       "destino": "E-5"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "DESCRIBE",
+      "destino": "CTX-01"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "SE_EVALUA_SEGUN",
+      "destino": "CTX-06"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-11"
+    },
+    {
+      "origen": "H-11",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-12"
+    },
+    {
+      "origen": "H-12",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-13"
+    },
+    {
+      "origen": "H-13",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-14"
+    },
+    {
+      "origen": "H-14",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-15"
+    },
+    {
+      "origen": "H-15",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "CTX-05",
+      "relacion": "REVELA",
+      "destino": "H-16"
+    },
+    {
+      "origen": "H-16",
+      "relacion": "CONTRIBUYE_A",
+      "destino": "P-01"
+    },
+    {
+      "origen": "H-11",
+      "relacion": "ORIGINA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "H-12",
+      "relacion": "ORIGINA",
+      "destino": "RF-02"
+    },
+    {
+      "origen": "H-12",
+      "relacion": "ORIGINA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "H-13",
+      "relacion": "ORIGINA",
+      "destino": "RF-12"
+    },
+    {
+      "origen": "H-13",
+      "relacion": "ORIGINA",
+      "destino": "RF-13"
+    },
+    {
+      "origen": "H-14",
+      "relacion": "ORIGINA",
+      "destino": "RF-06"
+    },
+    {
+      "origen": "H-15",
+      "relacion": "ORIGINA",
+      "destino": "RF-11"
+    },
+    {
+      "origen": "H-16",
+      "relacion": "ORIGINA",
+      "destino": "RF-05"
+    },
+    {
+      "origen": "H-16",
+      "relacion": "ORIGINA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "DB-NJ",
+      "relacion": "FUENTE_DE_VERDAD_DE",
+      "destino": "K-DNR"
+    },
+    {
+      "origen": "K-REF",
+      "relacion": "UNE",
+      "destino": "K-DNR"
+    },
+    {
+      "origen": "O-08",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-06"
+    },
+    {
+      "origen": "RI-06",
+      "relacion": "SE_IMPONE_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "RI-06",
+      "relacion": "REGULA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "RI-10",
+      "relacion": "SE_IMPONE_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "RI-10",
+      "relacion": "REGULA",
+      "destino": "RF-03"
+    },
+    {
+      "origen": "RI-14",
+      "relacion": "SE_IMPONE_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "RI-14",
+      "relacion": "REGULA",
+      "destino": "RF-10"
+    },
+    {
+      "origen": "D-18",
+      "relacion": "AFECTA",
+      "destino": "RI-10"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-24"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-25"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-26"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-27"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-28"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-29"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-30"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-31"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-32"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-33"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-34"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-35"
+    },
+    {
+      "origen": "D-24",
+      "relacion": "AFECTA",
+      "destino": "K-ASU"
+    },
+    {
+      "origen": "D-24",
+      "relacion": "AFECTA",
+      "destino": "K-REF"
+    },
+    {
+      "origen": "D-25",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-26",
+      "relacion": "AFECTA",
+      "destino": "K-EXP"
+    },
+    {
+      "origen": "D-27",
+      "relacion": "AFECTA",
+      "destino": "RF-02"
+    },
+    {
+      "origen": "D-28",
+      "relacion": "AFECTA",
+      "destino": "K-DOC"
+    },
+    {
+      "origen": "D-28",
+      "relacion": "AFECTA",
+      "destino": "O-01"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "AFECTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "AFECTA",
+      "destino": "C5"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "AFECTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "D-30",
+      "relacion": "AFECTA",
+      "destino": "O-08"
+    },
+    {
+      "origen": "D-31",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "D-31",
+      "relacion": "AFECTA",
+      "destino": "C4"
+    },
+    {
+      "origen": "D-32",
+      "relacion": "AFECTA",
+      "destino": "C3"
+    },
+    {
+      "origen": "D-32",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "D-33",
+      "relacion": "AFECTA",
+      "destino": "K-REF"
+    },
+    {
+      "origen": "D-33",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-34",
+      "relacion": "AFECTA",
+      "destino": "K-FOL"
+    },
+    {
+      "origen": "D-35",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-11",
+      "relacion": "AFECTA",
+      "destino": "RF-15"
+    },
+    {
+      "origen": "D-25",
+      "relacion": "DERIVA_DE",
+      "destino": "D-24"
+    },
+    {
+      "origen": "D-35",
+      "relacion": "DERIVA_DE",
+      "destino": "D-10"
+    },
+    {
+      "origen": "H-11",
+      "relacion": "JUSTIFICA",
+      "destino": "D-29"
+    },
+    {
+      "origen": "H-12",
+      "relacion": "JUSTIFICA",
+      "destino": "D-27"
+    },
+    {
+      "origen": "H-12",
+      "relacion": "JUSTIFICA",
+      "destino": "D-28"
+    },
+    {
+      "origen": "H-13",
+      "relacion": "JUSTIFICA",
+      "destino": "D-31"
+    },
+    {
+      "origen": "H-14",
+      "relacion": "JUSTIFICA",
+      "destino": "D-30"
+    },
+    {
+      "origen": "H-15",
+      "relacion": "JUSTIFICA",
+      "destino": "D-32"
+    },
+    {
+      "origen": "H-16",
+      "relacion": "JUSTIFICA",
+      "destino": "D-33"
+    },
+    {
+      "origen": "H-16",
+      "relacion": "JUSTIFICA",
+      "destino": "D-34"
+    },
+    {
+      "origen": "CTX-06",
+      "relacion": "JUSTIFICA",
+      "destino": "D-35"
+    },
+    {
+      "origen": "D-08",
+      "relacion": "ACEPTA",
+      "destino": "HU-C1"
+    },
+    {
+      "origen": "D-31",
+      "relacion": "PARCHA",
+      "destino": "HU-C1"
+    },
+    {
+      "origen": "D-27",
+      "relacion": "PARCHA",
+      "destino": "HU-G2"
+    },
+    {
+      "origen": "D-26",
+      "relacion": "MITIGA",
+      "destino": "DT-09"
+    },
+    {
+      "origen": "D-30",
+      "relacion": "PARCHA",
+      "destino": "HU-E4"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "PARCHA",
+      "destino": "HU-H1"
+    },
+    {
+      "origen": "D-32",
+      "relacion": "PARCHA",
+      "destino": "HU-D6"
+    },
+    {
+      "origen": "D-33",
+      "relacion": "PARCHA",
+      "destino": "HU-E3"
+    },
+    {
+      "origen": "D-28",
+      "relacion": "PARCHA",
+      "destino": "HU-C3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-G3"
+    },
+    {
+      "origen": "D-28",
+      "relacion": "PARCHA",
+      "destino": "HU-G3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-G4"
+    },
+    {
+      "origen": "D-27",
+      "relacion": "PARCHA",
+      "destino": "HU-G4"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-H4"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "PARCHA",
+      "destino": "HU-H4"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-H5"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "PARCHA",
+      "destino": "HU-H5"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-C5"
+    },
+    {
+      "origen": "D-34",
+      "relacion": "PARCHA",
+      "destino": "HU-C5"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-MG1"
+    },
+    {
+      "origen": "D-16",
+      "relacion": "PARCHA",
+      "destino": "HU-MG1"
+    },
+    {
+      "origen": "D-26",
+      "relacion": "PARCHA",
+      "destino": "HU-MG1"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-NJ1"
+    },
+    {
+      "origen": "D-25",
+      "relacion": "PARCHA",
+      "destino": "HU-NJ1"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-PG"
+    },
+    {
+      "origen": "D-35",
+      "relacion": "PARCHA",
+      "destino": "HU-PG"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-VIS"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DELIMITA",
+      "destino": "AL-01"
+    },
+    {
+      "origen": "E-1",
+      "relacion": "DOCUMENTA",
+      "destino": "AL-01"
+    },
+    {
+      "origen": "AL-01",
+      "relacion": "ACEPTA",
+      "destino": "HU-E2"
+    },
+    {
+      "origen": "AL-01",
+      "relacion": "ACEPTA",
+      "destino": "HU-G1"
+    },
+    {
+      "origen": "AL-01",
+      "relacion": "ACEPTA",
+      "destino": "HU-VIS"
+    },
+    {
+      "origen": "D-31",
+      "relacion": "MITIGA",
+      "destino": "DT-01"
+    },
+    {
+      "origen": "D-24",
+      "relacion": "GENERA",
+      "destino": "DT-12"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-12"
+    },
+    {
+      "origen": "D-25",
+      "relacion": "MITIGA",
+      "destino": "DT-12"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "GENERA",
+      "destino": "DT-13"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-13"
+    },
+    {
+      "origen": "D-33",
+      "relacion": "GENERA",
+      "destino": "DT-14"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-14"
+    },
+    {
+      "origen": "D-34",
+      "relacion": "GENERA",
+      "destino": "DT-15"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-15"
+    },
+    {
+      "origen": "D-27",
+      "relacion": "GENERA",
+      "destino": "DT-16"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-16"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-24"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-26"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-27"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-28"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-29"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-31"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-32"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-33"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-34"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-25"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-35"
+    },
+    {
+      "origen": "E-1",
+      "relacion": "DOCUMENTA",
+      "destino": "D-30"
+    },
+    {
+      "origen": "D-23",
+      "relacion": "AFECTA",
+      "destino": "E-1"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "D-29",
+      "relacion": "AFECTA",
+      "destino": "C2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-36"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-36"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-37"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-37"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-38"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-38"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-39"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-40"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-40"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-41"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-41"
+    },
+    {
+      "origen": "D-36",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-37",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "D-37",
+      "relacion": "AFECTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "D-38",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-39",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "D-40",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "D-40",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-40",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-40",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-41",
+      "relacion": "AFECTA",
+      "destino": "E-8"
+    },
+    {
+      "origen": "D-41",
+      "relacion": "AFECTA",
+      "destino": "D-13"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-37"
+    },
+    {
+      "origen": "E-6",
+      "relacion": "DOCUMENTA",
+      "destino": "D-39"
+    },
+    {
+      "origen": "E-6",
+      "relacion": "DOCUMENTA",
+      "destino": "D-40"
+    },
+    {
+      "origen": "E-7",
+      "relacion": "DOCUMENTA",
+      "destino": "D-36"
+    },
+    {
+      "origen": "E-7",
+      "relacion": "DOCUMENTA",
+      "destino": "D-38"
+    },
+    {
+      "origen": "E-8",
+      "relacion": "DOCUMENTA",
+      "destino": "D-41"
+    },
+    {
+      "origen": "H-07",
+      "relacion": "JUSTIFICA",
+      "destino": "D-10"
+    },
+    {
+      "origen": "H-03",
+      "relacion": "JUSTIFICA",
+      "destino": "D-10"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-10"
+    },
+    {
+      "origen": "D-36",
+      "relacion": "PARCHA",
+      "destino": "HU-INT"
+    },
+    {
+      "origen": "D-37",
+      "relacion": "PARCHA",
+      "destino": "HU-STK"
+    },
+    {
+      "origen": "D-38",
+      "relacion": "PARCHA",
+      "destino": "HU-STK"
+    },
+    {
+      "origen": "D-40",
+      "relacion": "PARCHA",
+      "destino": "HU-STK"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-OP14"
+    },
+    {
+      "origen": "D-37",
+      "relacion": "GENERA",
+      "destino": "DT-17"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-17"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DEFINE_ROL",
+      "destino": "ROL-OF"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "REGULADO_POR",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DEFINE_ROL",
+      "destino": "ROL-DI"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "REGULADO_POR",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DEFINE_ROL",
+      "destino": "ROL-TI"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "REGULADO_POR",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DEFINE_ROL",
+      "destino": "ROL-PE"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "REGULADO_POR",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "DEFINE_ROL",
+      "destino": "ROL-AD"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "REGULADO_POR",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "O-01",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-01",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-01",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-01"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-19"
+    },
+    {
+      "origen": "O-19",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-19",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-02"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-19"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-26"
+    },
+    {
+      "origen": "O-26",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-26",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-26",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-02"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-26"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-24"
+    },
+    {
+      "origen": "O-24",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-24",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-24",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-15"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-24"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-25"
+    },
+    {
+      "origen": "O-25",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-25",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-25",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-15"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-25"
+    },
+    {
+      "origen": "O-03",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-03",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-03",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-04"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-22"
+    },
+    {
+      "origen": "O-22",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-22",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-22",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-04"
+    },
+    {
+      "origen": "O-22",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-11"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-22"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-23"
+    },
+    {
+      "origen": "O-23",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-23",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-23",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-04"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-23"
+    },
+    {
+      "origen": "O-05",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-05",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-05",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-20"
+    },
+    {
+      "origen": "O-20",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-20",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-20",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-20",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-14"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-20"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-21"
+    },
+    {
+      "origen": "O-21",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-21",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-14"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-21"
+    },
+    {
+      "origen": "O-07",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-07",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-07"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-07"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-07"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-27"
+    },
+    {
+      "origen": "O-27",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-27",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-06"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-27"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-27"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-27"
+    },
+    {
+      "origen": "O-08",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-08"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-08"
+    },
+    {
+      "origen": "O-18",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "O-09",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-28"
+    },
+    {
+      "origen": "O-28",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-28",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-28"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-28"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "O-29",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-29",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "O-17",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-17"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-17"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "O-30",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-30",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-30",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-07"
+    },
+    {
+      "origen": "O-30",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "O-11",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-11",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-11",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-11",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-08"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "O-14",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-14",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-13"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "O-31",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-31",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-01"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "O-32",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-32",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-13"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-32"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-33"
+    },
+    {
+      "origen": "O-33",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-33",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-33",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-13"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-33"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-34"
+    },
+    {
+      "origen": "O-34",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-34",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-34",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-13"
+    },
+    {
+      "origen": "O-34",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-34"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-35"
+    },
+    {
+      "origen": "O-35",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-35",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-14"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-35"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-35"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "O-36",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-36",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "O-37",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-37",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "ROL-OF",
+      "relacion": "EJECUTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "ROL-DI",
+      "relacion": "EJECUTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "ROL-TI",
+      "relacion": "EJECUTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "ROL-PE",
+      "relacion": "EJECUTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "ROL-AD",
+      "relacion": "EJECUTA",
+      "destino": "O-37"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-38"
+    },
+    {
+      "origen": "O-38",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-38",
+      "relacion": "IMPLEMENTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-39"
+    },
+    {
+      "origen": "O-39",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-39",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "O-39",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-40"
+    },
+    {
+      "origen": "O-40",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-40",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-40",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-41"
+    },
+    {
+      "origen": "O-41",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "O-41",
+      "relacion": "USA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "O-41",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-01"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-07"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-08"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-17"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "C1",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "C1",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "C2",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "C2",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "C2"
+    },
+    {
+      "origen": "C3",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "C3"
+    },
+    {
+      "origen": "C4",
+      "relacion": "USA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "C4"
+    },
+    {
+      "origen": "C5",
+      "relacion": "USA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "C5"
+    },
+    {
+      "origen": "O-14",
+      "relacion": "EXPONE",
+      "destino": "C4"
+    },
+    {
+      "origen": "O-11",
+      "relacion": "EXPONE",
+      "destino": "C1"
+    },
+    {
+      "origen": "AR-01",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-01",
+      "relacion": "SIRVE_A",
+      "destino": "O-01"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-01"
+    },
+    {
+      "origen": "AR-02",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-02",
+      "relacion": "SIRVE_A",
+      "destino": "O-01"
+    },
+    {
+      "origen": "AR-02",
+      "relacion": "SIRVE_A",
+      "destino": "O-26"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-02"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-03"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-22"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-23"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-05"
+    },
+    {
+      "origen": "AR-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-25"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-03"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-01"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-03"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-05"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-07"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-20"
+    },
+    {
+      "origen": "AR-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-24"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-04"
+    },
+    {
+      "origen": "AR-05",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-05",
+      "relacion": "SIRVE_A",
+      "destino": "O-39"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-05"
+    },
+    {
+      "origen": "AR-06",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-06",
+      "relacion": "SIRVE_A",
+      "destino": "O-14"
+    },
+    {
+      "origen": "AR-06",
+      "relacion": "SIRVE_A",
+      "destino": "C4"
+    },
+    {
+      "origen": "AR-06",
+      "relacion": "SIRVE_A",
+      "destino": "C1"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-06"
+    },
+    {
+      "origen": "AR-07",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-07",
+      "relacion": "SIRVE_A",
+      "destino": "O-30"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-07"
+    },
+    {
+      "origen": "AR-08",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-38"
+    },
+    {
+      "origen": "AR-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-36"
+    },
+    {
+      "origen": "AR-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-37"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-08"
+    },
+    {
+      "origen": "AR-09",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-09",
+      "relacion": "SIRVE_A",
+      "destino": "O-33"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-09"
+    },
+    {
+      "origen": "AR-10",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-10",
+      "relacion": "SIRVE_A",
+      "destino": "O-11"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-10"
+    },
+    {
+      "origen": "AR-11",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "AR-11",
+      "relacion": "SIRVE_A",
+      "destino": "O-40"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AR-11"
+    },
+    {
+      "origen": "AD-01",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-01",
+      "relacion": "SIRVE_A",
+      "destino": "O-01"
+    },
+    {
+      "origen": "AD-01",
+      "relacion": "SIRVE_A",
+      "destino": "O-20"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "AD-02",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-02",
+      "relacion": "SIRVE_A",
+      "destino": "O-11"
+    },
+    {
+      "origen": "AD-02",
+      "relacion": "SIRVE_A",
+      "destino": "O-09"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-02"
+    },
+    {
+      "origen": "AD-03",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-03",
+      "relacion": "SIRVE_A",
+      "destino": "O-09"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-03"
+    },
+    {
+      "origen": "AD-04",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-04",
+      "relacion": "SIRVE_A",
+      "destino": "O-28"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-04"
+    },
+    {
+      "origen": "AD-05",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-05",
+      "relacion": "SIRVE_A",
+      "destino": "O-29"
+    },
+    {
+      "origen": "AD-05",
+      "relacion": "SIRVE_A",
+      "destino": "O-05"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-05"
+    },
+    {
+      "origen": "AD-06",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-06",
+      "relacion": "SIRVE_A",
+      "destino": "O-17"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-06"
+    },
+    {
+      "origen": "AD-07",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-07",
+      "relacion": "SIRVE_A",
+      "destino": "O-30"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-07"
+    },
+    {
+      "origen": "AD-08",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "AD-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-40"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AD-08"
+    },
+    {
+      "origen": "AG-01",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-01",
+      "relacion": "SIRVE_A",
+      "destino": "C1"
+    },
+    {
+      "origen": "AG-01",
+      "relacion": "SIRVE_A",
+      "destino": "O-11"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-01"
+    },
+    {
+      "origen": "AG-02",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-02",
+      "relacion": "SIRVE_A",
+      "destino": "C2"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-02"
+    },
+    {
+      "origen": "AG-03",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-03",
+      "relacion": "SIRVE_A",
+      "destino": "C3"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-03"
+    },
+    {
+      "origen": "AG-04",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-04",
+      "relacion": "SIRVE_A",
+      "destino": "C5"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-04"
+    },
+    {
+      "origen": "AG-05",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-05",
+      "relacion": "SIRVE_A",
+      "destino": "O-11"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-05"
+    },
+    {
+      "origen": "AG-06",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-06",
+      "relacion": "SIRVE_A",
+      "destino": "O-39"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-06"
+    },
+    {
+      "origen": "AG-07",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-07",
+      "relacion": "SIRVE_A",
+      "destino": "O-07"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-07"
+    },
+    {
+      "origen": "AG-08",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-27"
+    },
+    {
+      "origen": "AG-08",
+      "relacion": "SIRVE_A",
+      "destino": "O-08"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-08"
+    },
+    {
+      "origen": "AG-09",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-09",
+      "relacion": "SIRVE_A",
+      "destino": "O-18"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-09"
+    },
+    {
+      "origen": "AG-10",
+      "relacion": "SE_EJECUTA_EN",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "AG-10",
+      "relacion": "SIRVE_A",
+      "destino": "O-40"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "AG-10"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-42"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-43"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-44"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-45"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-46"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-47"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-48"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-49"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-50"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-51"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-52"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-53"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "AFECTA",
+      "destino": "C4"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "D-43",
+      "relacion": "AFECTA",
+      "destino": "K-DOC"
+    },
+    {
+      "origen": "D-43",
+      "relacion": "AFECTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "D-44",
+      "relacion": "AFECTA",
+      "destino": "RF-16"
+    },
+    {
+      "origen": "D-44",
+      "relacion": "AFECTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "D-44",
+      "relacion": "AFECTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "D-45",
+      "relacion": "AFECTA",
+      "destino": "E-5"
+    },
+    {
+      "origen": "D-46",
+      "relacion": "AFECTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "D-46",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-46",
+      "relacion": "AFECTA",
+      "destino": "D-10"
+    },
+    {
+      "origen": "D-47",
+      "relacion": "AFECTA",
+      "destino": "O-33"
+    },
+    {
+      "origen": "D-48",
+      "relacion": "AFECTA",
+      "destino": "O-39"
+    },
+    {
+      "origen": "D-48",
+      "relacion": "AFECTA",
+      "destino": "D-13"
+    },
+    {
+      "origen": "D-49",
+      "relacion": "AFECTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "D-49",
+      "relacion": "AFECTA",
+      "destino": "O-38"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "AFECTA",
+      "destino": "C2"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "AFECTA",
+      "destino": "C3"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "AFECTA",
+      "destino": "C5"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-51",
+      "relacion": "AFECTA",
+      "destino": "C4"
+    },
+    {
+      "origen": "D-52",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-52",
+      "relacion": "DERIVA_DE",
+      "destino": "D-22"
+    },
+    {
+      "origen": "D-53",
+      "relacion": "AFECTA",
+      "destino": "O-11"
+    },
+    {
+      "origen": "H-07",
+      "relacion": "JUSTIFICA",
+      "destino": "D-46"
+    },
+    {
+      "origen": "H-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-44"
+    },
+    {
+      "origen": "H-11",
+      "relacion": "JUSTIFICA",
+      "destino": "D-44"
+    },
+    {
+      "origen": "H-01",
+      "relacion": "JUSTIFICA",
+      "destino": "D-43"
+    },
+    {
+      "origen": "H-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-42"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-53"
+    },
+    {
+      "origen": "CTX-06",
+      "relacion": "JUSTIFICA",
+      "destino": "D-51"
+    },
+    {
+      "origen": "CTX-06",
+      "relacion": "JUSTIFICA",
+      "destino": "D-46"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-42"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-43"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-44"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-46"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-47"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-50"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-51"
+    },
+    {
+      "origen": "E-2",
+      "relacion": "DOCUMENTA",
+      "destino": "D-52"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "D-45"
+    },
+    {
+      "origen": "E-5",
+      "relacion": "DOCUMENTA",
+      "destino": "D-53"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-48"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-49"
+    },
+    {
+      "origen": "D-47",
+      "relacion": "MITIGA",
+      "destino": "DT-07"
+    },
+    {
+      "origen": "D-45",
+      "relacion": "PARCHA",
+      "destino": "HU-OP14"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "PARCHA",
+      "destino": "HU-F1"
+    },
+    {
+      "origen": "D-50",
+      "relacion": "PARCHA",
+      "destino": "HU-F4"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-PEN"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "PARCHA",
+      "destino": "HU-PEN"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-SIN"
+    },
+    {
+      "origen": "D-43",
+      "relacion": "PARCHA",
+      "destino": "HU-SIN"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-ROL"
+    },
+    {
+      "origen": "D-44",
+      "relacion": "PARCHA",
+      "destino": "HU-ROL"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-NUM"
+    },
+    {
+      "origen": "D-45",
+      "relacion": "PARCHA",
+      "destino": "HU-NUM"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-MG2"
+    },
+    {
+      "origen": "D-46",
+      "relacion": "PARCHA",
+      "destino": "HU-MG2"
+    },
+    {
+      "origen": "D-10",
+      "relacion": "PARCHA",
+      "destino": "HU-MG2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-JER"
+    },
+    {
+      "origen": "D-47",
+      "relacion": "PARCHA",
+      "destino": "HU-JER"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-ORD"
+    },
+    {
+      "origen": "D-48",
+      "relacion": "PARCHA",
+      "destino": "HU-ORD"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-SES"
+    },
+    {
+      "origen": "D-49",
+      "relacion": "PARCHA",
+      "destino": "HU-SES"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-CON4"
+    },
+    {
+      "origen": "D-51",
+      "relacion": "PARCHA",
+      "destino": "HU-CON4"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-NJ2"
+    },
+    {
+      "origen": "D-52",
+      "relacion": "PARCHA",
+      "destino": "HU-NJ2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-DEG"
+    },
+    {
+      "origen": "D-53",
+      "relacion": "PARCHA",
+      "destino": "HU-DEG"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-ASU2"
+    },
+    {
+      "origen": "D-30",
+      "relacion": "PARCHA",
+      "destino": "HU-ASU2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-EVI"
+    },
+    {
+      "origen": "D-19",
+      "relacion": "PARCHA",
+      "destino": "HU-EVI"
+    },
+    {
+      "origen": "D-48",
+      "relacion": "GENERA",
+      "destino": "DT-18"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-18"
+    },
+    {
+      "origen": "D-42",
+      "relacion": "GENERA",
+      "destino": "DT-19"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_DEUDA",
+      "destino": "DT-19"
     }
   ]
 }

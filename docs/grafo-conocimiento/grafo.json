@@ -2143,7 +2143,7 @@
       "id": "D-62",
       "tipo": "Decision",
       "nombre": "Vistas por rol: bandeja diferenciada y asuntos para Dirección",
-      "descripcion": "Bandeja con dos variantes propias: titular (con la tarjeta «Salida con acuse», D-58) y personal del área (sin acciones de turno). La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, con la vista de asuntos y el filtro de D-29.",
+      "descripcion": "Bandeja con dos variantes propias, titular y personal del área, ambas con la tarjeta de acuses (D-58) porque el personal también concluye si su área es responsable (D-44); la diferencia está en la ficha, donde el personal no ve Devolver, Turnar ni Atraer. La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, solo de consulta: sin asignar documentos ni crear asuntos.",
       "estado": "tomada"
     },
     {

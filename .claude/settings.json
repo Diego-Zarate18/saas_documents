@@ -1,5 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(uv run *)",
@@ -27,13 +32,6 @@
       "Bash(npm create vite@latest *)",
       "Bash(git show *)"
     ],
-    "ask": [
-      "Bash(docker compose down *)",
-      "Bash(docker volume *)",
-      "Bash(git reset *)",
-      "Bash(git checkout *)",
-      "Bash(git restore *)"
-    ],
     "deny": [
       "Bash(git push *)",
       "Edit(/docs/grafo-conocimiento/**)",
@@ -42,11 +40,17 @@
       "Edit(/docs/decisiones-tecnologicas.md)",
       "Edit(/ai/handoff/README.md)",
       "Edit(/ai/handoff/siguiente.md)"
+    ],
+    "ask": [
+      "Bash(docker compose down *)",
+      "Bash(docker volume *)",
+      "Bash(git reset *)",
+      "Bash(git checkout *)",
+      "Bash(git restore *)"
     ]
   },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
-  "includeCoAuthoredBy": false
+  "enabledPlugins": {
+    "figma@claude-plugins-official": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": false
+  }
 }

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(uv sync *)",
+      "Bash(uv add *)",
+      "Bash(uv lock *)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(npm ci *)",
+      "Bash(npx openapi-typescript *)",
+      "Bash(docker compose ps *)",
+      "Bash(docker compose logs *)",
+      "Bash(docker compose up *)",
+      "Bash(docker compose stop *)",
+      "Bash(docker compose exec *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ],
+    "ask": [
+      "Bash(docker compose down *)",
+      "Bash(docker volume *)",
+      "Bash(git reset *)",
+      "Bash(git checkout *)",
+      "Bash(git restore *)"
+    ],
+    "deny": [
+      "Bash(git push *)",
+      "Edit(/docs/grafo-conocimiento/**)",
+      "Edit(/docs/operaciones/**)",
+      "Edit(/docs/arquitectura.md)",
+      "Edit(/docs/decisiones-tecnologicas.md)",
+      "Edit(/ai/handoff/README.md)",
+      "Edit(/ai/handoff/siguiente.md)"
+    ]
+  }
+}

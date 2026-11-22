@@ -1,0 +1,962 @@
+{
+  "roles": {
+    "OF": {
+      "id": "ROL-OF",
+      "nombre": "Oficialía de partes",
+      "descripcion": "Registra entradas y salidas, turna, cancela, corrige y resuelve duplicados. Ve el recorrido de todo, sin el contenido de lo confidencial ajeno."
+    },
+    "DI": {
+      "id": "ROL-DI",
+      "nombre": "Dirección",
+      "descripcion": "Turna y consulta el recorrido de todo, sin el contenido de lo confidencial ajeno."
+    },
+    "TI": {
+      "id": "ROL-TI",
+      "nombre": "Titular de área",
+      "descripcion": "Turna de forma directa desde su área, devuelve, returna, atrae y concluye. Ve lo suyo completo."
+    },
+    "PE": {
+      "id": "ROL-PE",
+      "nombre": "Personal del área",
+      "descripcion": "Atiende y concluye solo cuando su área es la responsable; agrega notas y anexos."
+    },
+    "AD": {
+      "id": "ROL-AD",
+      "nombre": "Administrador",
+      "descripcion": "Gestiona áreas, personas, usuarios y roles."
+    }
+  },
+  "operaciones": [
+    {
+      "id": "O-01",
+      "seccion": "Recepción, registro y corrección",
+      "nombre": "Registrar documento recibido y asignar folio",
+      "roles": "OF",
+      "recibe": "Tipo, número del emisor (opcional), emisor (área o actor externo), fecha del documento, canal (correo o papel), fecha y hora de recepción, síntesis, confidencial, contenido según el tipo, marca de extemporáneo",
+      "devuelve": "Id, folio y, si aplica, el documento que ya existe con el mismo número",
+      "reglas": "Una sola transacción: folio con contador bloqueado por área y año de registro (D-21, D-34); si número, emisor y año de la fecha del documento ya existen, no crea nada y ofrece O-19 (D-27); sin número o sin fecha se marca posible_duplicado; todo documento tiene emisor (RI-06); encola el expediente y el nodo en el outbox (D-13)",
+      "tipo": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-01",
+        "RF-02"
+      ]
+    },
+    {
+      "id": "O-19",
+      "seccion": "Recepción, registro y corrección",
+      "nombre": "Registrar segunda recepción",
+      "roles": "OF",
+      "recibe": "Id del documento, canal, fecha y hora del sello",
+      "devuelve": "Documento con sus dos fechas de recepción",
+      "reglas": "Si el segundo canal es papel, su sello fija la fecha oficial; el folio no cambia (D-28); un segundo registro por el mismo canal se rechaza",
+      "tipo": "E",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-02"
+      ]
+    },
+    {
+      "id": "O-26",
+      "seccion": "Recepción, registro y corrección",
+      "nombre": "Resolver posible duplicado",
+      "roles": "OF",
+      "recibe": "Ids de los dos documentos y la decisión: son el mismo o son distintos",
+      "devuelve": "Marca retirada, o documento posterior cancelado",
+      "reglas": "Si son el mismo, el posterior pasa a cancelado con duplicado_de; sus movimientos se conservan en la bitácora (D-20); si son distintos, se retira la marca posible_duplicado",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-02"
+      ]
+    },
+    {
+      "id": "O-24",
+      "seccion": "Recepción, registro y corrección",
+      "nombre": "Cancelar documento",
+      "roles": "OF",
+      "recibe": "Id del documento y motivo",
+      "devuelve": "Documento cancelado",
+      "reglas": "Nunca se borra (D-20); deja de aparecer en pendientes; el estado se replica a Neo4j por el outbox",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-15"
+      ]
+    },
+    {
+      "id": "O-25",
+      "seccion": "Recepción, registro y corrección",
+      "nombre": "Corregir un movimiento",
+      "roles": "OF",
+      "recibe": "Id del movimiento, datos corregidos y motivo",
+      "devuelve": "Movimiento de corrección",
+      "reglas": "Inserta un movimiento nuevo con CORRIGE; el original queda intacto porque la bitácora no se edita (HU-H3, RF-15)",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-15"
+      ]
+    },
+    {
+      "id": "O-03",
+      "seccion": "Recorrido del documento",
+      "nombre": "Turnar a una o varias áreas",
+      "roles": "OF, DI, TI",
+      "recibe": "Id del documento y, por área destino, su rol (responsable, apoyo o conocimiento) e instrucción",
+      "devuelve": "Movimientos creados con su id_grupo_turno",
+      "reglas": "Exactamente un responsable por grupo (RI-10); guarda el titular del área destino al turnar, nulo si está vacante (D-31); oficialía y dirección turnan cualquier documento, el titular solo los que tiene pendientes en su área (turno directo) (D-44); no se turnan documentos concluidos ni cancelados",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-03",
+        "RF-04"
+      ]
+    },
+    {
+      "id": "O-22",
+      "seccion": "Recorrido del documento",
+      "nombre": "Devolver o returnar con motivo",
+      "roles": "TI",
+      "recibe": "Id del documento, motivo del catálogo, área sugerida (opcional), nota",
+      "devuelve": "Movimiento de devolución o returno",
+      "reglas": "Motivo obligatorio (D-32); devolver regresa al área que lo envió y returnar lo manda a otra; 'no_competencia' sin área sugerida cuenta como rebote en C3",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Media",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-04",
+        "RF-11"
+      ]
+    },
+    {
+      "id": "O-23",
+      "seccion": "Recorrido del documento",
+      "nombre": "Atraer documento",
+      "roles": "TI",
+      "recibe": "Id del documento y justificación",
+      "devuelve": "Movimiento de atracción",
+      "reglas": "El área que atrae queda como responsable y el área anterior deja de tenerlo pendiente; requiere visibilidad sobre el documento",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-04"
+      ]
+    },
+    {
+      "id": "O-05",
+      "seccion": "Recorrido del documento",
+      "nombre": "Concluir documento",
+      "roles": "TI, PE",
+      "recibe": "Id del documento, forma de conclusión, documento de respuesta (opcional), evidencia (si fue sin oficio)",
+      "devuelve": "Documento concluido",
+      "reglas": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14); la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
+      "tipo": "E",
+      "bases": "PG+NJ+MG",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-10"
+      ]
+    },
+    {
+      "id": "O-20",
+      "seccion": "Salidas externas",
+      "nombre": "Registrar salida externa",
+      "roles": "OF",
+      "recibe": "Tipo, número, área emisora, actor externo destinatario, síntesis, contenido, documento al que responde (opcional)",
+      "devuelve": "Id del documento de salida",
+      "reglas": "Emisor interno y destinatario externo; si responde a otro documento crea RESPONDE_A; encola expediente y nodo en el outbox",
+      "tipo": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-14"
+      ]
+    },
+    {
+      "id": "O-21",
+      "seccion": "Salidas externas",
+      "nombre": "Registrar acuse de salida",
+      "roles": "OF",
+      "recibe": "Id del documento de salida, fecha y hora del acuse, quién recibió",
+      "devuelve": "Salida con acuse",
+      "reglas": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, ofrece concluirlo (O-05)",
+      "tipo": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-14"
+      ]
+    },
+    {
+      "id": "O-07",
+      "seccion": "Relaciones y asuntos",
+      "nombre": "Relacionar documentos",
+      "roles": "OF, TI, PE",
+      "recibe": "Documento origen, destino (id, o número y emisor en texto si no está registrado) y tipo de relación",
+      "devuelve": "Relación creada",
+      "reglas": "Sin autorreferencia; destino no registrado crea o reutiliza un DocumentoNoRegistrado con el mismo número y emisor (D-33); SUSTITUYE_A solo entre registrados y deja al sustituido sin_efecto en PostgreSQL con reconciliación (D-14); requiere visibilidad sobre el origen",
+      "tipo": "E",
+      "bases": "NJ+PG",
+      "frecuencia": "Media",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-05"
+      ]
+    },
+    {
+      "id": "O-27",
+      "seccion": "Relaciones y asuntos",
+      "nombre": "Crear asunto",
+      "roles": "OF, TI, PE",
+      "recibe": "Nombre y descripción",
+      "devuelve": "Id del asunto",
+      "reglas": "Id único con restricción de unicidad en Neo4j (D-25)",
+      "tipo": "E",
+      "bases": "NJ",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-06"
+      ]
+    },
+    {
+      "id": "O-08",
+      "seccion": "Relaciones y asuntos",
+      "nombre": "Asignar documento a un asunto",
+      "roles": "TI, PE",
+      "recibe": "Id del documento e id del asunto",
+      "devuelve": "Pertenencia creada",
+      "reglas": "En cualquier momento, no en ventanilla (D-30); un documento puede pertenecer a varios asuntos",
+      "tipo": "E",
+      "bases": "NJ",
+      "frecuencia": "Media",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-06"
+      ]
+    },
+    {
+      "id": "O-18",
+      "seccion": "Relaciones y asuntos",
+      "nombre": "Quitar referencia o sacar de un asunto",
+      "roles": "OF, TI, PE",
+      "recibe": "Id de la relación o de la pertenencia",
+      "devuelve": "Confirmación",
+      "reglas": "Solo capturas por error (D-20); quitar SUSTITUYE_A devuelve al documento su estado anterior con la misma reconciliación de D-14",
+      "tipo": "E",
+      "bases": "NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-05",
+        "RF-06"
+      ]
+    },
+    {
+      "id": "O-09",
+      "seccion": "Expediente",
+      "nombre": "Consultar y actualizar contenido del expediente",
+      "roles": "OF, TI, PE",
+      "recibe": "Id del documento y campos del contenido",
+      "devuelve": "Expediente actualizado",
+      "reglas": "Validación por tipo con $jsonSchema; el tipo no cambia (D-26); lo confidencial solo lo ven el titular y quien tiene movimiento (D-29); los documentos cancelados son de solo lectura",
+      "tipo": "L+E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-01"
+      ]
+    },
+    {
+      "id": "O-28",
+      "seccion": "Expediente",
+      "nombre": "Agregar anexo",
+      "roles": "OF, PE",
+      "recibe": "Id del documento, descripción, número de hojas, ubicación física",
+      "devuelve": "Anexo agregado",
+      "reglas": "Solo datos descriptivos, sin archivo (DT-03)",
+      "tipo": "E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-01"
+      ]
+    },
+    {
+      "id": "O-29",
+      "seccion": "Expediente",
+      "nombre": "Agregar nota",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Id del documento, tipo de nota y texto",
+      "devuelve": "Nota agregada",
+      "reglas": "Autor y fecha los pone el servidor; requiere visibilidad sobre el documento",
+      "tipo": "E",
+      "bases": "MG",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-01"
+      ]
+    },
+    {
+      "id": "O-17",
+      "seccion": "Expediente",
+      "nombre": "Eliminar anexo o nota",
+      "roles": "OF, PE",
+      "recibe": "Id del documento e id del anexo o la nota",
+      "devuelve": "Confirmación",
+      "reglas": "Solo capturas por error, por su autor u oficialía (D-20); la nota evidencia_atencion de una conclusión no se elimina, porque dejaría sin evidencia a RF-10",
+      "tipo": "E",
+      "bases": "MG",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-01"
+      ]
+    },
+    {
+      "id": "O-30",
+      "seccion": "Consultas",
+      "nombre": "Buscar documentos",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Filtros: folio, número, emisor, tipo, estado, fechas, texto de la síntesis, campo propio del tipo",
+      "devuelve": "Lista paginada: folio, número, síntesis, tipo, estado y área responsable",
+      "reglas": "Paginación obligatoria; de los documentos fuera de su visibilidad solo muestra estado y responsable (D-29); el filtro por campo propio del tipo consulta MongoDB y filtra la visibilidad en PostgreSQL (D-46)",
+      "tipo": "L",
+      "bases": "PG+MG",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-07",
+        "RF-16"
+      ]
+    },
+    {
+      "id": "O-11",
+      "seccion": "Consultas",
+      "nombre": "Ficha completa de un documento",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Id del documento",
+      "devuelve": "Registro, folios y acuses; expediente; recorrido con tiempos (C1); relaciones y asuntos",
+      "reglas": "Flujo integrado de las tres bases; si MongoDB o Neo4j no responden, devuelve lo disponible y marca la sección faltante (D-53); contenido confidencial oculto según D-29",
+      "tipo": "L",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-07",
+        "RF-08"
+      ]
+    },
+    {
+      "id": "O-14",
+      "seccion": "Consultas",
+      "nombre": "Pendientes por área y responsable (bandeja)",
+      "roles": "OF, DI, TI, PE",
+      "recibe": "Área (o todas, según el rol), filtros por tipo y antigüedad",
+      "devuelve": "Documentos pendientes con rol, antigüedad en días naturales, titular al turnar y si quien lo recibió ya no está adscrito",
+      "reglas": "Regla de pendiente de D-42, calculada en PostgreSQL para que refleje un turno al instante; implementa C4 (D-51)",
+      "tipo": "L",
+      "bases": "PG",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-12",
+        "RF-13"
+      ]
+    },
+    {
+      "id": "O-31",
+      "seccion": "Consultas",
+      "nombre": "Consultar catálogos",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Catálogo: áreas, tipos, motivos de devolución, formas de conclusión, actores externos",
+      "devuelve": "Elementos activos del catálogo",
+      "reglas": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos",
+      "tipo": "L",
+      "bases": "PG",
+      "frecuencia": "Alta",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-01"
+      ]
+    },
+    {
+      "id": "O-32",
+      "seccion": "Consultas",
+      "nombre": "Consultar estructura organizacional",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Área (opcional)",
+      "devuelve": "Áreas con dependencia, titular y personas adscritas",
+      "reglas": "Solo el estado actual (D-08)",
+      "tipo": "L",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-13"
+      ]
+    },
+    {
+      "id": "O-33",
+      "seccion": "Administración",
+      "nombre": "Gestionar áreas",
+      "roles": "AD",
+      "recibe": "Siglas, nombre, área de la que depende, titular; o id para desactivar",
+      "devuelve": "Área creada o actualizada",
+      "reglas": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-13"
+      ]
+    },
+    {
+      "id": "O-34",
+      "seccion": "Administración",
+      "nombre": "Gestionar personas y usuarios",
+      "roles": "AD",
+      "recibe": "Nombre, correo, área de adscripción, rol; o id para dar de baja",
+      "devuelve": "Persona y usuario creados o actualizados",
+      "reglas": "Correo único; contraseña guardada con hash; baja lógica que conserva sus movimientos; si era titular, el área queda vacante",
+      "tipo": "E",
+      "bases": "PG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-13",
+        "RF-16"
+      ]
+    },
+    {
+      "id": "O-35",
+      "seccion": "Administración",
+      "nombre": "Gestionar actores externos",
+      "roles": "OF, AD",
+      "recibe": "Nombre, tipo (institución, municipio, proveedor, ciudadano), datos de contacto",
+      "devuelve": "Actor creado o actualizado",
+      "reglas": "No se eliminan si ya tienen documentos; se desactivan",
+      "tipo": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-14"
+      ]
+    },
+    {
+      "id": "O-36",
+      "seccion": "Sesión y seguridad",
+      "nombre": "Iniciar sesión",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Correo y contraseña",
+      "devuelve": "Sesión en cookie httpOnly, nombre, rol y área",
+      "reglas": "Mensaje genérico ante credenciales incorrectas; bloqueo temporal tras varios intentos fallidos; sesión en PostgreSQL (D-49)",
+      "tipo": "L+E",
+      "bases": "PG",
+      "frecuencia": "Media",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-16"
+      ]
+    },
+    {
+      "id": "O-37",
+      "seccion": "Sesión y seguridad",
+      "nombre": "Cerrar sesión",
+      "roles": "OF, DI, TI, PE, AD",
+      "recibe": "Sesión actual",
+      "devuelve": "Pantalla de inicio de sesión",
+      "reglas": "Revoca la sesión en la base, efectivo de inmediato (D-49)",
+      "tipo": "E",
+      "bases": "PG",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": [
+        "RF-16"
+      ]
+    },
+    {
+      "id": "O-38",
+      "seccion": "Sesión y seguridad",
+      "nombre": "Validar sesión y calcular visibilidad",
+      "roles": "Sistema",
+      "recibe": "Código de sesión (cookie)",
+      "devuelve": "Usuario, rol, área y conjunto de áreas visibles",
+      "reglas": "En cada petición; caduca por inactividad; la función central de visibilidad pasa las áreas visibles a cada consulta (D-29)",
+      "tipo": "L+E",
+      "bases": "PG",
+      "frecuencia": "Muy alta",
+      "nucleo": true,
+      "requerimientos": [
+        "RF-16"
+      ]
+    },
+    {
+      "id": "O-39",
+      "seccion": "Procesos del sistema y del equipo",
+      "nombre": "Sincronizar el outbox",
+      "roles": "Sistema",
+      "recibe": "Registros pendientes del outbox",
+      "devuelve": "Registros marcados como enviados o con error",
+      "reglas": "Un solo proceso, en orden de id (D-48); escrituras idempotentes con MERGE en Neo4j y upsert en MongoDB; reintentos con espera creciente y marca de error tras varios fallos",
+      "tipo": "E",
+      "bases": "PG+NJ+MG",
+      "frecuencia": "Alta",
+      "nucleo": true,
+      "requerimientos": []
+    },
+    {
+      "id": "O-40",
+      "seccion": "Procesos del sistema y del equipo",
+      "nombre": "Reconciliar entre bases",
+      "roles": "Sistema, equipo",
+      "recibe": "Lote de ids o rango de fechas",
+      "devuelve": "Reporte de diferencias y registros reencolados",
+      "reglas": "Compara existencia, estado y tipo entre las tres bases y las sustituciones a medias (D-14, D-26); reencola en el outbox lo que falte",
+      "tipo": "L",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Baja",
+      "nucleo": false,
+      "requerimientos": []
+    },
+    {
+      "id": "O-41",
+      "seccion": "Procesos del sistema y del equipo",
+      "nombre": "Respaldo y carga de datos de prueba",
+      "roles": "Equipo",
+      "recibe": "Scripts versionados",
+      "devuelve": "Respaldos y bases cargadas",
+      "reglas": "pg_dump, mongodump y neo4j-admin database dump (D-25); carga reproducible desde cero (entregable 4)",
+      "tipo": "E",
+      "bases": "PG+MG+NJ",
+      "frecuencia": "Ocasional",
+      "nucleo": false,
+      "requerimientos": []
+    }
+  ],
+  "consultas": [
+    {
+      "id": "C1",
+      "nombre": "Recorrido de un documento",
+      "bases": "PG+NJ",
+      "descripcion": "Ubicación vigente desde PostgreSQL (D-42) y recorrido con ramas desde Neo4j."
+    },
+    {
+      "id": "C2",
+      "nombre": "Hilo de un asunto",
+      "bases": "NJ+PG",
+      "descripcion": "Documentos relacionados hasta 6 saltos (D-50) y su estado de conclusión."
+    },
+    {
+      "id": "C3",
+      "nombre": "Rebotes entre áreas",
+      "bases": "NJ",
+      "descripcion": "Devoluciones sin motivo, 'no competencia' sin área sugerida, tres o más devoluciones o tres o más áreas distintas (D-32)."
+    },
+    {
+      "id": "C4",
+      "nombre": "Pendientes por responsable",
+      "bases": "PG",
+      "descripcion": "Se resuelve en PostgreSQL (D-51); la expone O-14."
+    },
+    {
+      "id": "C5",
+      "nombre": "Alcance de un asunto",
+      "bases": "NJ",
+      "descripcion": "Áreas y personas con contacto con algún documento del asunto, filtradas por visibilidad."
+    }
+  ],
+  "patrones": [
+    {
+      "id": "AR-01",
+      "base": "PG",
+      "nombre": "Asignar folio sin huecos",
+      "sirve_a": [
+        "O-01"
+      ],
+      "tipo": "E",
+      "datos": "área receptora, año de registro",
+      "mecanismo": "SELECT ... FOR UPDATE sobre contador_folio y UPDATE en la misma transacción del INSERT (D-21)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-02",
+      "base": "PG",
+      "nombre": "Detectar duplicado",
+      "sirve_a": [
+        "O-01",
+        "O-26"
+      ],
+      "tipo": "L",
+      "datos": "número, emisor, año de fecha_documento",
+      "mecanismo": "UNIQUE parcial donde número y fecha_documento no son nulos; el conflicto devuelve el documento existente (D-27)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-03",
+      "base": "PG",
+      "nombre": "Insertar movimiento en la bitácora",
+      "sirve_a": [
+        "O-03",
+        "O-22",
+        "O-23",
+        "O-05",
+        "O-25"
+      ],
+      "tipo": "E",
+      "datos": "documento, áreas, persona, rol, motivo, titular al turnar",
+      "mecanismo": "Solo INSERT; un disparador impide UPDATE y DELETE; índice único parcial por id_grupo_turno para el responsable (RI-10)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-04",
+      "base": "PG",
+      "nombre": "Encolar en el outbox",
+      "sirve_a": [
+        "O-01",
+        "O-03",
+        "O-05",
+        "O-07",
+        "O-20",
+        "O-24"
+      ],
+      "tipo": "E",
+      "datos": "destino, tipo de evento, datos",
+      "mecanismo": "INSERT en la misma transacción que el cambio (D-13)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-05",
+      "base": "PG",
+      "nombre": "Tomar lote del outbox",
+      "sirve_a": [
+        "O-39"
+      ],
+      "tipo": "L+E",
+      "datos": "registros pendientes",
+      "mecanismo": "ORDER BY id con FOR UPDATE SKIP LOCKED y LIMIT; un solo proceso (D-48)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-06",
+      "base": "PG",
+      "nombre": "Bandeja de pendientes",
+      "sirve_a": [
+        "O-14",
+        "C4",
+        "C1"
+      ],
+      "tipo": "L",
+      "datos": "área, áreas visibles",
+      "mecanismo": "Último movimiento por documento y área con función de ventana; índice (id_documento, id_area_destino, fecha_hora) (D-42)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-07",
+      "base": "PG",
+      "nombre": "Búsqueda paginada con visibilidad",
+      "sirve_a": [
+        "O-30"
+      ],
+      "tipo": "L",
+      "datos": "filtros, áreas visibles, página",
+      "mecanismo": "Índices por folio, número y emisor, estado y fechas; búsqueda en síntesis con ILIKE",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-08",
+      "base": "PG",
+      "nombre": "Validar sesión",
+      "sirve_a": [
+        "O-38",
+        "O-36",
+        "O-37"
+      ],
+      "tipo": "L+E",
+      "datos": "huella del código de sesión",
+      "mecanismo": "Búsqueda por huella SHA-256 y renovación de la última actividad (D-49)",
+      "frecuencia": "Muy alta"
+    },
+    {
+      "id": "AR-09",
+      "base": "PG",
+      "nombre": "Validar jerarquía sin ciclos",
+      "sirve_a": [
+        "O-33"
+      ],
+      "tipo": "L",
+      "datos": "área, área padre",
+      "mecanismo": "Consulta recursiva (WITH RECURSIVE) con bloqueo de la tabla de áreas en la transacción (D-47)",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AR-10",
+      "base": "PG",
+      "nombre": "Ficha: registro, folios y acuses",
+      "sirve_a": [
+        "O-11"
+      ],
+      "tipo": "L",
+      "datos": "id del documento",
+      "mecanismo": "Lectura por llave primaria con sus folios, acuses y ubicación vigente",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AR-11",
+      "base": "PG",
+      "nombre": "Lote para reconciliar",
+      "sirve_a": [
+        "O-40"
+      ],
+      "tipo": "L",
+      "datos": "rango de fechas",
+      "mecanismo": "Ids, estado y tipo por lote, ordenados por id",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-01",
+      "base": "MG",
+      "nombre": "Crear expediente validado por tipo",
+      "sirve_a": [
+        "O-01",
+        "O-20"
+      ],
+      "tipo": "E",
+      "datos": "_id = id_documento, tipo, contenido, referencias citadas",
+      "mecanismo": "Upsert desde el outbox; $jsonSchema con una rama por cada uno de los 7 tipos",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AD-02",
+      "base": "MG",
+      "nombre": "Leer expediente por _id",
+      "sirve_a": [
+        "O-11",
+        "O-09"
+      ],
+      "tipo": "L",
+      "datos": "id_documento",
+      "mecanismo": "Búsqueda por _id",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AD-03",
+      "base": "MG",
+      "nombre": "Actualizar contenido según el tipo",
+      "sirve_a": [
+        "O-09"
+      ],
+      "tipo": "E",
+      "datos": "id, campos",
+      "mecanismo": "$set sobre campos del contenido; el tipo nunca se modifica (D-26)",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-04",
+      "base": "MG",
+      "nombre": "Agregar anexo",
+      "sirve_a": [
+        "O-28"
+      ],
+      "tipo": "E",
+      "datos": "id, descripción, hojas, ubicación física",
+      "mecanismo": "$push al arreglo anexos con id propio",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-05",
+      "base": "MG",
+      "nombre": "Agregar nota o evidencia",
+      "sirve_a": [
+        "O-29",
+        "O-05"
+      ],
+      "tipo": "E",
+      "datos": "id, tipo de nota, texto, autor, id_movimiento",
+      "mecanismo": "$push al arreglo notas; la evidencia de conclusión llega por el outbox (D-19)",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AD-06",
+      "base": "MG",
+      "nombre": "Quitar anexo o nota",
+      "sirve_a": [
+        "O-17"
+      ],
+      "tipo": "E",
+      "datos": "id, id del elemento",
+      "mecanismo": "$pull por id del elemento, excepto evidencia_atencion",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-07",
+      "base": "MG",
+      "nombre": "Buscar por campo propio del tipo",
+      "sirve_a": [
+        "O-30"
+      ],
+      "tipo": "L",
+      "datos": "tipo, campo, valor",
+      "mecanismo": "Índices parciales por tipo (partialFilterExpression); devuelve ids que se filtran por visibilidad en PostgreSQL (D-46)",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AD-08",
+      "base": "MG",
+      "nombre": "Verificar expedientes por lote",
+      "sirve_a": [
+        "O-40"
+      ],
+      "tipo": "L",
+      "datos": "lista de ids",
+      "mecanismo": "$in sobre _id proyectando solo el tipo",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-01",
+      "base": "NJ",
+      "nombre": "Recorrido de un documento con ramas",
+      "sirve_a": [
+        "C1",
+        "O-11"
+      ],
+      "tipo": "L",
+      "datos": "id_documento",
+      "mecanismo": "Desde el nodo Documento por SIGUIENTE entre movimientos (D-09)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-02",
+      "base": "NJ",
+      "nombre": "Hilo de un asunto",
+      "sirve_a": [
+        "C2"
+      ],
+      "tipo": "L",
+      "datos": "id del documento o del asunto",
+      "mecanismo": "Las cuatro referencias en ambos sentidos, hasta 6 saltos (D-50)",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-03",
+      "base": "NJ",
+      "nombre": "Rebotes",
+      "sirve_a": [
+        "C3"
+      ],
+      "tipo": "L",
+      "datos": "periodo, área",
+      "mecanismo": "Parte de movimientos filtrados por fecha con índice; cuenta devoluciones y áreas distintas por documento (D-32, D-50)",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-04",
+      "base": "NJ",
+      "nombre": "Alcance de un asunto",
+      "sirve_a": [
+        "C5"
+      ],
+      "tipo": "L",
+      "datos": "id del asunto, áreas visibles",
+      "mecanismo": "Desde el Asunto a sus documentos y de ahí a áreas y personas de sus movimientos (D-50)",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-05",
+      "base": "NJ",
+      "nombre": "Relaciones y asuntos de un documento",
+      "sirve_a": [
+        "O-11"
+      ],
+      "tipo": "L",
+      "datos": "id_documento",
+      "mecanismo": "Referencias entrantes y salientes a un salto y asuntos a los que pertenece",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-06",
+      "base": "NJ",
+      "nombre": "Replicar desde el outbox",
+      "sirve_a": [
+        "O-39"
+      ],
+      "tipo": "E",
+      "datos": "documento, movimiento, área, persona",
+      "mecanismo": "MERGE por id; nunca borra Asunto ni referencias (D-25)",
+      "frecuencia": "Alta"
+    },
+    {
+      "id": "AG-07",
+      "base": "NJ",
+      "nombre": "Crear referencia",
+      "sirve_a": [
+        "O-07"
+      ],
+      "tipo": "E",
+      "datos": "origen, destino, tipo",
+      "mecanismo": "MERGE de la relación; MERGE del DocumentoNoRegistrado por número y emisor (D-33)",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-08",
+      "base": "NJ",
+      "nombre": "Crear asunto y asignar documento",
+      "sirve_a": [
+        "O-27",
+        "O-08"
+      ],
+      "tipo": "E",
+      "datos": "id_asunto, id_documento",
+      "mecanismo": "CREATE del Asunto con restricción de unicidad; MERGE de PERTENECE_A",
+      "frecuencia": "Media"
+    },
+    {
+      "id": "AG-09",
+      "base": "NJ",
+      "nombre": "Quitar referencia o pertenencia",
+      "sirve_a": [
+        "O-18"
+      ],
+      "tipo": "E",
+      "datos": "ids",
+      "mecanismo": "DELETE de la relación, nunca de nodos",
+      "frecuencia": "Baja"
+    },
+    {
+      "id": "AG-10",
+      "base": "NJ",
+      "nombre": "Detectar faltantes para reconciliar",
+      "sirve_a": [
+        "O-40"
+      ],
+      "tipo": "L",
+      "datos": "lote de ids",
+      "mecanismo": "UNWIND de ids y OPTIONAL MATCH para reportar nodos o estados faltantes",
+      "frecuencia": "Baja"
+    }
+  ]
+}

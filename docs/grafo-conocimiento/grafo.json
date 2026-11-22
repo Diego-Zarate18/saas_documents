@@ -364,12 +364,12 @@
       "id": "O-05",
       "tipo": "Operacion",
       "nombre": "Concluir documento",
-      "descripcion": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14); la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
+      "descripcion": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14) con una forma del catálogo de D-59; la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
       "seccion": "Recorrido del documento",
       "roles": "TI, PE",
-      "recibe": "Id del documento, forma de conclusión, documento de respuesta (opcional), evidencia (si fue sin oficio)",
+      "recibe": "Id del documento, forma de conclusión (catálogo de D-59), documento de respuesta (opcional), evidencia (si fue sin oficio)",
       "devuelve": "Documento concluido",
-      "reglas": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14); la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
+      "reglas": "Solo el área responsable con el documento pendiente (D-44); conclusión explícita (RI-14) con una forma del catálogo de D-59; la atención sin oficio exige la nota evidencia_atencion ligada al movimiento (D-19), escrita en MongoDB por el outbox; cierra los pendientes de todas las ramas",
       "tipo_operacion": "E",
       "bases": "PG+NJ+MG",
       "frecuencia": "Alta",
@@ -1069,7 +1069,7 @@
       "id": "RI-14",
       "tipo": "Regla",
       "nombre": "Conclusión explícita",
-      "descripcion": "Un documento solo se concluye con forma_conclusion registrada. Redacción reconstruida desde HU-D3; confirmar contra E-2.",
+      "descripcion": "Un documento solo se concluye con forma_conclusion registrada, de las cinco del catálogo D-59. Redacción reconstruida desde HU-D3; confirmar contra E-2.",
       "imposicion": "PostgreSQL y backend"
     },
     {
@@ -1461,12 +1461,12 @@
       "id": "O-21",
       "tipo": "Operacion",
       "nombre": "Registrar acuse de salida",
-      "descripcion": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, ofrece concluirlo (O-05)",
+      "descripcion": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, informa al titular del área responsable que puede concluirlo (O-05, D-58); oficialía no concluye",
       "seccion": "Salidas externas",
       "roles": "OF",
       "recibe": "Id del documento de salida, fecha y hora del acuse, quién recibió",
-      "devuelve": "Salida con acuse",
-      "reglas": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, ofrece concluirlo (O-05)",
+      "devuelve": "Salida con acuse; aviso al titular del área responsable",
+      "reglas": "Solo documentos de salida; un acuse por destinatario; si la salida responde a un documento pendiente, informa al titular del área responsable que puede concluirlo (O-05, D-58); oficialía no concluye",
       "tipo_operacion": "E",
       "bases": "PG",
       "frecuencia": "Baja",
@@ -1566,12 +1566,12 @@
       "id": "O-33",
       "tipo": "Operacion",
       "nombre": "Gestionar áreas",
-      "descripcion": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área",
+      "descripcion": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área; las siglas no se modifican si el área tiene folios emitidos (D-61)",
       "seccion": "Administración",
       "roles": "AD",
       "recibe": "Siglas, nombre, área de la que depende, titular; o id para desactivar",
       "devuelve": "Área creada o actualizada",
-      "reglas": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área",
+      "reglas": "Sin ciclos en la jerarquía, validado con consulta recursiva dentro de la transacción (D-47); no se desactiva un área con pendientes; el titular debe estar adscrito al área; las siglas no se modifican si el área tiene folios emitidos (D-61)",
       "tipo_operacion": "E",
       "bases": "PG+NJ",
       "frecuencia": "Baja",
@@ -2109,6 +2109,41 @@
       "tipo": "Decision",
       "nombre": "Desarrollo entre revisor y Claude Code",
       "descripcion": "El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-58",
+      "tipo": "Decision",
+      "nombre": "Oficialía registra el acuse; el área responsable concluye",
+      "descripcion": "O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Salida con acuse». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo».",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-59",
+      "tipo": "Decision",
+      "nombre": "Catálogo cerrado de formas de conclusión",
+      "descripcion": "Cinco formas: con_respuesta (exige un documento de salida o respuesta registrado y enlazado), atencion_sin_oficio (nota evidencia_atencion, D-19), enterado (documento informativo, sin más requisitos), no_procede (nota con el motivo) y duplicado (referencia al documento original, D-27). Toda forma salvo con_respuesta y enterado lleva nota obligatoria; ninguna se borra (D-20). Enumeración versionada en PostgreSQL (D-55). Propuesta por confirmar contra E-2.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-60",
+      "tipo": "Decision",
+      "nombre": "Núcleo en PostgreSQL y campos por tipo en MongoDB",
+      "descripcion": "PostgreSQL guarda solo el núcleo oficial: folio, tipo, asunto, remitente, fecha y fecha límite. Los campos propios de cada tipo de documento van en el expediente de MongoDB con un esquema JSON versionado por tipo (D-55), máximo tres campos específicos por tipo, opcionales salvo la fecha límite en los tipos que exigen respuesta. El detalle por tipo queda por definir en E-2.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-61",
+      "tipo": "Decision",
+      "nombre": "Siglas de área inmutables con folios emitidos",
+      "descripcion": "Las siglas forman parte del folio (D-21), así que no se pueden modificar mientras el área tenga folios emitidos. Administración puede editarlas solo si el área no tiene documentos; los folios ya emitidos conservan las suyas.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-62",
+      "tipo": "Decision",
+      "nombre": "Vistas por rol: bandeja diferenciada y asuntos para Dirección",
+      "descripcion": "Bandeja con dos variantes propias: titular (con la tarjeta «Salida con acuse», D-58) y personal del área (sin acciones de turno). La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, con la vista de asuntos y el filtro de D-29.",
       "estado": "tomada"
     },
     {
@@ -6642,6 +6677,176 @@
       "origen": "D-57",
       "relacion": "AFECTA",
       "destino": "E-8"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-58"
+    },
+    {
+      "origen": "D-58",
+      "relacion": "DERIVA_DE",
+      "destino": "D-44"
+    },
+    {
+      "origen": "D-58",
+      "relacion": "AFECTA",
+      "destino": "O-21"
+    },
+    {
+      "origen": "D-58",
+      "relacion": "AFECTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "D-58",
+      "relacion": "AFECTA",
+      "destino": "ROL-OF"
+    },
+    {
+      "origen": "D-58",
+      "relacion": "AFECTA",
+      "destino": "ROL-TI"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-59"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "DERIVA_DE",
+      "destino": "D-19"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "DERIVA_DE",
+      "destino": "D-27"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "AFECTA",
+      "destino": "RI-14"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "AFECTA",
+      "destino": "O-05"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "AFECTA",
+      "destino": "HU-D3"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-59",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-60"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "DERIVA_DE",
+      "destino": "D-17"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "DERIVA_DE",
+      "destino": "D-10"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "DERIVA_DE",
+      "destino": "D-55"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "AFECTA",
+      "destino": "H-07"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-60",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-61"
+    },
+    {
+      "origen": "D-61",
+      "relacion": "DERIVA_DE",
+      "destino": "D-21"
+    },
+    {
+      "origen": "D-61",
+      "relacion": "AFECTA",
+      "destino": "O-33"
+    },
+    {
+      "origen": "D-61",
+      "relacion": "AFECTA",
+      "destino": "K-ARE"
+    },
+    {
+      "origen": "D-61",
+      "relacion": "AFECTA",
+      "destino": "ROL-AD"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-62"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "DERIVA_DE",
+      "destino": "D-29"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "DERIVA_DE",
+      "destino": "D-44"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "AFECTA",
+      "destino": "ROL-DI"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "AFECTA",
+      "destino": "ROL-TI"
+    },
+    {
+      "origen": "D-62",
+      "relacion": "AFECTA",
+      "destino": "ROL-PE"
     }
   ]
 }

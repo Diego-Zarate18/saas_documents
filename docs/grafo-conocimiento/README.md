@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 267 nodos y 885 relaciones
+## Contenido: 272 nodos y 919 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 57 | Decisiones de diseño tomadas |
+| Decision | 62 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -98,7 +98,7 @@ Una deuda **parchada** tiene una decisión que la mitiga; una **aceptada** se as
 | --- | --- | --- | --- |
 | RI-06 | Todo documento tiene emisor | PostgreSQL | Un área emisora o un actor externo. Redacción reconstruida desde HU-EMI; confirmar contra E-2. |
 | RI-10 | Un solo responsable por grupo de turno | PostgreSQL y backend | 'A lo más uno' con índice único parcial sobre id_grupo_turno; 'al menos uno' en el servicio (DT-06). |
-| RI-14 | Conclusión explícita | PostgreSQL y backend | Un documento solo se concluye con forma_conclusion registrada. Redacción reconstruida desde HU-D3; confirmar contra E-2. |
+| RI-14 | Conclusión explícita | PostgreSQL y backend | Un documento solo se concluye con forma_conclusion registrada, de las cinco del catálogo D-59. Redacción reconstruida desde HU-D3; confirmar contra E-2. |
 
 ## Roles
 
@@ -247,6 +247,11 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-55 | Esquemas versionados y versiones fijas | CTX-02 | El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes. |
 | D-56 | Pruebas por tipo de la guía con evidencia de ejecución | CTX-02 | Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12). |
 | D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. |
+| D-58 | Oficialía registra el acuse; el área responsable concluye | — | O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Salida con acuse». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo». |
+| D-59 | Catálogo cerrado de formas de conclusión | — | Cinco formas: con_respuesta (exige un documento de salida o respuesta registrado y enlazado), atencion_sin_oficio (nota evidencia_atencion, D-19), enterado (documento informativo, sin más requisitos), no_procede (nota con el motivo) y duplicado (referencia al documento original, D-27). Toda forma salvo con_respuesta y enterado lleva nota obligatoria; ninguna se borra (D-20). Enumeración versionada en PostgreSQL (D-55). Propuesta por confirmar contra E-2. |
+| D-60 | Núcleo en PostgreSQL y campos por tipo en MongoDB | — | PostgreSQL guarda solo el núcleo oficial: folio, tipo, asunto, remitente, fecha y fecha límite. Los campos propios de cada tipo de documento van en el expediente de MongoDB con un esquema JSON versionado por tipo (D-55), máximo tres campos específicos por tipo, opcionales salvo la fecha límite en los tipos que exigen respuesta. El detalle por tipo queda por definir en E-2. |
+| D-61 | Siglas de área inmutables con folios emitidos | — | Las siglas forman parte del folio (D-21), así que no se pueden modificar mientras el área tenga folios emitidos. Administración puede editarlas solo si el área no tiene documentos; los folios ya emitidos conservan las suyas. |
+| D-62 | Vistas por rol: bandeja diferenciada y asuntos para Dirección | — | Bandeja con dos variantes propias: titular (con la tarjeta «Salida con acuse», D-58) y personal del área (sin acciones de turno). La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, con la vista de asuntos y el filtro de D-29. |
 
 ## Tipos de relación
 
@@ -254,12 +259,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 99 |
+| AFECTA | 119 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 10 |
+| DERIVA_DE | 19 |
 | DESCRIBE | 2 |
 | DESDE_HACIA | 1 |
 | DOCUMENTA | 116 |
@@ -296,7 +301,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 57 |
+| TOMA | 62 |
 | UNE | 2 |
 | USA | 64 |
 

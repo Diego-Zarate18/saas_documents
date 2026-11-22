@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIGEDOC · Grafo de conocimiento</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#ffffff; --ink:#1d1d1b; --muted:#6b6b66; --line:#e3e2dc; --accent:#2f5d8a; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
+  #app { display:grid; grid-template-columns: var(--wl,260px) 6px minmax(0,1fr) 6px var(--wr,360px); height:100vh; }
+  aside { background:var(--panel); overflow:auto; padding:16px; min-width:0; }
+  body.sin-izq #izq, body.sin-der #detalle { visibility:hidden; padding:0; overflow:hidden; }
+  .rz { background:var(--line); cursor:col-resize; transition:background .15s; touch-action:none; }
+  .rz:hover, body.redim .rz.act { background:var(--accent); }
+  body.redim { user-select:none; cursor:col-resize; }
+  .tg { position:absolute; top:10px; z-index:5; font-size:12px; background:rgba(255,255,255,.92); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  #tgL { left:12px; } #tgR { right:12px; }
+  .tg.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  h1 { font-size:16px; margin:0 0 2px; }
+  .sub { font-size:12px; color:var(--muted); margin-bottom:14px; }
+  input[type=search] { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; }
+  .grupo { margin-top:16px; }
+  .grupo h2 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 8px; }
+  label.tipo { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; cursor:pointer; }
+  label.tipo .sw { width:11px; height:11px; border-radius:50%; flex:none; }
+  label.tipo .n { margin-left:auto; color:var(--muted); font-variant-numeric: tabular-nums; }
+  .btns { display:flex; gap:6px; flex-wrap:wrap; }
+  button { font:inherit; font-size:12px; padding:5px 9px; border:1px solid var(--line); background:#fff; border-radius:6px; cursor:pointer; }
+  button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  main { position:relative; overflow:hidden; }
+  canvas { display:block; width:100%; height:100%; cursor:grab; }
+  canvas.drag { cursor:grabbing; }
+  #ayuda { position:absolute; bottom:10px; left:12px; font-size:11px; color:var(--muted); background:rgba(255,255,255,.85); padding:4px 8px; border-radius:4px; }
+  #detalle .vacio { color:var(--muted); font-size:13px; }
+  .chip { display:inline-block; font-size:11px; padding:2px 7px; border-radius:10px; background:#eee; margin-right:4px; }
+  .det-id { font-size:12px; color:var(--muted); }
+  .det-nombre { font-size:17px; font-weight:600; margin:4px 0 8px; line-height:1.3; }
+  .det-desc { font-size:13px; line-height:1.5; }
+  .props { font-size:12px; margin-top:10px; }
+  .props div { padding:2px 0; } .props b { color:var(--muted); font-weight:500; }
+  .rels h3 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:16px 0 6px; }
+  .rel { font-size:12.5px; padding:4px 0; border-bottom:1px dashed var(--line); cursor:pointer; }
+  .rel:hover { color:var(--accent); }
+  .rel .rt { font-family: ui-monospace, Menlo, monospace; font-size:11px; color:var(--muted); }
+  .est { font-weight:600; }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="izq">
+    <h1>SIGEDOC</h1>
+    <div class="sub">Grafo de conocimiento · __FECHA__</div>
+    <input type="search" id="buscar" placeholder="Buscar por id o nombre…">
+    <div class="grupo">
+      <h2>Vista</h2>
+      <div class="btns">
+        <button id="btnPend">Solo pendientes</button>
+        <button id="btnTodos">Todos los tipos</button>
+        <button id="btnNinguno">Ninguno</button>
+      </div>
+    </div>
+    <div class="grupo"><h2>Tipos de nodo</h2><div id="tipos"></div></div>
+    <div class="grupo"><h2>Estado (borde)</h2><div id="estados"></div></div>
+  </aside>
+  <div class="rz" id="rzL" title="Arrastra para ajustar · doble clic para ocultar o mostrar"></div>
+  <main>
+    <canvas id="cv"></canvas>
+    <button class="tg on" id="tgL" title="Mostrar u ocultar filtros">◧ Filtros</button>
+    <button class="tg on" id="tgR" title="Mostrar u ocultar detalle">Detalle ◨</button>
+    <div id="ayuda">Arrastra para mover · rueda para acercar · clic en un nodo para ver detalle · arrastra las barras grises para ajustar los paneles</div>
+  </main>
+  <div class="rz" id="rzR" title="Arrastra para ajustar · doble clic para ocultar o mostrar"></div>
+  <aside id="detalle"><div class="vacio">Selecciona un nodo para ver su detalle y sus relaciones.</div></aside>
+</div>
+<script>
+const DATOS = __DATOS__;
+const COLORES = {
+  Proyecto:"#1d1d1b", Contexto:"#8a7f6a", Problema:"#b23a3a", Hallazgo:"#d9822b", Requerimiento:"#2f5d8a",
+  Consulta:"#5b8fc7", Operacion:"#7aa6d6", Base:"#3e7c59", Concepto:"#6aaa7f", Regla:"#9c6ab0",
+  Decision:"#4a4a8a", Hueco:"#c9a227", DeudaTecnica:"#a0522d", Alcance:"#7d7d7d", Entregable:"#2a9d8f",
+  Rol:"#c2185b", Patron:"#00838f"
+};
+const ESTADO_COLOR = { abierto:"#d62828", parcial:"#f08c00", aceptado:"#8d8d8d", aceptada:"#8d8d8d",
+  resuelto:"#2b9348", parchada:"#2b9348", eliminado:"#bdbdbd", activo:"#2b9348", retirado:"#bdbdbd" };
+const ORDEN = ["Proyecto","Contexto","Problema","Hallazgo","Requerimiento","Rol","Consulta","Operacion","Patron","Base","Concepto","Regla","Decision","Hueco","DeudaTecnica","Alcance","Entregable"];
+
+const nodos = DATOS.nodos.map((n,i) => ({...n, x: Math.cos(i)*300*Math.random(), y: Math.sin(i)*300*Math.random(), vx:0, vy:0}));
+const porId = Object.fromEntries(nodos.map(n => [n.id, n]));
+const aristas = DATOS.relaciones.map(e => ({...e, a: porId[e.origen], b: porId[e.destino]})).filter(e => e.a && e.b);
+const grado = {}; aristas.forEach(e => { grado[e.origen]=(grado[e.origen]||0)+1; grado[e.destino]=(grado[e.destino]||0)+1; });
+nodos.forEach(n => n.r = 5 + Math.min(14, Math.sqrt(grado[n.id]||1)*1.6));
+
+const visibleTipo = Object.fromEntries(ORDEN.map(t => [t, true]));
+let soloPend = false, seleccion = null, filtroTexto = "";
+const esPend = n => (n.tipo==="Hueco" && ["abierto","parcial"].includes(n.estado)) || (n.tipo==="DeudaTecnica" && n.estado==="aceptada");
+const visible = n => visibleTipo[n.tipo] && (!soloPend || esPend(n) || n.tipo==="Proyecto");
+
+// ---- panel izquierdo
+const cuenta = {}; nodos.forEach(n => cuenta[n.tipo]=(cuenta[n.tipo]||0)+1);
+const divT = document.getElementById("tipos");
+ORDEN.filter(t => cuenta[t]).forEach(t => {
+  const l = document.createElement("label"); l.className="tipo";
+  l.innerHTML = `<input type="checkbox" checked data-t="${t}"><span class="sw" style="background:${COLORES[t]}"></span>${t}<span class="n">${cuenta[t]}</span>`;
+  l.querySelector("input").onchange = ev => { visibleTipo[t] = ev.target.checked; };
+  divT.appendChild(l);
+});
+const divE = document.getElementById("estados");
+[["abierto","abierto"],["parcial","parcial"],["aceptado / aceptada","aceptado"],["resuelto / parchada","resuelto"]].forEach(([txt,k]) => {
+  const l = document.createElement("label"); l.className="tipo";
+  l.innerHTML = `<span class="sw" style="background:#fff;border:3px solid ${ESTADO_COLOR[k]}"></span>${txt}`;
+  divE.appendChild(l);
+});
+function setTodos(v){ ORDEN.forEach(t=>visibleTipo[t]=v); divT.querySelectorAll("input").forEach(i=>i.checked=v); }
+document.getElementById("btnTodos").onclick = () => setTodos(true);
+document.getElementById("btnNinguno").onclick = () => setTodos(false);
+const bp = document.getElementById("btnPend");
+bp.onclick = () => { soloPend = !soloPend; bp.classList.toggle("on", soloPend); };
+document.getElementById("buscar").oninput = ev => {
+  filtroTexto = ev.target.value.trim().toLowerCase();
+  if (!filtroTexto) return;
+  const m = nodos.find(n => n.id.toLowerCase()===filtroTexto) || nodos.find(n => (n.id+" "+n.nombre).toLowerCase().includes(filtroTexto));
+  if (m && visible(m)) { seleccionar(m); centrar(m); }
+};
+
+// ---- detalle
+const det = document.getElementById("detalle");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function seleccionar(n){
+  seleccion = n;
+  if (!n) { det.innerHTML = '<div class="vacio">Selecciona un nodo para ver su detalle y sus relaciones.</div>'; return; }
+  const sal = aristas.filter(e => e.a===n), ent = aristas.filter(e => e.b===n);
+  const extra = Object.entries(n).filter(([k]) => !["id","tipo","nombre","descripcion","x","y","vx","vy","r","fx","fy"].includes(k));
+  const fila = (e, otro, dir) => `<div class="rel" data-id="${esc(otro.id)}"><span class="rt">${dir==="out"?"→":"←"} ${esc(e.relacion)}</span><br>${esc(otro.id)} · ${esc(otro.nombre)}</div>`;
+  det.innerHTML = `
+    <span class="chip" style="background:${COLORES[n.tipo]};color:#fff">${esc(n.tipo)}</span>
+    <div class="det-id">${esc(n.id)}</div>
+    <div class="det-nombre">${esc(n.nombre)}</div>
+    <div class="det-desc">${esc(n.descripcion)}</div>
+    <div class="props">${extra.map(([k,v]) => `<div><b>${esc(k)}:</b> <span class="${k==='estado'?'est':''}" style="${k==='estado'&&ESTADO_COLOR[v]?'color:'+ESTADO_COLOR[v]:''}">${esc(v)}</span></div>`).join("")}</div>
+    <div class="rels">
+      <h3>Salientes (${sal.length})</h3>${sal.map(e => fila(e, e.b, "out")).join("") || '<div class="vacio">—</div>'}
+      <h3>Entrantes (${ent.length})</h3>${ent.map(e => fila(e, e.a, "in")).join("") || '<div class="vacio">—</div>'}
+    </div>`;
+  det.querySelectorAll(".rel").forEach(el => el.onclick = () => { const m = porId[el.dataset.id]; if (!visibleTipo[m.tipo]) { visibleTipo[m.tipo]=true; divT.querySelector(`[data-t="${m.tipo}"]`).checked=true; } seleccionar(m); centrar(m); });
+}
+
+// ---- simulación
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+let W=0, H=0, dpr = window.devicePixelRatio||1;
+let cam = { x:0, y:0, k:0.42 };
+function resize(){ const r = cv.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; }
+window.addEventListener("resize", resize); resize();
+new ResizeObserver(resize).observe(document.querySelector("main"));
+
+// ---- paneles laterales: ajustar, ocultar y recordar
+const LS = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+             set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
+let wL = +LS.get("sigedoc.wL") || 260, wR = +LS.get("sigedoc.wR") || 360;
+let oL = LS.get("sigedoc.oL") !== "0", oR = LS.get("sigedoc.oR") !== "0";
+const tgL = document.getElementById("tgL"), tgR = document.getElementById("tgR");
+function aplicarPaneles(){
+  const r = document.documentElement.style;
+  r.setProperty("--wl", (oL ? wL : 0) + "px"); r.setProperty("--wr", (oR ? wR : 0) + "px");
+  document.body.classList.toggle("sin-izq", !oL); document.body.classList.toggle("sin-der", !oR);
+  tgL.classList.toggle("on", oL); tgR.classList.toggle("on", oR);
+  LS.set("sigedoc.wL", wL); LS.set("sigedoc.wR", wR); LS.set("sigedoc.oL", oL ? "1" : "0"); LS.set("sigedoc.oR", oR ? "1" : "0");
+}
+tgL.onclick = () => { oL = !oL; aplicarPaneles(); };
+tgR.onclick = () => { oR = !oR; aplicarPaneles(); };
+function arrastrar(rz, lado){
+  rz.addEventListener("mousedown", ev => {
+    ev.preventDefault();
+    const x0 = ev.clientX, w0 = lado === "L" ? (oL ? wL : 0) : (oR ? wR : 0);
+    document.body.classList.add("redim"); rz.classList.add("act");
+    const mv = e => {
+      let w = lado === "L" ? w0 + (e.clientX - x0) : w0 - (e.clientX - x0);
+      if (w < 140) { if (lado === "L") oL = false; else oR = false; }
+      else { w = Math.min(w, Math.max(300, innerWidth * 0.6)); if (lado === "L") { oL = true; wL = w; } else { oR = true; wR = w; } }
+      aplicarPaneles();
+    };
+    const up = () => { removeEventListener("mousemove", mv); removeEventListener("mouseup", up);
+      document.body.classList.remove("redim"); rz.classList.remove("act"); };
+    addEventListener("mousemove", mv); addEventListener("mouseup", up);
+  });
+  rz.addEventListener("dblclick", () => { if (lado === "L") oL = !oL; else oR = !oR; aplicarPaneles(); });
+}
+arrastrar(document.getElementById("rzL"), "L"); arrastrar(document.getElementById("rzR"), "R");
+aplicarPaneles();
+let alpha = 1;
+function paso(){
+  const vs = nodos.filter(visible);
+  const set = new Set(vs);
+  for (let i=0;i<vs.length;i++){ const a=vs[i];
+    for (let j=i+1;j<vs.length;j++){ const b=vs[j];
+      let dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy+0.01; if (d2>250000) continue;
+      const f = 900/d2; dx*=f; dy*=f; a.vx+=dx; a.vy+=dy; b.vx-=dx; b.vy-=dy; } }
+  aristas.forEach(e => { if (!set.has(e.a)||!set.has(e.b)) return;
+    const dx=e.b.x-e.a.x, dy=e.b.y-e.a.y, d=Math.sqrt(dx*dx+dy*dy)||1, f=(d-80)*0.02;
+    e.a.vx+=dx/d*f; e.a.vy+=dy/d*f; e.b.vx-=dx/d*f; e.b.vy-=dy/d*f; });
+  vs.forEach(n => { n.vx-=n.x*0.004; n.vy-=n.y*0.004;
+    if (n===arr) { n.vx=0; n.vy=0; return; }
+    const v=Math.hypot(n.vx,n.vy); if (v>15){ n.vx*=15/v; n.vy*=15/v; }
+    n.x+=n.vx*alpha; n.y+=n.vy*alpha; n.vx*=0.6; n.vy*=0.6; });
+  alpha = Math.max(0.05, alpha*0.995);
+}
+function vecinos(n){ const s=new Set([n]); aristas.forEach(e => { if(e.a===n) s.add(e.b); if(e.b===n) s.add(e.a); }); return s; }
+function dibujar(){
+  paso();
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  ctx.translate(W/2+cam.x, H/2+cam.y); ctx.scale(cam.k, cam.k);
+  const vec = seleccion ? vecinos(seleccion) : null;
+  const txt = filtroTexto;
+  aristas.forEach(e => { if (!visible(e.a)||!visible(e.b)) return;
+    const resalta = vec && (e.a===seleccion||e.b===seleccion);
+    ctx.strokeStyle = resalta ? "rgba(47,93,138,.85)" : (vec ? "rgba(0,0,0,.04)" : "rgba(0,0,0,.10)");
+    ctx.lineWidth = resalta ? 1.6/cam.k : 0.8/cam.k;
+    ctx.beginPath(); ctx.moveTo(e.a.x,e.a.y); ctx.lineTo(e.b.x,e.b.y); ctx.stroke();
+    if (resalta && cam.k>0.7){ const mx=(e.a.x+e.b.x)/2, my=(e.a.y+e.b.y)/2; ctx.fillStyle="#2f5d8a"; ctx.font=`${10/cam.k}px system-ui`; ctx.fillText(e.relacion, mx, my); }
+  });
+  nodos.forEach(n => { if (!visible(n)) return;
+    const tenue = vec ? !vec.has(n) : (txt && !(n.id+" "+n.nombre).toLowerCase().includes(txt));
+    ctx.globalAlpha = tenue ? 0.15 : 1;
+    ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2); ctx.fillStyle = COLORES[n.tipo]||"#999"; ctx.fill();
+    if (n.estado && ESTADO_COLOR[n.estado] && ["Hueco","DeudaTecnica","Requerimiento"].includes(n.tipo)) { ctx.lineWidth=3/cam.k; ctx.strokeStyle=ESTADO_COLOR[n.estado]; ctx.stroke(); }
+    if (n===seleccion){ ctx.lineWidth=3/cam.k; ctx.strokeStyle="#000"; ctx.stroke(); }
+    if (cam.k>0.55 || n===seleccion || (vec&&vec.has(n))) { ctx.fillStyle="#1d1d1b"; ctx.font=`${11/cam.k}px system-ui`; ctx.fillText(n.id, n.x+n.r+2, n.y+3); }
+    ctx.globalAlpha = 1;
+  });
+  requestAnimationFrame(dibujar);
+}
+function centrar(n){ cam.x = -n.x*cam.k; cam.y = -n.y*cam.k; }
+// ---- interacción
+let arr=null, panning=false, last=null, movido=false;
+function mundo(ev){ const r=cv.getBoundingClientRect(); return { x:(ev.clientX-r.left-W/2-cam.x)/cam.k, y:(ev.clientY-r.top-H/2-cam.y)/cam.k }; }
+function hit(p){ let best=null, bd=1e9; nodos.forEach(n => { if(!visible(n)) return; const d=Math.hypot(n.x-p.x,n.y-p.y); if (d<n.r+4 && d<bd){bd=d;best=n;} }); return best; }
+cv.onmousedown = ev => { const p=mundo(ev); arr=hit(p); panning=!arr; last={x:ev.clientX,y:ev.clientY}; movido=false; cv.classList.add("drag"); };
+window.onmousemove = ev => { if(!last) return; const dx=ev.clientX-last.x, dy=ev.clientY-last.y; if (Math.abs(dx)+Math.abs(dy)>2) movido=true;
+  if (arr){ const p=mundo(ev); arr.x=p.x; arr.y=p.y; alpha=Math.max(alpha,0.3); } else if (panning){ cam.x+=dx; cam.y+=dy; }
+  last={x:ev.clientX,y:ev.clientY}; };
+window.onmouseup = ev => { if (last && !movido){ const n = hit(mundo(ev)); seleccionar(n||null); } arr=null; panning=false; last=null; cv.classList.remove("drag"); };
+cv.onwheel = ev => { ev.preventDefault(); const f = ev.deltaY<0 ? 1.1 : 1/1.1; const r=cv.getBoundingClientRect();
+  const mx=ev.clientX-r.left-W/2, my=ev.clientY-r.top-H/2; cam.x = mx-(mx-cam.x)*f; cam.y = my-(my-cam.y)*f; cam.k*=f; };
+for (let i=0;i<300;i++) paso();
+seleccionar(porId["PRY"]);
+dibujar();
+</script>
+</body>
+</html>

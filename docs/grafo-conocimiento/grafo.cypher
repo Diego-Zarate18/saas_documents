@@ -251,6 +251,10 @@ MERGE (n:Nodo:`Decision` {id: 'D-50'}) SET n += {nombre: 'Consultas de grafo anc
 MERGE (n:Nodo:`Decision` {id: 'D-51'}) SET n += {nombre: 'C4 se resuelve en PostgreSQL', descripcion: 'Pendientes por responsable no recorre caminos: todo lo que necesita (movimientos, titular al turnar, adscripción) está en PostgreSQL. Presentarla como consulta de grafo debilitaba la justificación de Neo4j. El flujo integrado de la guía lo cubre O-11.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-52'}) SET n += {nombre: 'Relaciones organizacionales solo en PostgreSQL', descripcion: 'Aplica D-22: DEPENDE_DE, TITULAR_DE y ADSCRITA_A no las recorre ninguna consulta de grafo, así que salen de Neo4j; Área y Persona quedan como nodos de id y nombre para los movimientos.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-53'}) SET n += {nombre: 'Ficha completa con degradación controlada', descripcion: 'Si MongoDB o Neo4j no responden, la ficha devuelve lo disponible y marca la sección faltante, como pide la guía en el flujo integrado.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-54'}) SET n += {nombre: 'Estructura del repositorio según la guía', descripcion: 'El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-55'}) SET n += {nombre: 'Esquemas versionados y versiones fijas', descripcion: 'El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-56'}) SET n += {nombre: 'Pruebas por tipo de la guía con evidencia de ejecución', descripcion: 'Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12).', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-57'}) SET n += {nombre: 'Desarrollo entre revisor y Claude Code', descripcion: 'El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación.', estado: 'tomada'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PEN'}) SET n += {nombre: 'Regla de pendiente y ubicación vigente con ramas', descripcion: 'Calculada de la bitácora en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-SIN'}) SET n += {nombre: 'Descripción corta para listados', descripcion: 'Columna sintesis en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-ROL'}) SET n += {nombre: 'Roles y permisos de turno sin definir', descripcion: 'Cinco roles con permisos de turno.', estado: 'resuelto'};
@@ -1126,6 +1130,32 @@ MATCH (a:Nodo {id: 'D-48'}), (b:Nodo {id: 'DT-18'}) MERGE (a)-[:`GENERA`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'DT-18'}) MERGE (a)-[:`TIENE_DEUDA`]->(b);
 MATCH (a:Nodo {id: 'D-42'}), (b:Nodo {id: 'DT-19'}) MERGE (a)-[:`GENERA`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'DT-19'}) MERGE (a)-[:`TIENE_DEUDA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-54'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-55'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-56'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-57'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'CTX-02'}), (b:Nodo {id: 'D-54'}) MERGE (a)-[:`JUSTIFICA`]->(b);
+MATCH (a:Nodo {id: 'E-3'}), (b:Nodo {id: 'D-54'}) MERGE (a)-[:`DOCUMENTA`]->(b);
+MATCH (a:Nodo {id: 'D-54'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-54'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-54'}), (b:Nodo {id: 'D-37'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-54'}), (b:Nodo {id: 'D-40'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'CTX-02'}), (b:Nodo {id: 'D-55'}) MERGE (a)-[:`JUSTIFICA`]->(b);
+MATCH (a:Nodo {id: 'E-3'}), (b:Nodo {id: 'D-55'}) MERGE (a)-[:`DOCUMENTA`]->(b);
+MATCH (a:Nodo {id: 'D-55'}), (b:Nodo {id: 'E-4'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-55'}), (b:Nodo {id: 'DB-PG'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-55'}), (b:Nodo {id: 'DB-MG'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-55'}), (b:Nodo {id: 'DB-NJ'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-55'}), (b:Nodo {id: 'D-41'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'CTX-02'}), (b:Nodo {id: 'D-56'}) MERGE (a)-[:`JUSTIFICA`]->(b);
+MATCH (a:Nodo {id: 'E-8'}), (b:Nodo {id: 'D-56'}) MERGE (a)-[:`DOCUMENTA`]->(b);
+MATCH (a:Nodo {id: 'D-56'}), (b:Nodo {id: 'E-5'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-56'}), (b:Nodo {id: 'E-4'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-56'}), (b:Nodo {id: 'D-29'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'E-3'}), (b:Nodo {id: 'D-57'}) MERGE (a)-[:`DOCUMENTA`]->(b);
+MATCH (a:Nodo {id: 'D-57'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-57'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-57'}), (b:Nodo {id: 'E-8'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 263 nodos y 859 relaciones
+## Contenido: 267 nodos y 885 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 53 | Decisiones de diseño tomadas |
+| Decision | 57 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -243,6 +243,10 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-51 | C4 se resuelve en PostgreSQL | CTX-06 | Pendientes por responsable no recorre caminos: todo lo que necesita (movimientos, titular al turnar, adscripción) está en PostgreSQL. Presentarla como consulta de grafo debilitaba la justificación de Neo4j. El flujo integrado de la guía lo cubre O-11. |
 | D-52 | Relaciones organizacionales solo en PostgreSQL | — | Aplica D-22: DEPENDE_DE, TITULAR_DE y ADSCRITA_A no las recorre ninguna consulta de grafo, así que salen de Neo4j; Área y Persona quedan como nodos de id y nombre para los movimientos. |
 | D-53 | Ficha completa con degradación controlada | CTX-02 | Si MongoDB o Neo4j no responden, la ficha devuelve lo disponible y marca la sección faltante, como pide la guía en el flujo integrado. |
+| D-54 | Estructura del repositorio según la guía | CTX-02 | El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers. |
+| D-55 | Esquemas versionados y versiones fijas | CTX-02 | El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes. |
+| D-56 | Pruebas por tipo de la guía con evidencia de ejecución | CTX-02 | Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12). |
+| D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. |
 
 ## Tipos de relación
 
@@ -250,15 +254,15 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 88 |
+| AFECTA | 99 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 6 |
+| DERIVA_DE | 10 |
 | DESCRIBE | 2 |
 | DESDE_HACIA | 1 |
-| DOCUMENTA | 112 |
+| DOCUMENTA | 116 |
 | EJECUTA | 72 |
 | ELIGE | 3 |
 | ENTREGA | 8 |
@@ -268,7 +272,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | GENERA | 19 |
 | IMPLEMENTA | 54 |
 | INTEGRA | 3 |
-| JUSTIFICA | 25 |
+| JUSTIFICA | 28 |
 | MITIGA | 7 |
 | ORIGINA | 28 |
 | PARCHA | 61 |
@@ -292,7 +296,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 53 |
+| TOMA | 57 |
 | UNE | 2 |
 | USA | 64 |
 

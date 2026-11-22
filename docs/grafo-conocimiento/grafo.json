@@ -2084,6 +2084,34 @@
       "estado": "tomada"
     },
     {
+      "id": "D-54",
+      "tipo": "Decision",
+      "nombre": "Estructura del repositorio según la guía",
+      "descripcion": "El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-55",
+      "tipo": "Decision",
+      "nombre": "Esquemas versionados y versiones fijas",
+      "descripcion": "El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-56",
+      "tipo": "Decision",
+      "nombre": "Pruebas por tipo de la guía con evidencia de ejecución",
+      "descripcion": "Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12).",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-57",
+      "tipo": "Decision",
+      "nombre": "Desarrollo entre revisor y Claude Code",
+      "descripcion": "El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación.",
+      "estado": "tomada"
+    },
+    {
       "id": "HU-PEN",
       "tipo": "Hueco",
       "nombre": "Regla de pendiente y ubicación vigente con ramas",
@@ -6484,6 +6512,136 @@
       "origen": "PRY",
       "relacion": "TIENE_DEUDA",
       "destino": "DT-19"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-54"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-55"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-56"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-57"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-54"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-54"
+    },
+    {
+      "origen": "D-54",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "D-54",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-54",
+      "relacion": "DERIVA_DE",
+      "destino": "D-37"
+    },
+    {
+      "origen": "D-54",
+      "relacion": "DERIVA_DE",
+      "destino": "D-40"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-55"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-55"
+    },
+    {
+      "origen": "D-55",
+      "relacion": "AFECTA",
+      "destino": "E-4"
+    },
+    {
+      "origen": "D-55",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-55",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-55",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-55",
+      "relacion": "DERIVA_DE",
+      "destino": "D-41"
+    },
+    {
+      "origen": "CTX-02",
+      "relacion": "JUSTIFICA",
+      "destino": "D-56"
+    },
+    {
+      "origen": "E-8",
+      "relacion": "DOCUMENTA",
+      "destino": "D-56"
+    },
+    {
+      "origen": "D-56",
+      "relacion": "AFECTA",
+      "destino": "E-5"
+    },
+    {
+      "origen": "D-56",
+      "relacion": "AFECTA",
+      "destino": "E-4"
+    },
+    {
+      "origen": "D-56",
+      "relacion": "DERIVA_DE",
+      "destino": "D-29"
+    },
+    {
+      "origen": "E-3",
+      "relacion": "DOCUMENTA",
+      "destino": "D-57"
+    },
+    {
+      "origen": "D-57",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "D-57",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-57",
+      "relacion": "AFECTA",
+      "destino": "E-8"
     }
   ]
 }

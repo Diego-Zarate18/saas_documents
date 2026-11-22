@@ -260,6 +260,8 @@ MERGE (n:Nodo:`Decision` {id: 'D-59'}) SET n += {nombre: 'Catálogo cerrado de f
 MERGE (n:Nodo:`Decision` {id: 'D-60'}) SET n += {nombre: 'Núcleo en PostgreSQL y campos por tipo en MongoDB', descripcion: 'PostgreSQL guarda solo el núcleo oficial: folio, tipo, asunto, remitente, fecha y fecha límite. Los campos propios de cada tipo de documento van en el expediente de MongoDB con un esquema JSON versionado por tipo (D-55), máximo tres campos específicos por tipo, opcionales salvo la fecha límite en los tipos que exigen respuesta. El detalle por tipo queda por definir en E-2.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-61'}) SET n += {nombre: 'Siglas de área inmutables con folios emitidos', descripcion: 'Las siglas forman parte del folio (D-21), así que no se pueden modificar mientras el área tenga folios emitidos. Administración puede editarlas solo si el área no tiene documentos; los folios ya emitidos conservan las suyas.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-62'}) SET n += {nombre: 'Vistas por rol: bandeja diferenciada y asuntos para Dirección', descripcion: 'Bandeja con dos variantes propias, titular y personal del área, ambas con la tarjeta de acuses (D-58) porque el personal también concluye si su área es responsable (D-44); la diferencia está en la ficha, donde el personal no ve Devolver, Turnar ni Atraer. La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, solo de consulta: sin asignar documentos ni crear asuntos.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-63'}) SET n += {nombre: 'Interfaz primero con datos simulados', descripcion: 'Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36).', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-64'}) SET n += {nombre: 'Sistema visual del frontend desde el Figma', descripcion: 'Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.', estado: 'tomada'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PEN'}) SET n += {nombre: 'Regla de pendiente y ubicación vigente con ramas', descripcion: 'Calculada de la bitácora en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-SIN'}) SET n += {nombre: 'Descripción corta para listados', descripcion: 'Columna sintesis en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-ROL'}) SET n += {nombre: 'Roles y permisos de turno sin definir', descripcion: 'Cinco roles con permisos de turno.', estado: 'resuelto'};
@@ -1195,6 +1197,15 @@ MATCH (a:Nodo {id: 'D-62'}), (b:Nodo {id: 'O-14'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-62'}), (b:Nodo {id: 'ROL-DI'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-62'}), (b:Nodo {id: 'ROL-TI'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-62'}), (b:Nodo {id: 'ROL-PE'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-63'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-63'}), (b:Nodo {id: 'D-38'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-63'}), (b:Nodo {id: 'D-57'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-63'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-63'}), (b:Nodo {id: 'E-3'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-64'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'D-38'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'E-3'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

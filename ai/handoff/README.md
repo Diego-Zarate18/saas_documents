@@ -49,6 +49,7 @@ Si dos fuentes se contradicen, manda la de número menor y reportas la contradic
 11. **No marques una tarea como completa** si una prueba falla, un criterio no se cumple o hay un error sin resolver. Usa `parcial` y explica.
 12. **Idioma**: código, nombres de tablas, campos y endpoints en español sin acentos ni ñ (`documento`, `anio`); comentarios, docstrings y reportes en español.
 13. **No hagas push** ni cambies la configuración de git.
+14. **Commits sin coautoría**: el mensaje lleva solo `T-xx: <resumen>` y, si hace falta, un cuerpo. Nada de `Co-Authored-By`, `Claude-Session`, «Generated with» ni firmas parecidas. `.claude/settings.json` ya las desactiva; si alguna aparece, corrige el mensaje antes de terminar.
 
 ## Skills del proyecto (`.claude/skills/`)
 
@@ -57,6 +58,19 @@ Si dos fuentes se contradicen, manda la de número menor y reportas la contradic
 | `handoff` | Ejecutar el protocolo: leer la asignación, cerrar la tarea, escribir el reporte y archivar |
 | `consultar-grafo` | Buscar un nodo del grafo o del catálogo (operación, decisión, patrón, hueco) sin cargar el archivo completo |
 | `implementar-operacion` | Lista de verificación para implementar una operación O-xx de punta a punta |
+
+## Skills y herramientas instaladas en la máquina de Diego
+
+Se usan cuando la tarea las cita. Si una no está disponible en tu sesión, no la sustituyas por otra: repórtalo.
+
+| Skill o herramienta | Para qué | Cuándo |
+| --- | --- | --- |
+| Figma (MCP y skills `figma-design-to-code`, `figma-use`) | Leer el maquetado: contexto de diseño, variables, capturas y recursos | Tareas de interfaz |
+| `impeccable` | Calidad visual y de experiencia: contexto (PRODUCT.md, DESIGN.md), `audit`, `polish`, `harden` | Tareas de interfaz |
+| `accesslint` (`accessibility-scan`, `accessibility-audit`, `accessibility-fix`) | Accesibilidad de las vistas | Al cerrar tareas de interfaz |
+| `ponytail` (`/ponytail lite\|full\|ultra\|off`, `/ponytail-review`) | La solución más pequeña que resuelve completo; revisión del cambio | Según lo que indique la tarea |
+
+Cuando la tarea marque un cambio de nivel de ponytail, avísale a Diego en una línea (`Ponytail → full`, por ejemplo) y espera a que lo confirme antes de seguir.
 
 ## Plantilla de `reporte.md`
 

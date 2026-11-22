@@ -7,4 +7,4 @@ Sistema de Seguimiento de Documentos entre Departamentos. Proyecto final de base
 - Operaciones y patrones de acceso: [`docs/operaciones/`](docs/operaciones/).
 - Método de trabajo con Claude Code: [`ai/handoff/README.md`](ai/handoff/README.md).
 
-Las instrucciones para levantar el proyecto se agregan al completar T-01.
+Las instrucciones se agregan con cada tarea: la interfaz en T-01 y las bases y el backend en T-03.

@@ -19,7 +19,13 @@
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vitest *)",
+      "Bash(npx eslint *)",
+      "Bash(npm test *)",
+      "Bash(npm create vite@latest *)",
+      "Bash(git show *)"
     ],
     "ask": [
       "Bash(docker compose down *)",
@@ -37,5 +43,10 @@
       "Edit(/ai/handoff/README.md)",
       "Edit(/ai/handoff/siguiente.md)"
     ]
-  }
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false
 }

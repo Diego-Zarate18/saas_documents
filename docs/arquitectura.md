@@ -1,6 +1,6 @@
 # Arquitectura de SIGEDOC
 
-Actualizado: 2026-11-21 · Decisiones de origen: D-10 a D-16, D-29, D-36 a D-57 (grafo de conocimiento).
+Actualizado: 2026-11-21 · Decisiones de origen: D-10 a D-16, D-29, D-36 a D-64 (grafo de conocimiento).
 
 Está diseñado contra la guía del proyecto (`docs/guia/`); la sección 11 muestra dónde se cubre cada requisito y qué falta.
 
@@ -73,12 +73,18 @@ saas_documents/
 ├── tests/                        raíz, como pide la guía; se ejecutan desde backend/ con `uv run pytest ../tests`
 │   ├── unit/                     servicios con repositorios falsos
 │   ├── integration/              repositorios y flujos contra las tres bases reales
-│   └── e2e/                      flujos completos por API (y por navegador en T-14)
+│   └── e2e/                      flujos completos por API (y por navegador en T-16)
+├── PRODUCT.md  DESIGN.md         contexto de producto y sistema visual (skill impeccable, T-01)
 └── frontend/
     ├── package.json
     └── src/
-        ├── api/                  cliente generado (no se edita a mano)
-        └── paginas/  componentes/  hooks/  rutas/
+        ├── api/                  tipos y cliente; `simulado/` con datos de prueba hasta T-15 (D-63)
+        ├── estilos/              tokens.css (variables de Figma), tipografía, efectos, base
+        ├── componentes/          sistema visual: base (Botón, Estado, Rol, Campo…) y compuestos
+        ├── iconos/               SVG exportados del Figma como componentes
+        ├── sesion/               sesión y rol (simulados hasta T-15)
+        ├── paginas/              una carpeta por vista V-xx
+        └── rutas/                rutas y menú por rol
 ```
 
 ## 3. Backend por capas (D-37, D-40, D-54)
@@ -206,21 +212,33 @@ Ubicación: `tests/unit`, `tests/integration` y `tests/e2e`; consultas y pruebas
 
 | Tipo de la guía | Cómo se cubre | Cuándo |
 | --- | --- | --- |
-| Conectividad | `/salud` y una prueba automatizada que se conecta a las tres bases con la configuración del `.env` | T-01 |
+| Conectividad | `/salud` y una prueba automatizada que se conecta a las tres bases con la configuración del `.env` | T-03 |
 | Funcional | Por operación: un caso normal, uno límite y uno de error (núcleo: O-01, O-03, O-05, O-07, O-08, O-09, O-11, O-14, O-22, O-30, O-38, O-39) | con cada tarea |
-| Integridad | PostgreSQL: duplicado de folio, UPDATE y DELETE de la bitácora bloqueados, segundo responsable en un grupo de turno (RI-10), documento sin emisor (RI-06). MongoDB: documentos válidos e inválidos por tipo. Neo4j: restricciones de unicidad, dirección y cardinalidad de relaciones. Consultas de validación guardadas en `queries/` | T-02 a T-04 |
-| Integración | Extremo a extremo: registrar → outbox → réplicas → ficha O-11 con las tres bases | T-14 |
-| Consistencia | Escenario: se detiene el destino, se escribe, se reanuda y se verifica; escenario de contradicción inducida detectada por O-40 | T-12 y T-14 |
-| Errores | Base caída, dato inválido y escritura parcial (el outbox en `fallido`); la API responde con `BASE_NO_DISPONIBLE` o con la réplica marcada pendiente, nunca con éxito completo falso | con cada tarea y T-14 |
-| Concurrencia | Registros simultáneos en la misma área y año: folios consecutivos sin huecos ni repetidos (D-21); dos usuarios turnando el mismo documento | T-06 y T-14 |
-| Rendimiento | Flujos prioritarios (O-01, O-14, O-30, O-11, C1) con volumen de semilla de temporada alta (unos 300 documentos por semana, D-35) y entorno descrito | T-14 |
+| Integridad | PostgreSQL: duplicado de folio, UPDATE y DELETE de la bitácora bloqueados, segundo responsable en un grupo de turno (RI-10), documento sin emisor (RI-06). MongoDB: documentos válidos e inválidos por tipo. Neo4j: restricciones de unicidad, dirección y cardinalidad de relaciones. Consultas de validación guardadas en `queries/` | T-04 a T-06 |
+| Integración | Extremo a extremo: registrar → outbox → réplicas → ficha O-11 con las tres bases | T-16 |
+| Consistencia | Escenario: se detiene el destino, se escribe, se reanuda y se verifica; escenario de contradicción inducida detectada por O-40 | T-14 y T-16 |
+| Errores | Base caída, dato inválido y escritura parcial (el outbox en `fallido`); la API responde con `BASE_NO_DISPONIBLE` o con la réplica marcada pendiente, nunca con éxito completo falso | con cada tarea y T-16 |
+| Concurrencia | Registros simultáneos en la misma área y año: folios consecutivos sin huecos ni repetidos (D-21); dos usuarios turnando el mismo documento | T-08 y T-16 |
+| Rendimiento | Flujos prioritarios (O-01, O-14, O-30, O-11, C1) con volumen de semilla de temporada alta (unos 300 documentos por semana, D-35) y entorno descrito | T-16 |
 | Visibilidad | Toda consulta que lee documentos: un usuario sin visibilidad no ve el contenido (DT-13) | con cada tarea |
 
-Calidad: `uv run ruff check`, `uv run ruff format --check`, `uv run pytest ../tests`; en el frontend, `npm run lint` y `npm run build`. Las pruebas de integración usan bases de prueba aisladas (`sigedoc_test`) que se limpian entre pruebas. La matriz de pruebas (qué se probó, cómo y con qué resultado) vive en `docs/pruebas/matriz.md`.
+Calidad: `uv run ruff check`, `uv run ruff format --check`, `uv run pytest ../tests`; en el frontend, `npm run lint`, `npm run typecheck`, `npm test` y `npm run build`. Las pruebas de integración usan bases de prueba aisladas (`sigedoc_test`) que se limpian entre pruebas. La matriz de pruebas (qué se probó, cómo y con qué resultado) vive en `docs/pruebas/matriz.md`.
 
-## 8. Frontend (D-38)
+## 8. Frontend (D-38, D-63, D-64)
 
-SPA con React, Vite y TypeScript estricto. Estado del servidor con TanStack Query; rutas con React Router. La biblioteca de componentes y el sistema visual se eligen después del maquetado en Figma; hasta entonces no se instala ninguna. En desarrollo, Vite reenvía `/api` al backend, así la cookie es del mismo origen.
+SPA con React, Vite y TypeScript estricto. Estado del servidor con TanStack Query; rutas con React Router. En desarrollo, Vite reenvía `/api` al backend, así la cookie es del mismo origen.
+
+**Interfaz primero (D-63).** El maquetado está aprobado (Figma «SIGEDOC», página «03 · Vistas»), así que la interfaz se construye antes que el backend, con datos simulados que siguen el contrato de la sección 4. Toda lectura pasa por funciones de `src/api/` envueltas en TanStack Query; en T-01 y T-02 esas funciones responden con datos de `src/api/simulado/`, y en T-15 se sustituyen por el cliente generado del OpenAPI sin tocar las páginas. `VITE_API_MODO=simulado|real` elige la fuente. La sesión y el rol también se simulan hasta T-15: el inicio de sesión ofrece usuarios de prueba, uno por rol.
+
+**Sistema visual (D-64).** Identidad «Señal Guinda» del Figma:
+- Colores, efectos y tipografía salen de las variables y estilos del Figma a `src/estilos/tokens.css` como propiedades CSS; ningún color escrito fuera de ese archivo.
+- Estilos con CSS Modules (incluido en Vite); sin Tailwind ni biblioteca de componentes.
+- Primitivas accesibles de Radix UI solo donde el navegador no basta: diálogo modal, menú desplegable, selector con búsqueda, pestañas y ventana emergente.
+- Fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; sin CDN.
+- Íconos: los SVG del Figma como componentes de React; sin biblioteca de íconos.
+- Escritorio primero: el diseño es de 1440 px; se garantiza de 1280 a 1920 px y legibilidad a 1024 px. El móvil queda fuera de alcance.
+- Fechas con `Intl.DateTimeFormat('es-MX', { timeZone: 'America/Mexico_City' })`.
+- Pruebas de componentes y lógica con Vitest y Testing Library; las de navegador llegan en T-16.
 
 ## 9. Despliegue (D-41)
 
@@ -232,36 +250,38 @@ Una tarea a la vez; cada una deja pruebas en verde, evidencia y un commit. El de
 
 | Tarea | Contenido | Depende de |
 | --- | --- | --- |
-| T-01 | Esqueleto: docker-compose con las tres bases, backend con configuración, pools y `/salud`, frontend vacío, herramientas de calidad, prueba de conectividad | — |
-| T-02 | PostgreSQL (E-4): esquema, ejecutor de esquemas, datos de prueba, consultas representativas y pruebas de integridad y transacciones | T-01, E-2 en `docs/modelos/` |
-| T-03 | MongoDB (E-4): validadores `$jsonSchema` por tipo, índices, carga, consultas y pruebas de documentos válidos e inválidos | T-02 |
-| T-04 | Neo4j (E-4): restricciones, índices, carga, consultas y pruebas de humo, integridad y cardinalidad | T-02 |
-| T-05 | Sesiones, roles y visibilidad (O-36 a O-38) | T-02 |
-| T-06 | Registro O-01 y proceso del outbox O-39 (primer flujo completo) y prueba de concurrencia de folios | T-03, T-04, T-05 |
-| T-07 | Turnos, devoluciones, atracción y bandeja (O-03, O-22, O-23, O-14) | T-06 |
-| T-08 | Ficha O-11, recorrido C1 y expediente (O-09, O-17, O-28, O-29) | T-07 |
-| T-09 | Conclusión, cancelación, corrección, duplicados y segunda recepción (O-05, O-24, O-25, O-26, O-19) | T-07 |
-| T-10 | Referencias y asuntos (O-07, O-08, O-18, O-27) y consultas C2, C3, C5 | T-08 |
-| T-11 | Búsqueda, catálogos, organización, administración y salidas (O-30 a O-35, O-20, O-21), C4 | T-09 |
-| T-12 | Reconciliación O-40, respaldo y carga O-41, con escenarios de consistencia | T-10 |
-| T-13 | Vistas del frontend según el maquetado | maquetado aprobado, T-05 |
-| T-14 | Validación integral: extremo a extremo, consistencia, errores, rendimiento, matriz de pruebas, evidencia del catálogo E-5 y exportación de `docs/api/openapi.json` | T-11, T-12, T-13 |
-| T-15 | Despliegue y documentación: servicio `web`, compose completo, README de instalación y ejecución desde cero | T-14 |
+| T-01 | Interfaz base (D-63): proyecto React, arquitectura del frontend, sistema visual desde el Figma, marco por rol y vistas núcleo (V-01, V-02, V-02b, V-02c, V-04, V-04b, V-05) con datos simulados | maquetado aprobado |
+| T-02 | Interfaz: el resto de las vistas y variantes del maquetado con datos simulados | T-01 |
+| T-03 | Esqueleto: docker-compose con las tres bases, backend con configuración, pools y `/salud`, proxy del frontend a la API, herramientas de calidad, prueba de conectividad | — |
+| T-04 | PostgreSQL (E-4): esquema, ejecutor de esquemas, datos de prueba, consultas representativas y pruebas de integridad y transacciones | T-03, E-2 en `docs/modelos/` |
+| T-05 | MongoDB (E-4): validadores `$jsonSchema` por tipo, índices, carga, consultas y pruebas de documentos válidos e inválidos | T-04 |
+| T-06 | Neo4j (E-4): restricciones, índices, carga, consultas y pruebas de humo, integridad y cardinalidad | T-04 |
+| T-07 | Sesiones, roles y visibilidad (O-36 a O-38) | T-04 |
+| T-08 | Registro O-01 y proceso del outbox O-39 (primer flujo completo) y prueba de concurrencia de folios | T-05, T-06, T-07 |
+| T-09 | Turnos, devoluciones, atracción y bandeja (O-03, O-22, O-23, O-14) | T-08 |
+| T-10 | Ficha O-11, recorrido C1 y expediente (O-09, O-17, O-28, O-29) | T-09 |
+| T-11 | Conclusión, cancelación, corrección, duplicados y segunda recepción (O-05, O-24, O-25, O-26, O-19) | T-09 |
+| T-12 | Referencias y asuntos (O-07, O-08, O-18, O-27) y consultas C2, C3, C5 | T-10 |
+| T-13 | Búsqueda, catálogos, organización, administración y salidas (O-30 a O-35, O-20, O-21), C4 | T-11 |
+| T-14 | Reconciliación O-40, respaldo y carga O-41, con escenarios de consistencia | T-12 |
+| T-15 | Conectar la interfaz a la API: cliente generado del OpenAPI, sesión real y retiro de los datos simulados | T-02, T-13 |
+| T-16 | Validación integral: extremo a extremo, consistencia, errores, rendimiento, matriz de pruebas, evidencia del catálogo E-5 y exportación de `docs/api/openapi.json` | T-13, T-14, T-15 |
+| T-17 | Despliegue y documentación: servicio `web`, compose completo, README de instalación y ejecución desde cero | T-16 |
 
 ## 11. Trazabilidad con la guía
 
 | Guía | Requisito | Dónde se cubre | Estado |
 | --- | --- | --- | --- |
 | 2.4, 8 | Interfaz → API → servicios → repositorios → tres bases; sin acceso directo | Secciones 1 y 3; regla 2 del handoff | Diseñado |
-| 5.2 | Fuente de verdad, replicación, sincronización, consistencia | Sección 5 (matriz) y 3.1 a 3.4 | Diseñado; evidencia en T-12 y T-14 |
+| 5.2 | Fuente de verdad, replicación, sincronización, consistencia | Sección 5 (matriz) y 3.1 a 3.4 | Diseñado; evidencia en T-14 y T-16 |
 | 7.1 | E-1 Propuesta | `docs/propuesta.md` | De Diego (en revisión) |
-| 7.2 | E-2 Modelado de datos | `docs/modelos/` | De Diego (en revisión); debe reconciliarse con D-42 a D-57 antes de T-02 |
+| 7.2 | E-2 Modelado de datos | `docs/modelos/` | De Diego (en revisión); debe reconciliarse con D-42 a D-57 antes de T-04 |
 | 7.3 | E-3 Arquitectura y stack | Este documento y `decisiones-tecnologicas.md` | Redactado; falta la figura del diagrama |
-| 7.4 | E-4 Tres bases: scripts, carga, consultas y pruebas | `database/` | T-02 a T-04 |
-| 7.5 | E-5 Catálogo con casos y evidencia | `docs/operaciones/` y `docs/pruebas/` | Catálogo hecho; casos y evidencia en T-14 |
-| 7.6 | E-6 Backend y API, contrato documentado | `backend/app` y `docs/api/openapi.json` | T-05 a T-11; exportación en T-14 |
-| 7.7 | E-7 Interfaz y flujo integrado (O-11) | `frontend/` | T-13 |
-| 7.8 | E-8 Pruebas, rendimiento, instalación | `tests/`, `docs/pruebas/`, `README.md`, `.env.example` | T-01 a T-15 |
+| 7.4 | E-4 Tres bases: scripts, carga, consultas y pruebas | `database/` | T-04 a T-06 |
+| 7.5 | E-5 Catálogo con casos y evidencia | `docs/operaciones/` y `docs/pruebas/` | Catálogo hecho; casos y evidencia en T-16 |
+| 7.6 | E-6 Backend y API, contrato documentado | `backend/app` y `docs/api/openapi.json` | T-07 a T-13; exportación en T-16 |
+| 7.7 | E-7 Interfaz y flujo integrado (O-11) | `frontend/` | T-01 y T-02 (simulada); T-15 (integrada) |
+| 7.8 | E-8 Pruebas, rendimiento, instalación | `tests/`, `docs/pruebas/`, `README.md`, `.env.example` | T-01 a T-17 |
 | 9 | Siete tipos de prueba de integración | Sección 7 | Planeado |
 | 10 | Organización del repositorio | Sección 2 | Adaptada con equivalencias |
-| 12 | Evitar scripts sin evidencia de ejecución y documentación al final | Cada tarea exige evidencia en el reporte; T-15 solo cierra | Método |
+| 12 | Evitar scripts sin evidencia de ejecución y documentación al final | Cada tarea exige evidencia en el reporte; T-17 solo cierra | Método |

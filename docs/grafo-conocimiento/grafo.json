@@ -2147,6 +2147,20 @@
       "estado": "tomada"
     },
     {
+      "id": "D-63",
+      "tipo": "Decision",
+      "nombre": "Interfaz primero con datos simulados",
+      "descripcion": "Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36).",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-64",
+      "tipo": "Decision",
+      "nombre": "Sistema visual del frontend desde el Figma",
+      "descripcion": "Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.",
+      "estado": "tomada"
+    },
+    {
       "id": "HU-PEN",
       "tipo": "Hueco",
       "nombre": "Regla de pendiente y ubicación vigente con ramas",
@@ -6847,6 +6861,51 @@
       "origen": "D-62",
       "relacion": "AFECTA",
       "destino": "ROL-PE"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-63"
+    },
+    {
+      "origen": "D-63",
+      "relacion": "DERIVA_DE",
+      "destino": "D-38"
+    },
+    {
+      "origen": "D-63",
+      "relacion": "DERIVA_DE",
+      "destino": "D-57"
+    },
+    {
+      "origen": "D-63",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-63",
+      "relacion": "AFECTA",
+      "destino": "E-3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-64"
+    },
+    {
+      "origen": "D-64",
+      "relacion": "DERIVA_DE",
+      "destino": "D-38"
+    },
+    {
+      "origen": "D-64",
+      "relacion": "AFECTA",
+      "destino": "E-7"
+    },
+    {
+      "origen": "D-64",
+      "relacion": "AFECTA",
+      "destino": "E-3"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "proyecto": "SIGEDOC",
-  "actualizado": "2026-11-21",
+  "actualizado": "2026-11-22",
   "nodos": [
     {
       "id": "PRY",
@@ -581,7 +581,7 @@
       "id": "D-17",
       "tipo": "Decision",
       "nombre": "Catálogo de 7 tipos de documento",
-      "descripcion": "Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia.",
+      "descripcion": "Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. Los siete nombres están en D-65.",
       "estado": "tomada"
     },
     {
@@ -2159,6 +2159,14 @@
       "nombre": "Sistema visual del frontend desde el Figma",
       "descripcion": "Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.",
       "estado": "tomada"
+    },
+    {
+      "id": "D-65",
+      "tipo": "Decision",
+      "nombre": "Los siete tipos de documento: nombres y alcance",
+      "descripcion": "Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2.",
+      "estado": "tomada",
+      "supuesto": true
     },
     {
       "id": "HU-PEN",
@@ -6906,6 +6914,41 @@
       "origen": "D-64",
       "relacion": "AFECTA",
       "destino": "E-3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-65"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "DERIVA_DE",
+      "destino": "D-17"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "DERIVA_DE",
+      "destino": "D-60"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "K-DOC"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "E-2"
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Grafo de conocimiento del proyecto SIGEDOC
 
-Actualizado: 2026-11-21
+Actualizado: 2026-11-22
 
 Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta las entrevistas, la guía del proyecto o la retroalimentación del profesor.
 
@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 274 nodos y 928 relaciones
+## Contenido: 275 nodos y 935 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 64 | Decisiones de diseño tomadas |
+| Decision | 65 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -206,7 +206,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-14 | Consulta de reconciliación para sustituciones | — | SUSTITUYE_A se escribe en Neo4j y luego el estado en PostgreSQL; la reconciliación detecta fallas a medias. |
 | D-15 | Un mismo UUID en las tres bases | — | Generado por el backend; _id en MongoDB e id en Neo4j. |
 | D-16 | Expediente con _id = id_documento | — | Relación 1:1 sin tabla de equivalencias; tipo copiado como dato inmutable. |
-| D-17 | Catálogo de 7 tipos de documento | — | Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. |
+| D-17 | Catálogo de 7 tipos de documento | — | Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. Los siete nombres están en D-65. |
 | D-18 | id_grupo_turno para RI-10 | — | Agrupa turnos simultáneos en lugar de comparar fecha_hora. |
 | D-19 | Evidencia como nota del expediente | — | Nota evidencia_atencion ligada al id_movimiento de la conclusión. |
 | D-20 | Documentos y movimientos no se borran | — | Se cancelan o corrigen; solo se eliminan anexos, notas, referencias y pertenencias a asuntos capturados por error. |
@@ -254,6 +254,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-62 | Vistas por rol: bandeja diferenciada y asuntos para Dirección | — | Bandeja con dos variantes propias, titular y personal del área, ambas con la tarjeta de acuses (D-58) porque el personal también concluye si su área es responsable (D-44); la diferencia está en la ficha, donde el personal no ve Devolver, Turnar ni Atraer. La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, solo de consulta: sin asignar documentos ni crear asuntos. |
 | D-63 | Interfaz primero con datos simulados | — | Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36). |
 | D-64 | Sistema visual del frontend desde el Figma | — | Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado. |
+| D-65 | Los siete tipos de documento: nombres y alcance * | — | Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2. |
 
 ## Tipos de relación
 
@@ -261,12 +262,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 123 |
+| AFECTA | 127 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 22 |
+| DERIVA_DE | 24 |
 | DESCRIBE | 2 |
 | DESDE_HACIA | 1 |
 | DOCUMENTA | 116 |
@@ -303,7 +304,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 64 |
+| TOMA | 65 |
 | UNE | 2 |
 | USA | 64 |
 

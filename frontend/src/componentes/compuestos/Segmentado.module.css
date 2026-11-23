@@ -7,7 +7,10 @@
   border: 0;
   border-radius: var(--radio-control);
   background: var(--fondo-hundido);
-  box-shadow: var(--hundida-sombra);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
 }
 
 .segmento {

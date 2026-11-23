@@ -4,6 +4,7 @@ import { Isotipo } from '../../iconos/Isotipo'
 import { MENU, OPCIONES } from '../../rutas/menu'
 import { useCerrarSesion, useSesion } from '../../sesion/sesion'
 import { AccionNavegacion, ElementoNavegacion } from '../base/ElementoNavegacion'
+import { AnuncioCarga } from '../compuestos/Esqueleto'
 import estilos from './Marco.module.css'
 
 /** Rótulo bajo el logotipo, como en el Figma. */
@@ -77,9 +78,10 @@ export function Marco() {
             <span className={estilos.adscripcion}>{adscripcion(sesion)}</span>
           </span>
         </div>
-        <AccionNavegacion icono="salir" texto="Cerrar sesión" onClick={salir} />
+        <AccionNavegacion icono="salir" texto="Cerrar sesión" onClick={salir} pendiente={cerrar.isPending} />
       </aside>
       <main className={estilos.contenido}>
+        <AnuncioCarga />
         <Outlet />
       </main>
     </div>

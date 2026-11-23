@@ -27,6 +27,8 @@
   /* ── Borde ───────────────────────────────────────────────── */
   --borde-marca: #6d1f33;
   --borde-sutil: #d6cec6;
+  /* Borde de los controles (WCAG 1.4.11, 3:1): el gris cálido de la paleta; 4.63:1 sobre el marfil hundido. */
+  --borde-campo: var(--texto-secundario);
 
   /* ── Estados del documento y marcas ──────────────────────── */
   --estado-en-tramite: #1f5a8a;
@@ -144,6 +146,19 @@
   --espacio-32: 32px;
   --espacio-40: 40px;
   --espacio-96: 96px;
+
+  /* ── Movimiento (T-01b; el Figma no lo dibuja: diseño propio) ── */
+  /* Duraciones y curvas: ninguna se escribe fuera de aquí. Sin rebotes ni curvas elásticas. */
+  --mov-nulo: 0.01ms;
+  --mov-instantaneo: 100ms;
+  --mov-corto: 150ms;
+  --mov-medio: 220ms;
+  --mov-giro: 800ms;
+  --mov-giro-reducido: 1600ms;
+  --mov-brillo: 1400ms;
+  --curva-salida: cubic-bezier(0.2, 0, 0, 1);
+  --curva-estandar: cubic-bezier(0.4, 0, 0.2, 1);
+  --curva-lineal: linear;
 
   /* ── Foco (no lo dibuja el Figma; anillo guinda) ─────────── */
   --foco-anillo: 0 0 0 2px var(--fondo-superficie), 0 0 0 4px var(--borde-marca);

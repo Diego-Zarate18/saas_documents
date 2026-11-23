@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useBandeja, useCatalogos } from '../../api/consultas'
-import type { PendienteBandeja, TipoMovimiento, Uuid } from '../../api/tipos'
+import { type useBandeja, useCatalogos } from '../../api/consultas'
+import type { PendienteBandeja, TipoMovimiento } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Estado } from '../../componentes/base/Estado'
 import { RolTurno } from '../../componentes/base/RolTurno'
+import { Forma } from '../../componentes/compuestos/Esqueleto'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
 import { Selector } from '../../componentes/compuestos/Selector'
 import { Tabla } from '../../componentes/compuestos/Tabla'
@@ -14,7 +15,7 @@ import { dias } from '../formato'
 import estilos from './TablaPendientes.module.css'
 
 const VISIBLES = 5
-const TODOS = 'todos'
+export const TODOS = 'todos'
 
 // El Figma no define las opciones del filtro de antigüedad (O-14 solo dice «filtros por tipo y antigüedad»).
 const ANTIGUEDADES = [
@@ -37,26 +38,95 @@ const COLUMNAS = [
   { titulo: 'Titular al turnar', ancho: 128 },
 ]
 
+// Anchos de las formas de cada fila del esqueleto (folio, asunto, tipo y emisor, último movimiento), en ch.
+const FILAS_ESQUELETO = [
+  [11, 24, 34, 22],
+  [11, 30, 28, 18],
+  [11, 26, 32, 24],
+  [11, 28, 24, 20],
+  [11, 22, 30, 26],
+  [11, 32, 26, 19],
+]
+
+/** Seis filas con las medidas de una fila real: cada forma va dentro del elemento de texto que sustituye. */
+const esqueleto = (
+  <div aria-hidden="true">
+    <Tabla titulo="Documentos pendientes en el área" columnas={COLUMNAS}>
+      {FILAS_ESQUELETO.map(([folio, asunto, meta, movimiento]) => (
+        <tr key={`${asunto}-${meta}`}>
+          <td>
+            <span className={estilos.folio}>
+              <Forma ancho={`${folio}ch`} />
+            </span>
+          </td>
+          <td>
+            <div className={estilos.documento}>
+              <div className={estilos.lineaTitulo}>
+                <span className={estilos.asunto}>
+                  <Forma ancho={`${asunto}ch`} />
+                </span>
+              </div>
+              <p className={estilos.meta}>
+                <Forma ancho={`${meta}ch`} />
+              </p>
+              <p className={estilos.movimiento}>
+                <span>
+                  <Forma ancho={`${movimiento}ch`} />
+                </span>
+              </p>
+            </div>
+          </td>
+          <td>
+            <Forma>
+              <RolTurno rol="responsable" />
+            </Forma>
+          </td>
+          <td className={estilos.dato}>
+            <Forma ancho="6ch" />
+          </td>
+          <td>
+            <span className={estilos.sinTitular}>
+              <Forma ancho="12ch" />
+            </span>
+          </td>
+        </tr>
+      ))}
+    </Tabla>
+  </div>
+)
+
 interface Props {
-  idArea: Uuid | undefined
-  seleccion: PendienteBandeja | undefined
+  /** La bandeja ya filtrada por tipo y antigüedad. */
+  bandeja: ReturnType<typeof useBandeja>
+  tipo: string
+  alCambiarTipo: (tipo: string) => void
+  antiguedad: string
+  alCambiarAntiguedad: (antiguedad: string) => void
+  /** La calcula `Bandeja`, para que la tabla y el recorrido muestren el mismo documento. */
+  elegida: PendienteBandeja | undefined
   alSeleccionar: (pendiente: PendienteBandeja) => void
 }
 
 /** Tarjeta «Pendientes» de la bandeja: filtros de O-14, tabla y «Ver todos». */
-export function TablaPendientes({ idArea, seleccion, alSeleccionar }: Props) {
-  const [tipo, setTipo] = useState(TODOS)
-  const [antiguedad, setAntiguedad] = useState('0')
+export function TablaPendientes({
+  bandeja,
+  tipo,
+  alCambiarTipo,
+  antiguedad,
+  alCambiarAntiguedad,
+  elegida,
+  alSeleccionar,
+}: Props) {
   const [verTodos, setVerTodos] = useState(false)
   const catalogos = useCatalogos()
-  const bandeja = useBandeja({
-    id_area: idArea,
-    tipo: tipo === TODOS ? undefined : tipo,
-    antiguedad_minima: Number(antiguedad),
-  })
 
   return (
-    <Tarjeta material="solida" className={estilos.tarjeta} aria-labelledby="titulo-pendientes">
+    <Tarjeta
+      material="solida"
+      className={estilos.tarjeta}
+      aria-labelledby="titulo-pendientes"
+      aria-busy={bandeja.isPending || undefined}
+    >
       <div className={estilos.cabecera}>
         <h2 id="titulo-pendientes" className={estilos.titulo}>
           Pendientes
@@ -69,29 +139,29 @@ export function TablaPendientes({ idArea, seleccion, alSeleccionar }: Props) {
             { valor: TODOS, texto: 'Todos' },
             ...(catalogos.data?.tipos_documento ?? []).map((t) => ({ valor: t, texto: t })),
           ]}
-          alCambiar={setTipo}
+          alCambiar={alCambiarTipo}
         />
         <Selector
           variante="pildora"
           prefijo="Antigüedad:"
           valor={antiguedad}
           opciones={ANTIGUEDADES}
-          alCambiar={setAntiguedad}
+          alCambiar={alCambiarAntiguedad}
         />
       </div>
       <EstadoConsulta
         consulta={bandeja}
         que="la bandeja"
+        esqueleto={esqueleto}
         vacio={(d) => (d.total === 0 ? 'No hay pendientes en esta área con esos filtros.' : null)}
       >
         {({ elementos, total }) => {
           const filas = verTodos ? elementos : elementos.slice(0, VISIBLES)
-          const elegida = seleccion?.id_documento ?? elementos[0]?.id_documento
           return (
             <>
               <Tabla titulo="Documentos pendientes en el área" columnas={COLUMNAS}>
                 {filas.map((p) => (
-                  <tr key={p.id_documento} className={p.id_documento === elegida ? estilos.elegida : undefined}>
+                  <tr key={p.id_documento} className={p.id_documento === elegida?.id_documento ? estilos.elegida : undefined}>
                     <td>
                       <Link to={`/documentos/${p.id_documento}`} className={estilos.folio}>
                         {p.folio}
@@ -103,7 +173,7 @@ export function TablaPendientes({ idArea, seleccion, alSeleccionar }: Props) {
                           <button
                             type="button"
                             className={estilos.asunto}
-                            aria-pressed={p.id_documento === elegida}
+                            aria-pressed={p.id_documento === elegida?.id_documento}
                             title="Ver su recorrido"
                             onClick={() => alSeleccionar(p)}
                           >

@@ -1,0 +1,53 @@
+/* Esqueletos de carga (T-01b, diseño propio): formas con un tinte de la tinta y un brillo que las
+   recorre. Quien las pone sobre la guinda cambia --forma-color. */
+.forma {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radio-rol);
+  background: var(--forma-color, color-mix(in srgb, var(--texto-principal) 8%, transparent));
+}
+
+/* Una línea de texto: 0.8 em centrados en la línea, así el alto lo sigue poniendo la fuente. */
+.linea {
+  display: inline-block;
+  width: 100%;
+  height: 0.8em;
+  vertical-align: middle;
+}
+
+.molde {
+  display: inline-flex;
+  color: transparent;
+}
+
+.molde > * {
+  visibility: hidden;
+}
+
+/* Brillo: un degradado que cruza la forma de izquierda a derecha, en bucle. En reposo queda fuera. */
+.forma::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fondo-superficie) 55%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: brillo var(--mov-brillo) var(--curva-lineal) infinite;
+}
+
+@keyframes brillo {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Movimiento reducido: el esqueleto queda estático y visible. */
+@media (prefers-reduced-motion: reduce) {
+  .forma::after {
+    animation: none;
+  }
+}

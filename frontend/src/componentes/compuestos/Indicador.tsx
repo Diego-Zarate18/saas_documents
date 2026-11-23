@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
 import estilos from './Indicador.module.css'
 
 interface Props {
   etiqueta: string
-  valor: string | number
+  /** La cifra, o una forma mientras carga. */
+  valor: ReactNode
   nota: string
   destacado?: boolean
 }

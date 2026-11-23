@@ -7,6 +7,55 @@
   backdrop-filter: var(--velo-desenfoque);
 }
 
+/* Entrada y salida (T-01b): Radix espera a que termine la animación de data-state="closed" para
+   desmontar el diálogo, así que el foco vuelve al control que lo abrió después del cierre. */
+.velo[data-state='open'],
+.panel[data-state='open'] {
+  animation: aparecer var(--mov-medio) var(--curva-salida);
+}
+
+.velo[data-state='closed'],
+.panel[data-state='closed'] {
+  animation: desaparecer var(--mov-corto) var(--curva-salida) forwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel[data-state='open'] {
+    animation-name: subir;
+  }
+
+  .panel[data-state='closed'] {
+    animation-name: bajar;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes desaparecer {
+  to {
+    opacity: 0;
+  }
+}
+
+/* El panel se centra con translate(-50%, -50%); los fotogramas lo conservan. */
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px));
+  }
+}
+
+@keyframes bajar {
+  to {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px));
+  }
+}
+
 .panel {
   position: fixed;
   top: 50%;

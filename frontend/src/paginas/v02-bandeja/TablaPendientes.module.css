@@ -99,8 +99,13 @@
   color: var(--estado-posible-duplicado);
 }
 
-/* Fila elegida para la vista previa del recorrido (no la dibuja el Figma). */
-.elegida td {
+/* Fila al pasar el cursor y fila elegida para la vista previa del recorrido (no las dibuja el Figma).
+   Misma especificidad: la elegida, declarada después, se conserva bajo el cursor. */
+.tarjeta tbody tr:hover td {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 35%, transparent);
+}
+
+.tarjeta tbody tr.elegida td {
   background: color-mix(in srgb, var(--fondo-marca-suave) 60%, transparent);
 }
 

@@ -1,5 +1,6 @@
-/* Botón (Figma 31:119). Hover y deshabilitado no los dibuja el Figma: se derivan de los tokens. */
+/* Botón (Figma 31:119). Hover, deshabilitado, pendiente y movimiento no los dibuja el Figma: se derivan de los tokens. */
 .boton {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11,12 +12,22 @@
   font: var(--etiqueta-m);
   white-space: nowrap;
   text-decoration: none;
+  transition:
+    background-color var(--mov-corto) var(--curva-estandar),
+    box-shadow var(--mov-corto) var(--curva-estandar),
+    transform var(--mov-instantaneo) var(--curva-estandar);
 }
 
 .boton:disabled,
 .boton[aria-disabled='true'] {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Pendiente: la acción sigue en curso, no está deshabilitada por una regla; conserva su color. */
+.boton[aria-busy='true'] {
+  cursor: progress;
+  opacity: 1;
 }
 
 .primario {
@@ -61,4 +72,24 @@
 
 .icono {
   flex: none;
+}
+
+/* Spinner de un botón sin ícono: a la izquierda, fuera del flujo, para que el texto no se mueva. */
+.giroSuelto {
+  position: absolute;
+  left: var(--espacio-16);
+}
+
+.flecha {
+  transition: transform var(--mov-corto) var(--curva-estandar);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boton:not(:disabled):active {
+    transform: scale(0.98);
+  }
+
+  .boton:not(:disabled):hover .flecha {
+    transform: translateX(2px);
+  }
 }

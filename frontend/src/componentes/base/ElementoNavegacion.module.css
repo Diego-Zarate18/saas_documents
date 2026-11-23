@@ -13,19 +13,25 @@
   font: var(--cuerpo-m);
   text-align: left;
   text-decoration: none;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
 }
 
+/* Indicador arena: siempre presente, aparece en la vista activa creciendo desde el centro. */
 .elemento::before {
   content: '';
   flex: none;
   width: 3px;
   height: 18px;
   border-radius: var(--radio-indicador);
+  background: var(--fondo-detalle);
+  transform: scaleY(0);
+  transition: transform var(--mov-corto) var(--curva-salida);
 }
 
 .icono {
   flex: none;
   opacity: 0.75;
+  transition: transform var(--mov-corto) var(--curva-estandar);
 }
 
 .texto {
@@ -34,8 +40,18 @@
   opacity: 0.8;
 }
 
-.elemento:hover {
+.elemento:not(:disabled):hover {
   background: var(--sobre-marca-tarjeta);
+}
+
+.elemento[aria-busy='true'] {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .elemento:not(:disabled):hover .icono {
+    transform: translateX(2px);
+  }
 }
 
 .elemento:focus-visible {
@@ -48,7 +64,7 @@
 }
 
 .elemento[aria-current='page']::before {
-  background: var(--fondo-detalle);
+  transform: scaleY(1);
 }
 
 .elemento[aria-current='page'] .icono,

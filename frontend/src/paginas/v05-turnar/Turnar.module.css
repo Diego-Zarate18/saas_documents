@@ -34,14 +34,20 @@
   border: 0;
   border-radius: var(--radio-control);
   background: var(--fondo-base);
-  box-shadow: var(--hundida-sombra);
+  /* Mismo límite que el selector de la fila (WCAG 1.4.11), como anillo interior para no cambiar la medida. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
   font: var(--cuerpo-s);
   resize: none;
   field-sizing: content;
 }
 
 .instruccion:focus-visible {
-  box-shadow: var(--hundida-sombra), var(--foco-anillo);
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo),
+    var(--foco-anillo);
 }
 
 .quitar {

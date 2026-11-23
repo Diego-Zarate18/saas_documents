@@ -1,0 +1,37 @@
+===== npm ci
+added 183 packages, and audited 184 packages in 36s
+27 packages are looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
+código de salida: 0
+===== npm run lint
+> sigedoc-frontend@0.0.0 lint
+> oxlint --deny-warnings
+código de salida: 0
+===== npm run typecheck
+> sigedoc-frontend@0.0.0 typecheck
+> tsc -b
+código de salida: 0
+===== npm test
+> sigedoc-frontend@0.0.0 test
+> vitest run
+ RUN  v5.1.1 C:/Users/brian/UPchiapas/Septimo Cuatri/Optativa I/U3/proyecto-U3/saas_documents/.claude/worktrees/sigedoc-t-01b-handoff-dd8f22/frontend
+ Test Files  6 passed (6)
+      Tests  52 passed (52)
+   Start at  00:10:30
+   Duration  20.91s (import 26%, environment 25%, tests 21%, setup 17%, transform 12%)
+código de salida: 0
+===== npm run build
+dist/assets/geist-latin-ext-wght-normal-DC-KSUi6.woff2           16.51 kB
+dist/assets/geist-mono-latin-wght-normal-XN7g48iV.woff2          23.12 kB
+dist/assets/geist-latin-wght-normal-BgDaEnEv.woff2               29.40 kB
+dist/assets/unbounded-cyrillic-wght-normal-C627f1f8.woff2        31.42 kB
+dist/assets/unbounded-latin-wght-normal-D5afBTBx.woff2           50.90 kB
+dist/assets/unbounded-latin-ext-wght-normal-D6H-S6MW.woff2      118.34 kB
+dist/assets/dependencias-Beuno2FA.css                             7.26 kB │ gzip:   2.66 kB
+dist/assets/index-CFNR1HMc.css                                   37.16 kB │ gzip:   7.27 kB
+dist/assets/rolldown-runtime-XKyaHtl9.js                          0.72 kB │ gzip:   0.42 kB
+dist/assets/index-DDlLyXQ_.js                                    77.29 kB │ gzip:  24.16 kB
+dist/assets/dependencias-SBDcFrjY.js                            440.55 kB │ gzip: 139.37 kB
+✓ built in 753ms
+código de salida: 0

@@ -14,7 +14,10 @@
   padding: var(--espacio-10) var(--espacio-14);
   border-radius: var(--radio-control);
   background: var(--fondo-base);
-  box-shadow: var(--hundida-sombra);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
 }
 
 .hundido .prefijo {
@@ -28,7 +31,7 @@
 .pildora {
   gap: var(--espacio-6);
   padding: var(--espacio-6) var(--espacio-12);
-  border: 1px solid var(--borde-sutil);
+  border: 1px solid var(--borde-campo);
   border-radius: var(--radio-pildora);
   background: transparent;
 }
@@ -46,7 +49,10 @@
   padding: var(--espacio-9) var(--espacio-12);
   border-radius: var(--radio-control);
   background: var(--fondo-base);
-  box-shadow: var(--hundida-sombra);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
 }
 
 .fila .valor {
@@ -76,6 +82,13 @@
 .flecha {
   flex: none;
   color: var(--texto-secundario);
+  transition: transform var(--mov-corto) var(--curva-estandar);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .disparador[data-state='open'] .flecha {
+    transform: rotate(180deg);
+  }
 }
 
 .lista {
@@ -88,6 +101,36 @@
   background: var(--vidrio-fondo-modal);
   backdrop-filter: var(--vidrio-desenfoque);
   box-shadow: var(--vidrio-sombra);
+  animation: desplegar var(--mov-corto) var(--curva-salida);
+}
+
+@keyframes desplegar {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lista {
+    animation-name: desplegar-bajando;
+  }
+}
+
+@keyframes desplegar-bajando {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Lista de opciones mientras se leen (V-05): una forma por opción, con su misma medida. */
+.cargando {
+  display: flex;
+  flex-direction: column;
+}
+
+.cargando .opcion {
+  cursor: progress;
 }
 
 .opcion {

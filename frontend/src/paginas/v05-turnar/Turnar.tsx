@@ -37,7 +37,8 @@ interface Props {
 /** V-05 Turnar a una o varias áreas en un solo grupo (O-03, RI-10). */
 export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
   const [filas, setFilas] = useState<Fila[]>(() => [filaNueva()])
-  const areas = useAreas().data?.elementos ?? []
+  const consultaAreas = useAreas()
+  const areas = consultaAreas.data?.elementos ?? []
   const idPropia = useSesion().data?.id_area
   const turnar = useTurnar(idDocumento)
 
@@ -76,7 +77,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
           <Boton variante="fantasma" onClick={() => cerrar(false)}>
             Cancelar
           </Boton>
-          <Boton icono="turnar" onClick={enviar} disabled={error !== null || turnar.isPending}>
+          <Boton icono="turnar" onClick={enviar} disabled={error !== null} pendiente={turnar.isPending}>
             Turnar a {filas.length} {filas.length === 1 ? 'área' : 'áreas'}
           </Boton>
         </>
@@ -97,6 +98,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
                 etiqueta={`Área destino ${i + 1}`}
                 marcador="Elige un área"
                 valor={f.id_area || undefined}
+                cargando={consultaAreas.isPending}
                 opciones={areas.filter((a) => a.id !== idPropia).map((a) => ({ valor: a.id, texto: a.nombre }))}
                 alCambiar={(id_area) => cambiar(f.clave, { id_area })}
               />

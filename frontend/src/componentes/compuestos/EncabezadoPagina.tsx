@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import estilos from './EncabezadoPagina.module.css'
 
 interface Props {
-  titulo: string
+  /** Texto del h1; la ficha pasa formas mientras carga. */
+  titulo: ReactNode
   /** Migas de pan sobre el título (V-04: «BANDEJA / OP-2026-0139»). */
   migas?: ReactNode
   /** Línea bajo el título: texto o metadatos. */
@@ -20,7 +21,7 @@ export function EncabezadoPagina({ titulo, migas, descripcion, acciones }: Props
             {migas}
           </nav>
         )}
-        <h1 className={estilos.titulo} title={titulo}>
+        <h1 className={estilos.titulo} title={typeof titulo === 'string' ? titulo : undefined}>
           {titulo}
         </h1>
         {descripcion && <div className={estilos.descripcion}>{descripcion}</div>}

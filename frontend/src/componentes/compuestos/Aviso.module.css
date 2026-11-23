@@ -9,6 +9,13 @@
   border-radius: var(--radio-aviso);
   font: var(--cuerpo-s);
   color: var(--texto-principal);
+  animation: aparecer var(--mov-corto) var(--curva-salida);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
 }
 
 .icono {

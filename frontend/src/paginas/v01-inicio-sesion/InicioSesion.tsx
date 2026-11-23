@@ -74,7 +74,7 @@ export function InicioSesion() {
             {iniciar.error instanceof ErrorDeApi ? iniciar.error.problema.title : 'No se pudo iniciar sesión.'}
           </Aviso>
         )}
-        <Boton type="submit" ancho disabled={iniciar.isPending}>
+        <Boton type="submit" ancho pendiente={iniciar.isPending}>
           Entrar
         </Boton>
         <p className={estilos.bloqueo}>

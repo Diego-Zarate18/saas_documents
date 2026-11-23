@@ -13,7 +13,7 @@
 .caja {
   width: 100%;
   padding: var(--espacio-10) var(--espacio-12);
-  border: 1px solid var(--borde-sutil);
+  border: 1px solid var(--borde-campo);
   border-radius: var(--radio-control);
   background: var(--fondo-base);
   box-shadow: var(--hundida-sombra);

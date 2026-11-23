@@ -4,7 +4,7 @@
   align-items: flex-start;
   gap: var(--espacio-10);
   padding: var(--espacio-10) var(--espacio-12);
-  border: 1px solid var(--borde-sutil);
+  border: 1px solid var(--borde-campo);
   border-radius: var(--radio-control);
   background: var(--fondo-superficie);
   cursor: pointer;
@@ -30,7 +30,7 @@
   width: 16px;
   height: 16px;
   margin: 2px 0 0;
-  border: 1.5px solid var(--borde-sutil);
+  border: 1.5px solid var(--borde-campo);
   border-radius: var(--radio-pildora);
   background: var(--fondo-superficie);
 }

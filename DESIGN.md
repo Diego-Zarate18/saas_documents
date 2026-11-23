@@ -18,6 +18,7 @@ colors:
   texto-sobre-detalle: "#1F1B1C"
   borde-marca: "#6D1F33"
   borde-sutil: "#D6CEC6"
+  borde-campo: "#6B6461"
   estado-en-tramite: "#1F5A8A"
   estado-concluido: "#2E6B4A"
   estado-cancelado: "#6B6461"
@@ -205,7 +206,8 @@ Paleta cálida y contenida: marfil de fondo, tinta casi negra para texto y guind
 - **Blanco** (#FFFFFF, `fondo-superficie`): tablas y formularios.
 - **Tinta** (#1F1B1C, `texto-principal`): texto principal.
 - **Gris cálido** (#6B6461, `texto-secundario`): texto secundario, metadatos, rol de conocimiento.
-- **Borde sutil** (#D6CEC6, `borde-sutil`): divisiones de tabla, bordes de campos y selectores.
+- **Borde sutil** (#D6CEC6, `borde-sutil`): divisiones de tabla y bordes de tarjetas.
+- **Borde de campo** (#6B6461, `borde-campo`, el mismo gris cálido de `texto-secundario`): borde de campos, selectores, opciones de radio y segmentado. Agregado en T-01b por WCAG 1.4.11 (3:1 en los límites de los controles): 5.06:1 sobre marfil, 4.63:1 sobre marfil hundido, 5.19:1 sobre marfil relieve y 5.80:1 sobre blanco. El borde sutil daba 1.36:1. Los selectores hundido y de fila y el segmentado no tienen borde en el Figma: llevan un anillo interior de 1 px con el mismo token, para no cambiar sus medidas.
 
 ### Estados
 - **En trámite** #1F5A8A · **Concluido** #2E6B4A · **Cancelado** #6B6461 · **Sin efecto** #5B4B8A · **Posible duplicado** #9A5B00 · **Rebote** #C2410C · **Confidencial** #6D1F33 · **Error** #B42318.
@@ -275,7 +277,7 @@ Píldora con punto de 6 px y texto Etiqueta/S del color del estado sobre su tint
 Etiqueta de 6 px de radio. Responsable: guinda con texto blanco. Apoyo: guinda suave con texto guinda. Conocimiento: borde sutil con texto gris. Un solo responsable por grupo de turno (RI-10).
 
 ### Inputs / Fields
-- **Style:** etiqueta Etiqueta/S arriba (6 px de separación), caja de 10 px de radio sobre marfil con sombra hundida y borde sutil de 1 px.
+- **Style:** etiqueta Etiqueta/S arriba (6 px de separación), caja de 10 px de radio sobre marfil con sombra hundida y borde de campo de 1 px.
 - **Focus:** borde guinda de 1.5 px.
 - **Error:** borde y texto de ayuda en rojo de error.
 - **Disabled:** fondo marfil hundido y texto gris.
@@ -285,6 +287,68 @@ Elemento de 40 px de alto en la barra lateral: indicador de 3 × 18 px, ícono d
 
 ### Cards / Containers
 Radio de 20 px y relleno de 24 px. El material sigue la regla del material; la tarjeta indicadora destacada usa el degradado guinda con texto blanco.
+
+## Movimiento
+
+<!-- T-01b. El Figma no dibuja movimiento: todo lo de esta sección es diseño propio, pendiente de revisión. -->
+
+El movimiento informa y no decora: que algo carga, que algo respondió, qué cambió de estado. Solo CSS; se anima `opacity` y `transform`, y en hover y foco además `background-color`, `border-color` y `box-shadow`. Sin rebotes ni curvas elásticas, sin animaciones de entrada de página ni transiciones entre rutas, y ninguna animación desplaza el diseño.
+
+### Tokens
+
+Están en `tokens.css`; ninguna duración ni curva se escribe fuera de ahí.
+
+| Token | Valor | Uso |
+| --- | --- | --- |
+| `--mov-instantaneo` | 100 ms | `:active` de los botones |
+| `--mov-corto` | 150 ms | hover, foco, fundidos, chevrons, salidas del modal |
+| `--mov-medio` | 220 ms | entrada del modal (el máximo, salvo los bucles) |
+| `--mov-brillo` | 1400 ms | brillo del esqueleto, en bucle |
+| `--mov-giro` | 800 ms | spinner, en bucle |
+| `--mov-giro-reducido` | 1600 ms | spinner con movimiento reducido |
+| `--mov-nulo` | 0.01 ms | todo lo demás con movimiento reducido |
+| `--curva-salida` | `cubic-bezier(0.2, 0, 0, 1)` | lo que aparece |
+| `--curva-estandar` | `cubic-bezier(0.4, 0, 0.2, 1)` | cambios de estado |
+| `--curva-lineal` | `linear` | bucles |
+
+### Animaciones aprobadas
+
+No hay otras.
+
+| Elemento | Qué se mueve | Duración | Curva |
+| --- | --- | --- | --- |
+| Esqueleto | Brillo que lo recorre (`translateX` de un pseudoelemento), en bucle | `--mov-brillo` | lineal |
+| Contenido tras el esqueleto | `opacity` 0 → 1 | `--mov-corto` | salida |
+| Botón (hover y foco) | Fondo y sombra | `--mov-corto` | estándar |
+| Botón (`:active`) | `scale(0.98)` | `--mov-instantaneo` | estándar |
+| Spinner de botón pendiente | `rotate` en bucle | `--mov-giro` | lineal |
+| Navegación lateral (hover) | Fondo; el ícono se desplaza `translateX(2px)` | `--mov-corto` | estándar |
+| Navegación lateral (activa) | La barra arena aparece con `scaleY` 0 → 1 | `--mov-corto` | salida |
+| Fila de tabla (hover y elegida) | Fondo | `--mov-corto` | estándar |
+| Chevron del selector | `rotate` 0 → 180° | `--mov-corto` | estándar |
+| Lista desplegable del selector | `opacity` y `translateY(-4px → 0)` | `--mov-corto` | salida |
+| Modal: velo | `opacity` | `--mov-medio` (al cerrar, `--mov-corto`) | salida |
+| Modal: panel | `opacity` y `translateY(8px → 0)` | `--mov-medio` (al cerrar, `--mov-corto`) | salida |
+| Avisos (errores, RI-10) | `opacity` | `--mov-corto` | salida |
+| Flecha de «Cerrar sesión» y de botones con flecha (hover) | `translateX(2px)` | `--mov-corto` | estándar |
+
+Los modales son de Radix y se animan con sus atributos `data-state`: el diálogo se desmonta al terminar la salida y el foco vuelve al control que lo abrió.
+
+### Esqueletos de carga
+
+Sustituyen los «—» y los estados de carga vacíos. Están en la bandeja (indicadores, aviso de duplicados, seis filas de pendientes, columna de recorrido y rebotes o acuses), en la ficha (encabezado, registro, expediente y recorrido con la ubicación actual), en la lista de áreas del selector de V-05 y en la pantalla neutra de la ruta protegida (isotipo y «Cargando…»).
+
+- **Forma** (`Esqueleto.tsx`): un tinte de la tinta al 8 % (`color-mix`), con el radio del rol de turno; sobre la guinda, el blanco al 22 %. Una forma de línea mide 0.8 em y va dentro del mismo elemento de texto que sustituye, así que el alto de la línea lo sigue poniendo la fuente. Un molde toma exactamente el tamaño de un control (botón, píldora) que no se ve.
+- **Medidas:** las del contenido real; CLS ≤ 0.01 en bandeja y ficha. En la carga inicial, la columna lateral de la bandeja espera al recorrido elegido por omisión y se sustituye de una vez, porque su alto depende de cuántos pasos tenga.
+- **Accesibilidad:** el contenedor lleva `aria-busy="true"` y las formas `aria-hidden`. Cada vista tiene un único `role="status"` (`AnuncioCarga`, en el marco) que dice «Cargando…» mientras alguna consulta se lee por primera vez.
+
+### Botón pendiente
+
+«Turnar a N áreas», «Entrar» y «Cerrar sesión» muestran un spinner (anillo SVG con `currentColor`) mientras la operación está en curso. El botón queda deshabilitado, con `aria-busy` y su color de siempre, sin el 50 % de deshabilitado. El texto no cambia; el spinner ocupa el lugar del ícono o, si no hay ícono, se coloca fuera del flujo a la izquierda, así que el ancho tampoco cambia.
+
+### Movimiento reducido
+
+Con `prefers-reduced-motion: reduce` todo cambio es inmediato (`--mov-nulo`). El brillo del esqueleto se detiene y la forma queda estática y visible. Los desplazamientos, escalas y giros se declaran solo con `no-preference`, así que no ocurren. Los modales y avisos aparecen solo con `opacity`, sin duración perceptible. El spinner sigue girando a `--mov-giro-reducido`, porque indica trabajo en curso.
 
 ## Do's and Don'ts
 

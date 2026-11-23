@@ -27,6 +27,7 @@
 }
 
 .destacado {
+  --forma-color: color-mix(in srgb, var(--texto-sobre-marca) 22%, transparent);
   background: var(--destacado-fondo);
   box-shadow: var(--destacado-sombra);
 }

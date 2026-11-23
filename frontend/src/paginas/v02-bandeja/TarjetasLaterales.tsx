@@ -2,23 +2,51 @@ import { Link } from 'react-router'
 import { useAcuses, useRebotes } from '../../api/consultas'
 import { BotonEnlace } from '../../componentes/base/Boton'
 import { Estado } from '../../componentes/base/Estado'
+import { Forma } from '../../componentes/compuestos/Esqueleto'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
 import { Tarjeta } from '../../componentes/compuestos/Tarjeta'
 import { OPCIONES } from '../../rutas/menu'
 import estilos from './TarjetasLaterales.module.css'
 
+/** Tres elementos de lista con folio y una línea, como los de rebotes y acuses. */
+const esqueleto = (
+  <ul className={estilos.lista} aria-hidden="true">
+    {['28ch', '22ch', '25ch'].map((ancho) => (
+      <li key={ancho}>
+        <span className={estilos.folio}>
+          <Forma ancho="11ch" />
+        </span>
+        <p>
+          <Forma ancho={ancho} />
+        </p>
+      </li>
+    ))}
+  </ul>
+)
+
+interface Props {
+  /** La columna lateral todavía espera al recorrido: se muestra el esqueleto aunque esta consulta ya haya llegado. */
+  cargando: boolean
+}
+
 /** Resumen de C3 para oficialía y dirección (D-32). */
-export function TarjetaRebotes() {
-  const rebotes = useRebotes(true)
+export function TarjetaRebotes({ cargando }: Props) {
+  const consulta = useRebotes(true)
+  const rebotes = { ...consulta, isPending: consulta.isPending || cargando }
   return (
-    <Tarjeta material="relieve" className={`${estilos.tarjeta} ${estilos.relieve}`} aria-labelledby="titulo-rebotes">
+    <Tarjeta
+      material="relieve"
+      className={`${estilos.tarjeta} ${estilos.relieve}`}
+      aria-labelledby="titulo-rebotes"
+      aria-busy={rebotes.isPending || undefined}
+    >
       <div className={estilos.cabecera}>
         <h2 id="titulo-rebotes" className={estilos.titulo}>
           Rebotes
         </h2>
         <Estado estado="rebote" />
       </div>
-      <EstadoConsulta consulta={rebotes} que="los rebotes" vacio={(d) => (d.total === 0 ? 'Sin rebotes detectados.' : null)}>
+      <EstadoConsulta consulta={rebotes} que="los rebotes" esqueleto={esqueleto} vacio={(d) => (d.total === 0 ? 'Sin rebotes detectados.' : null)}>
         {({ elementos }) => (
           <ul className={estilos.lista}>
             {elementos.map((r) => (
@@ -41,11 +69,17 @@ export function TarjetaRebotes() {
 }
 
 /** Salidas con acuse cuyo documento está pendiente en el área como responsable (D-58). */
-export function TarjetaAcuses() {
-  const acuses = useAcuses(true)
-  const primero = acuses.data?.elementos[0]
+export function TarjetaAcuses({ cargando }: Props) {
+  const consulta = useAcuses(true)
+  const acuses = { ...consulta, isPending: consulta.isPending || cargando }
+  const primero = acuses.isPending ? undefined : acuses.data?.elementos[0]
   return (
-    <Tarjeta material="relieve" className={`${estilos.tarjeta} ${estilos.relieve}`} aria-labelledby="titulo-acuses">
+    <Tarjeta
+      material="relieve"
+      className={`${estilos.tarjeta} ${estilos.relieve}`}
+      aria-labelledby="titulo-acuses"
+      aria-busy={acuses.isPending || undefined}
+    >
       <div className={estilos.cabecera}>
         <h2 id="titulo-acuses" className={estilos.titulo}>
           Acuses
@@ -55,6 +89,7 @@ export function TarjetaAcuses() {
       <EstadoConsulta
         consulta={acuses}
         que="los acuses"
+        esqueleto={esqueleto}
         vacio={(d) => (d.total === 0 ? 'Ninguna salida acusada espera conclusión.' : null)}
       >
         {({ elementos }) => (

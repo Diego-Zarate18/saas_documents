@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { borrarSesion } from '../sesion/almacen'
 
@@ -7,6 +7,10 @@ import { borrarSesion } from '../sesion/almacen'
 Element.prototype.hasPointerCapture ??= () => false
 Element.prototype.releasePointerCapture ??= () => {}
 Element.prototype.scrollIntoView ??= () => {}
+
+// Con todas las pruebas en paralelo, montar la aplicación (sesión, marco, esqueleto y datos) puede pasar
+// del segundo que espera findBy por omisión.
+configure({ asyncUtilTimeout: 3000 })
 
 afterEach(() => {
   cleanup()

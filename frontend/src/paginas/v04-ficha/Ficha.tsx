@@ -14,6 +14,7 @@ import { useSesion } from '../../sesion/sesion'
 import { dias } from '../formato'
 import { Turnar } from '../v05-turnar/Turnar'
 import estilos from './Ficha.module.css'
+import { FichaEsqueleto } from './FichaEsqueleto'
 import { RecorridoFicha, RelacionesFicha } from './Laterales'
 import { Expediente, Registro } from './Secciones'
 
@@ -40,7 +41,7 @@ export function Ficha() {
   const ficha = useFicha(id)
   if (!sesion) return null
   return (
-    <EstadoConsulta consulta={ficha} que="la ficha del documento">
+    <EstadoConsulta consulta={ficha} que="la ficha del documento" esqueleto={<FichaEsqueleto />}>
       {(datos) => <FichaDe ficha={datos} sesion={sesion} />}
     </EstadoConsulta>
   )

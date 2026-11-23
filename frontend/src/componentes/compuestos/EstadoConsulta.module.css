@@ -1,4 +1,4 @@
-/* Estados que el Figma no dibuja (cargando, vacío y error de la fuente): diseño propio y sobrio. */
+/* Estados que el Figma no dibuja (vacío y error de la fuente): diseño propio y sobrio. */
 .estado {
   display: flex;
   flex-direction: column;
@@ -11,4 +11,22 @@
 
 .error {
   color: var(--estado-error);
+  animation: aparecer var(--mov-corto) var(--curva-salida);
+}
+
+/* El contenido que sustituye al esqueleto aparece con un fundido. El envoltorio no crea caja,
+   así que el contenido sigue en la disposición de su tarjeta. */
+.contenido {
+  display: contents;
+}
+
+.contenido > *,
+.aparecer {
+  animation: aparecer var(--mov-corto) var(--curva-salida);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
 }

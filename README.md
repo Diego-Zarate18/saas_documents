@@ -48,3 +48,5 @@ Abre <http://localhost:5173> y entra con cualquiera de los usuarios de prueba. E
 | `npm run preview` | Sirve la versión compilada en <http://localhost:4173> |
 
 `VITE_API_MODO` elige la fuente de datos (ver `frontend/.env.example`); por ahora solo existe `simulado`, que es el valor por omisión.
+
+`VITE_API_LATENCIA_MS` fija la latencia de la fuente simulada en milisegundos (450 por omisión) para que se vean los esqueletos de carga; en las pruebas siempre es 0. Para cambiarla, crea `frontend/.env.local` con, por ejemplo, `VITE_API_LATENCIA_MS=1500` y reinicia `npm run dev`.

@@ -39,6 +39,17 @@ describe('V-05 Turnar: teclado y foco del modal', () => {
     await waitFor(() => expect(boton).toHaveFocus())
   })
 
+  it('o03_modal_anima_con_data_state_y_cierra_tras_la_salida', async () => {
+    const { usuario, boton, dialogo } = await abrirTurnar()
+    // Velo y panel llevan data-state: el CSS anima la entrada y la salida, y Radix desmonta al terminar.
+    expect(dialogo).toHaveAttribute('data-state', 'open')
+    expect(document.querySelector('[data-state="open"][class*="velo"]')).not.toBeNull()
+    await usuario.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(document.querySelector('[class*="velo"]')).toBeNull()
+    await waitFor(() => expect(boton).toHaveFocus())
+  })
+
   it('o03_cancelar_cierra_y_devuelve_el_foco', async () => {
     const { usuario, boton } = await abrirTurnar()
     await usuario.click(screen.getByRole('button', { name: 'Cancelar' }))

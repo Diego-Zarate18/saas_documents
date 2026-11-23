@@ -1,0 +1,24 @@
+/* Spinner: giro continuo y lineal. */
+.giro {
+  flex: none;
+  animation: girar var(--mov-giro) var(--curva-lineal) infinite;
+}
+
+.pista {
+  opacity: 0.25;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Con movimiento reducido el spinner se conserva, porque indica trabajo en curso, pero más lento.
+   Anula el bloque global de base.css (misma importancia, mayor especificidad). */
+@media (prefers-reduced-motion: reduce) {
+  .giro {
+    animation-duration: var(--mov-giro-reducido) !important;
+    animation-iteration-count: infinite !important;
+  }
+}

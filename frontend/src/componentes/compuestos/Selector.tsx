@@ -1,6 +1,7 @@
 import { Select } from 'radix-ui'
 import { useId } from 'react'
 import { Icono } from '../../iconos/Icono'
+import { Forma } from './Esqueleto'
 import estilos from './Selector.module.css'
 
 export interface OpcionSelector {
@@ -19,10 +20,12 @@ interface Props {
   alCambiar: (valor: string) => void
   marcador?: string
   deshabilitado?: boolean
+  /** Las opciones todavía se leen: el valor y la lista muestran formas en su lugar. */
+  cargando?: boolean
 }
 
 /** Selector con la lista accesible de Radix (teclado, búsqueda por letra, foco). */
-export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambiar, marcador, deshabilitado }: Props) {
+export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambiar, marcador, deshabilitado, cargando }: Props) {
   const id = useId()
   return (
     <Select.Root value={valor} onValueChange={alCambiar} disabled={deshabilitado}>
@@ -35,15 +38,34 @@ export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambi
           {prefijo ?? etiqueta}
         </span>
         <span id={`${id}-valor`} className={estilos.valor}>
-          <Select.Value placeholder={marcador} />
+          {cargando && valor ? <Forma ancho="9ch" /> : <Select.Value placeholder={marcador} />}
         </span>
         <Select.Icon className={estilos.flecha}>
           <Icono nombre="abajo" tamano={variante === 'hundido' ? 16 : 14} />
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
-        <Select.Content className={estilos.lista} position="popper" sideOffset={6}>
+        {/* La lista se nombra con el prefijo o la etiqueta del disparador; mientras carga, aria-busy la exime
+            de tener opciones (ARIA). */}
+        <Select.Content
+          className={estilos.lista}
+          position="popper"
+          sideOffset={6}
+          aria-labelledby={`${id}-prefijo`}
+          aria-busy={cargando || undefined}
+        >
           <Select.Viewport>
+            {cargando && (
+              // Único anuncio de carga dentro de la lista, que vive fuera del fondo inerte del modal.
+              <div className={estilos.cargando}>
+                <output className="solo-lector">Cargando…</output>
+                {['70%', '55%', '65%'].map((ancho) => (
+                  <span key={ancho} className={estilos.opcion}>
+                    <Forma ancho={ancho} />
+                  </span>
+                ))}
+              </div>
+            )}
             {opciones.map((o) => (
               <Select.Item key={o.valor} value={o.valor} className={estilos.opcion}>
                 <Select.ItemText>{o.texto}</Select.ItemText>

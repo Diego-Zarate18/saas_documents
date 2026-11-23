@@ -35,4 +35,5 @@
 
 .tabla td {
   padding-block: var(--espacio-12);
+  transition: background-color var(--mov-corto) var(--curva-estandar);
 }

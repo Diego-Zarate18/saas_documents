@@ -1,10 +1,14 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { idPorFolio } from '../../api/simulado/datos'
 import { entrarComo, montarApp, USUARIO } from '../../pruebas/utilidades'
 
 const acciones = async () => {
-  const titulo = await screen.findByRole('heading', { level: 1 })
+  // La pantalla de sesión («SIGEDOC») y el esqueleto («Ficha del documento») llevan su propio h1; se espera el de la ficha.
+  const titulo = await screen.findByRole('heading', {
+    level: 1,
+    name: (nombre) => !['SIGEDOC', 'Ficha del documento'].includes(nombre),
+  })
   const encabezado = titulo.closest('header') as HTMLElement
   return within(encabezado)
     .getAllByRole('button')
@@ -39,5 +43,28 @@ describe('O-11 Ficha: acciones por rol (D-44, D-62)', () => {
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Relacionar' }))
     const dialogo = await screen.findByRole('dialog', { name: 'Relacionar' })
     expect(dialogo).toHaveTextContent('V-10 · nodo del Figma 48:1119')
+  })
+
+  it('o11_esqueleto_de_la_sesion_y_de_la_ficha', async () => {
+    await entrarComo(USUARIO.marta)
+    montarApp(`/documentos/${idPorFolio('OP-2026-0139')}`)
+    // Mientras se resuelve la sesión: pantalla neutra con el isotipo y «Cargando…».
+    expect(screen.getByRole('status')).toHaveTextContent('Cargando…')
+    expect(screen.getByRole('status').closest('[aria-busy="true"]')).not.toBeNull()
+
+    // Después, el esqueleto de la ficha: un h1 propio, aria-busy, un solo anuncio y formas ocultas.
+    // Todo en una sola comprobación: cada findBy deja correr la fuente simulada (latencia 0 en pruebas).
+    await waitFor(() => {
+      const titulo = screen.getByRole('heading', { level: 1, name: 'Ficha del documento' })
+      expect(titulo.closest('[aria-busy="true"]')).not.toBeNull()
+      expect(screen.getAllByRole('status')).toHaveLength(1)
+      expect(screen.getByRole('status')).toHaveTextContent('Cargando…')
+      const formas = [...document.querySelectorAll('[class*="forma"]')]
+      expect(formas.length).toBeGreaterThan(20)
+      expect(formas.every((f) => f.closest('[aria-hidden="true"]'))).toBe(true)
+    })
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Requisición de material de cómputo' })).toBeInTheDocument()
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull()
   })
 })

@@ -27,7 +27,10 @@ import {
 } from '../tipos'
 import * as db from './datos'
 
-const LATENCIA_MS = import.meta.env.MODE === 'test' ? 0 : 250
+// Latencia simulada para que los esqueletos se vean en desarrollo (VITE_API_LATENCIA_MS, 450 ms por
+// omisión). En las pruebas es 0; un valor que no sea un número de milisegundos ≥ 0 cuenta como 0.
+const latencia = Number(import.meta.env.VITE_API_LATENCIA_MS ?? 450)
+const LATENCIA_MS = import.meta.env.MODE === 'test' || !(latencia >= 0) ? 0 : latencia
 const esperar = () => new Promise((listo) => setTimeout(listo, LATENCIA_MS))
 
 function falla(codigo: CodigoError, status: number, title: string): never {

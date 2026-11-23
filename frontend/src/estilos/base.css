@@ -144,11 +144,15 @@ a {
   color: var(--texto-secundario);
 }
 
+/* Movimiento reducido: todo cambio es inmediato y ningún bucle se repite (el brillo de los esqueletos
+   queda quieto). Los desplazamientos, escalas y giros solo se declaran con no-preference; el spinner
+   conserva su giro, más lento, porque indica trabajo en curso (Giro.module.css). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+    transition-duration: var(--mov-nulo) !important;
+    animation-duration: var(--mov-nulo) !important;
+    animation-iteration-count: 1 !important;
   }
 }

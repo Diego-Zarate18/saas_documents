@@ -2177,6 +2177,22 @@
       "supuesto": true
     },
     {
+      "id": "D-67",
+      "tipo": "Decision",
+      "nombre": "El turno de oficialía o dirección no cierra el pendiente de otras áreas",
+      "descripcion": "Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-68",
+      "tipo": "Decision",
+      "nombre": "Atraer deja una sola área responsable",
+      "descripcion": "Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
       "id": "HU-PEN",
       "tipo": "Hueco",
       "nombre": "Regla de pendiente y ubicación vigente con ramas",
@@ -7007,6 +7023,66 @@
       "origen": "D-66",
       "relacion": "AFECTA",
       "destino": "K-EXP"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "DERIVA_DE",
+      "destino": "D-42"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "DERIVA_DE",
+      "destino": "D-44"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-68"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "DERIVA_DE",
+      "destino": "D-42"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "DERIVA_DE",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "O-23"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
     }
   ]
 }

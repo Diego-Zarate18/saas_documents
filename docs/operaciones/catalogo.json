@@ -149,7 +149,7 @@
       "roles": "TI",
       "recibe": "Id del documento y justificación",
       "devuelve": "Movimiento de atracción",
-      "reglas": "El área que atrae queda como responsable y el área anterior deja de tenerlo pendiente; requiere visibilidad sobre el documento",
+      "reglas": "El área que atrae queda como única responsable y las demás áreas que lo tenían pendiente como responsable dejan de tenerlo (D-68); requiere visibilidad sobre el documento",
       "tipo": "E",
       "bases": "PG+NJ",
       "frecuencia": "Baja",

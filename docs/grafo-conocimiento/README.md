@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 276 nodos y 945 relaciones
+## Contenido: 278 nodos y 957 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 66 | Decisiones de diseño tomadas |
+| Decision | 68 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -256,6 +256,8 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-64 | Sistema visual del frontend desde el Figma | — | Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado. |
 | D-65 | Los siete tipos de documento: nombres y alcance * | — | Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2. |
 | D-66 | Campos propios por tipo de documento * | — | Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene. |
+| D-67 | El turno de oficialía o dirección no cierra el pendiente de otras áreas * | — | Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos. |
+| D-68 | Atraer deja una sola área responsable * | — | Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67. |
 
 ## Tipos de relación
 
@@ -263,12 +265,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 133 |
+| AFECTA | 139 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 27 |
+| DERIVA_DE | 31 |
 | DESCRIBE | 2 |
 | DESDE_HACIA | 1 |
 | DOCUMENTA | 116 |
@@ -305,7 +307,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 66 |
+| TOMA | 68 |
 | UNE | 2 |
 | USA | 64 |
 

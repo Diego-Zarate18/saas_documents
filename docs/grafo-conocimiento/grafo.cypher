@@ -264,6 +264,8 @@ MERGE (n:Nodo:`Decision` {id: 'D-63'}) SET n += {nombre: 'Interfaz primero con d
 MERGE (n:Nodo:`Decision` {id: 'D-64'}) SET n += {nombre: 'Sistema visual del frontend desde el Figma', descripcion: 'Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-65'}) SET n += {nombre: 'Los siete tipos de documento: nombres y alcance', descripcion: 'Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Decision` {id: 'D-66'}) SET n += {nombre: 'Campos propios por tipo de documento', descripcion: 'Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-67'}) SET n += {nombre: 'El turno de oficialía o dirección no cierra el pendiente de otras áreas', descripcion: 'Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-68'}) SET n += {nombre: 'Atraer deja una sola área responsable', descripcion: 'Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PEN'}) SET n += {nombre: 'Regla de pendiente y ubicación vigente con ramas', descripcion: 'Calculada de la bitácora en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-SIN'}) SET n += {nombre: 'Descripción corta para listados', descripcion: 'Columna sintesis en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-ROL'}) SET n += {nombre: 'Roles y permisos de turno sin definir', descripcion: 'Cinco roles con permisos de turno.', estado: 'resuelto'};
@@ -1225,6 +1227,18 @@ MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'E-2'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'O-01'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'O-09'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'K-EXP'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-67'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-67'}), (b:Nodo {id: 'D-42'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-67'}), (b:Nodo {id: 'D-44'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-67'}), (b:Nodo {id: 'O-03'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-67'}), (b:Nodo {id: 'O-14'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-67'}), (b:Nodo {id: 'C1'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-68'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'D-42'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'D-67'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'O-23'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'O-14'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'K-MOV'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

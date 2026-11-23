@@ -263,6 +263,7 @@ MERGE (n:Nodo:`Decision` {id: 'D-62'}) SET n += {nombre: 'Vistas por rol: bandej
 MERGE (n:Nodo:`Decision` {id: 'D-63'}) SET n += {nombre: 'Interfaz primero con datos simulados', descripcion: 'Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36).', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-64'}) SET n += {nombre: 'Sistema visual del frontend desde el Figma', descripcion: 'Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-65'}) SET n += {nombre: 'Los siete tipos de documento: nombres y alcance', descripcion: 'Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-66'}) SET n += {nombre: 'Campos propios por tipo de documento', descripcion: 'Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PEN'}) SET n += {nombre: 'Regla de pendiente y ubicación vigente con ramas', descripcion: 'Calculada de la bitácora en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-SIN'}) SET n += {nombre: 'Descripción corta para listados', descripcion: 'Columna sintesis en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-ROL'}) SET n += {nombre: 'Roles y permisos de turno sin definir', descripcion: 'Cinco roles con permisos de turno.', estado: 'resuelto'};
@@ -1214,6 +1215,16 @@ MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'K-DOC'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'DB-MG'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'AD-01'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'E-2'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-66'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'D-60'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'D-46'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'D-65'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'AD-01'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'DB-MG'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'E-2'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'O-01'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'O-09'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-66'}), (b:Nodo {id: 'K-EXP'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

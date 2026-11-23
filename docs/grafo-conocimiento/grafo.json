@@ -2169,6 +2169,14 @@
       "supuesto": true
     },
     {
+      "id": "D-66",
+      "tipo": "Decision",
+      "nombre": "Campos propios por tipo de documento",
+      "descripcion": "Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
       "id": "HU-PEN",
       "tipo": "Hueco",
       "nombre": "Regla de pendiente y ubicación vigente con ramas",
@@ -6949,6 +6957,56 @@
       "origen": "D-65",
       "relacion": "AFECTA",
       "destino": "E-2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-66"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-60"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-46"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-65"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "O-01"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "K-EXP"
     }
   ]
 }

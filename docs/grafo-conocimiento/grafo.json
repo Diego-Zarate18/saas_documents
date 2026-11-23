@@ -1,6 +1,6 @@
 {
   "proyecto": "SIGEDOC",
-  "actualizado": "2026-11-21",
+  "actualizado": "2026-11-22",
   "nodos": [
     {
       "id": "PRY",
@@ -11,8 +11,8 @@
     {
       "id": "CTX-01",
       "tipo": "Contexto",
-      "nombre": "Organización estudiada",
-      "descripcion": "Oficialía de Partes y Control de Gestión de una Dirección General de Administración. 120 a 150 documentos por semana, el doble en temporadas altas (1c)."
+      "nombre": "Organización del escenario",
+      "descripcion": "Organización hipotética: Oficialía de Partes y Control de Gestión de una Dirección General de Administración. Supuesto de 120 a 150 documentos por semana, el doble en temporadas altas (1c)."
     },
     {
       "id": "CTX-02",
@@ -29,84 +29,84 @@
     {
       "id": "CTX-04",
       "tipo": "Contexto",
-      "nombre": "Entrevista de requerimientos",
-      "descripcion": "Entrevista a la encargada de la Oficialía de Partes (43 preguntas). Las referencias como 4d remiten a sus respuestas."
+      "nombre": "Escenario hipotético de requerimientos",
+      "descripcion": "Entrevista simulada de 43 preguntas a una encargada de Oficialía de Partes ficticia. No corresponde a una persona ni a una organización reales: es un escenario verosímil del dominio y sus respuestas se tratan como supuestos explícitos. Las referencias como 4d remiten a ese escenario."
     },
     {
       "id": "P-01",
       "tipo": "Problema",
       "nombre": "No se sabe dónde está un documento ni quién debe atenderlo",
-      "descripcion": "Problema principal según la entrevistada (11a). De él se derivan atrasos, pérdidas y el 'a mí no me llegó'."
+      "descripcion": "Problema principal según el escenario hipotético (11a). De él se derivan atrasos, pérdidas y el 'a mí no me llegó'."
     },
     {
       "id": "H-01",
       "tipo": "Hallazgo",
       "nombre": "Registro disperso",
       "descripcion": "Excel compartido, libretas de entrega y controles propios por área. El sistema anterior se perdió en un cambio de administración (3b).",
-      "referencia_entrevista": "3b"
+      "referencia_escenario": "3b"
     },
     {
       "id": "H-02",
       "tipo": "Hallazgo",
       "nombre": "Turnos ambiguos",
       "descripcion": "El director turna a varias áreas con 'atender' y ninguna se asume responsable (4b).",
-      "referencia_entrevista": "4b"
+      "referencia_escenario": "4b"
     },
     {
       "id": "H-03",
       "tipo": "Hallazgo",
       "nombre": "Rebotes sin rastro",
       "descripcion": "Caso del arrendamiento: casi tres meses entre Materiales, Financieros y Jurídico; nadie pudo reconstruir el recorrido (4d).",
-      "referencia_entrevista": "4d"
+      "referencia_escenario": "4d"
     },
     {
       "id": "H-04",
       "tipo": "Hallazgo",
       "nombre": "Varios identificadores por documento",
       "descripcion": "Número del emisor, folio de recepción y a veces un tercer folio interno (2b, 2c).",
-      "referencia_entrevista": "2b, 2c"
+      "referencia_escenario": "2b, 2c"
     },
     {
       "id": "H-05",
       "tipo": "Hallazgo",
       "nombre": "Movimientos fuera del registro",
       "descripcion": "Entregas en mano, turnos directos entre áreas, fotos por WhatsApp y copias archivadas sin registro (3c).",
-      "referencia_entrevista": "3c"
+      "referencia_escenario": "3c"
     },
     {
       "id": "H-06",
       "tipo": "Hallazgo",
       "nombre": "Registros editables sin rastro",
       "descripcion": "En el Excel cualquiera modifica o borra filas sin dejar constancia (10c).",
-      "referencia_entrevista": "10c"
+      "referencia_escenario": "10c"
     },
     {
       "id": "H-07",
       "tipo": "Hallazgo",
       "nombre": "Información heterogénea por tipo",
       "descripcion": "Cada tipo de documento trae datos distintos: anexos, puntos de auditoría, solicitantes de transparencia (2a, 2e).",
-      "referencia_entrevista": "2a, 2e"
+      "referencia_escenario": "2a, 2e"
     },
     {
       "id": "H-08",
       "tipo": "Hallazgo",
       "nombre": "Memoria institucional frágil",
       "descripcion": "Los asuntos se ligan por la memoria de las personas y se pierden con los cambios de administración (5f, 11c).",
-      "referencia_entrevista": "5f, 11c"
+      "referencia_escenario": "5f, 11c"
     },
     {
       "id": "H-09",
       "tipo": "Hallazgo",
       "nombre": "Atención sin oficio",
       "descripcion": "Asuntos resueltos por teléfono o reunión quedan pendientes para siempre en el control (5d).",
-      "referencia_entrevista": "5d"
+      "referencia_escenario": "5d"
     },
     {
       "id": "H-10",
       "tipo": "Hallazgo",
       "nombre": "Respuestas integradas de varias áreas",
       "descripcion": "Los requerimientos de auditoría se contestan por partes y alguien integra una sola respuesta (5c).",
-      "referencia_entrevista": "5c"
+      "referencia_escenario": "5c"
     },
     {
       "id": "RF-01",
@@ -979,8 +979,8 @@
     {
       "id": "CTX-05",
       "tipo": "Contexto",
-      "nombre": "Entrevista complementaria",
-      "descripcion": "Seis preguntas de seguimiento a la encargada de la Oficialía de Partes. Las referencias como 2c-1 remiten a sus respuestas."
+      "nombre": "Escenario hipotético complementario",
+      "descripcion": "Seis preguntas de seguimiento dentro del mismo escenario simulado. Sus respuestas se tratan como supuestos; las referencias como 2c-1 remiten a ellas."
     },
     {
       "id": "CTX-06",
@@ -993,42 +993,42 @@
       "tipo": "Hallazgo",
       "nombre": "Documentos confidenciales y visibilidad entre áreas",
       "descripcion": "Personal, quejas y denuncias, jurídicos y algunos de auditoría solo los ven el jefe y quien atiende. De otras áreas basta saber estado y responsable (2c-3).",
-      "referencia_entrevista": "2c-3"
+      "referencia_escenario": "2c-3"
     },
     {
       "id": "H-12",
       "tipo": "Hallazgo",
       "nombre": "Registro doble por correo y papel",
       "descripcion": "El escaneado se registra al llegar por correo y el original otra vez en ventanilla; el sello del papel debería ser la fecha oficial. La numeración del emisor suele reiniciar cada año, con excepciones (2c-1).",
-      "referencia_entrevista": "2c-1"
+      "referencia_escenario": "2c-1"
     },
     {
       "id": "H-13",
       "tipo": "Hallazgo",
       "nombre": "Pendientes heredados y responsabilidad en el tiempo",
       "descripcion": "Al cambiar el titular, los pendientes se quedan sin dueño; para quejas importa quién era titular cuando se turnó, no quién lo es hoy (2c-2).",
-      "referencia_entrevista": "2c-2"
+      "referencia_escenario": "2c-2"
     },
     {
       "id": "H-14",
       "tipo": "Hallazgo",
       "nombre": "Asuntos ligados al responder, no al registrar",
       "descripcion": "Nadie decide formalmente qué documentos forman un asunto; lo hace quien atiende, casi siempre al contestar (2c-4).",
-      "referencia_entrevista": "2c-4"
+      "referencia_escenario": "2c-4"
     },
     {
       "id": "H-15",
       "tipo": "Hallazgo",
       "nombre": "Devoluciones legítimas frente a rebotes",
       "descripcion": "Devolución normal: motivo concreto y regresa a quien envió. Rebote: sin motivo, 'no es de nuestra competencia' sin redirigir o tres o más áreas (2c-5).",
-      "referencia_entrevista": "2c-5"
+      "referencia_escenario": "2c-5"
     },
     {
       "id": "H-16",
       "tipo": "Hallazgo",
       "nombre": "Citas a documentos no registrados y registros tardíos",
       "descripcion": "Es común citar oficios de otras instituciones, de administraciones anteriores o mal numerados; al localizarlos se registran tarde con la fecha de hoy (2c-6).",
-      "referencia_entrevista": "2c-6"
+      "referencia_escenario": "2c-6"
     },
     {
       "id": "K-DNR",
@@ -1217,7 +1217,7 @@
       "id": "HU-VIS",
       "tipo": "Hueco",
       "nombre": "Reglas de visibilidad sin validar por dirección y Jurídico",
-      "descripcion": "Se toma lo descrito por la entrevistada como supuesto declarado.",
+      "descripcion": "Se toma lo descrito en el escenario hipotético como supuesto declarado.",
       "estado": "aceptado"
     },
     {
@@ -2264,6 +2264,13 @@
       "nombre": "Pendientes calculados en cada consulta",
       "descripcion": "Sin tabla de estado; depende de un índice sobre la bitácora.",
       "estado": "aceptada"
+    },
+    {
+      "id": "D-65",
+      "tipo": "Decision",
+      "nombre": "La entrevista se trata como escenario hipotético",
+      "descripcion": "La entrevista de requerimientos fue simulada. Sus respuestas se presentan como supuestos explícitos de un escenario verosímil, no como hallazgos de una organización real, y así se declaran en los entregables.",
+      "estado": "tomada"
     }
   ],
   "relaciones": [
@@ -6906,6 +6913,26 @@
       "origen": "D-64",
       "relacion": "AFECTA",
       "destino": "E-3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-65"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "CTX-04"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "CTX-05"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "CTX-01"
     }
   ]
 }

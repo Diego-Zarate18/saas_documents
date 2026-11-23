@@ -1,24 +1,24 @@
 // Grafo de conocimiento de SIGEDOC. Ejecutar en una base de Neo4j dedicada.
-// Actualizado: 2026-11-21
+// Actualizado: 2026-11-22
 
 CREATE CONSTRAINT nodo_id IF NOT EXISTS FOR (n:Nodo) REQUIRE n.id IS UNIQUE;
 
 MERGE (n:Nodo:`Proyecto` {id: 'PRY'}) SET n += {nombre: 'SIGEDOC', descripcion: 'Sistema de Seguimiento de Documentos entre Departamentos. Proyecto final de bases de datos: una aplicación que integra una base relacional, una documental y una de grafos.'};
-MERGE (n:Nodo:`Contexto` {id: 'CTX-01'}) SET n += {nombre: 'Organización estudiada', descripcion: 'Oficialía de Partes y Control de Gestión de una Dirección General de Administración. 120 a 150 documentos por semana, el doble en temporadas altas (1c).'};
+MERGE (n:Nodo:`Contexto` {id: 'CTX-01'}) SET n += {nombre: 'Organización del escenario', descripcion: 'Organización hipotética: Oficialía de Partes y Control de Gestión de una Dirección General de Administración. Supuesto de 120 a 150 documentos por semana, el doble en temporadas altas (1c).'};
 MERGE (n:Nodo:`Contexto` {id: 'CTX-02'}) SET n += {nombre: 'Guía del proyecto final', descripcion: 'Universidad Politécnica de Chiapas: una sola aplicación con tres paradigmas justificados, integración por API, fuente de verdad definida y 8 entregables.'};
 MERGE (n:Nodo:`Contexto` {id: 'CTX-03'}) SET n += {nombre: 'Alcance de evaluación', descripcion: 'La aplicación se evalúa hasta que los datos se sirven, consultan, modifican y eliminan, junto con los servicios que eso requiere.'};
-MERGE (n:Nodo:`Contexto` {id: 'CTX-04'}) SET n += {nombre: 'Entrevista de requerimientos', descripcion: 'Entrevista a la encargada de la Oficialía de Partes (43 preguntas). Las referencias como 4d remiten a sus respuestas.'};
-MERGE (n:Nodo:`Problema` {id: 'P-01'}) SET n += {nombre: 'No se sabe dónde está un documento ni quién debe atenderlo', descripcion: 'Problema principal según la entrevistada (11a). De él se derivan atrasos, pérdidas y el \'a mí no me llegó\'.'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-01'}) SET n += {nombre: 'Registro disperso', descripcion: 'Excel compartido, libretas de entrega y controles propios por área. El sistema anterior se perdió en un cambio de administración (3b).', referencia_entrevista: '3b'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-02'}) SET n += {nombre: 'Turnos ambiguos', descripcion: 'El director turna a varias áreas con \'atender\' y ninguna se asume responsable (4b).', referencia_entrevista: '4b'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-03'}) SET n += {nombre: 'Rebotes sin rastro', descripcion: 'Caso del arrendamiento: casi tres meses entre Materiales, Financieros y Jurídico; nadie pudo reconstruir el recorrido (4d).', referencia_entrevista: '4d'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-04'}) SET n += {nombre: 'Varios identificadores por documento', descripcion: 'Número del emisor, folio de recepción y a veces un tercer folio interno (2b, 2c).', referencia_entrevista: '2b, 2c'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-05'}) SET n += {nombre: 'Movimientos fuera del registro', descripcion: 'Entregas en mano, turnos directos entre áreas, fotos por WhatsApp y copias archivadas sin registro (3c).', referencia_entrevista: '3c'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-06'}) SET n += {nombre: 'Registros editables sin rastro', descripcion: 'En el Excel cualquiera modifica o borra filas sin dejar constancia (10c).', referencia_entrevista: '10c'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-07'}) SET n += {nombre: 'Información heterogénea por tipo', descripcion: 'Cada tipo de documento trae datos distintos: anexos, puntos de auditoría, solicitantes de transparencia (2a, 2e).', referencia_entrevista: '2a, 2e'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-08'}) SET n += {nombre: 'Memoria institucional frágil', descripcion: 'Los asuntos se ligan por la memoria de las personas y se pierden con los cambios de administración (5f, 11c).', referencia_entrevista: '5f, 11c'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-09'}) SET n += {nombre: 'Atención sin oficio', descripcion: 'Asuntos resueltos por teléfono o reunión quedan pendientes para siempre en el control (5d).', referencia_entrevista: '5d'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-10'}) SET n += {nombre: 'Respuestas integradas de varias áreas', descripcion: 'Los requerimientos de auditoría se contestan por partes y alguien integra una sola respuesta (5c).', referencia_entrevista: '5c'};
+MERGE (n:Nodo:`Contexto` {id: 'CTX-04'}) SET n += {nombre: 'Escenario hipotético de requerimientos', descripcion: 'Entrevista simulada de 43 preguntas a una encargada de Oficialía de Partes ficticia. No corresponde a una persona ni a una organización reales: es un escenario verosímil del dominio y sus respuestas se tratan como supuestos explícitos. Las referencias como 4d remiten a ese escenario.'};
+MERGE (n:Nodo:`Problema` {id: 'P-01'}) SET n += {nombre: 'No se sabe dónde está un documento ni quién debe atenderlo', descripcion: 'Problema principal según el escenario hipotético (11a). De él se derivan atrasos, pérdidas y el \'a mí no me llegó\'.'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-01'}) SET n += {nombre: 'Registro disperso', descripcion: 'Excel compartido, libretas de entrega y controles propios por área. El sistema anterior se perdió en un cambio de administración (3b).', referencia_escenario: '3b'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-02'}) SET n += {nombre: 'Turnos ambiguos', descripcion: 'El director turna a varias áreas con \'atender\' y ninguna se asume responsable (4b).', referencia_escenario: '4b'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-03'}) SET n += {nombre: 'Rebotes sin rastro', descripcion: 'Caso del arrendamiento: casi tres meses entre Materiales, Financieros y Jurídico; nadie pudo reconstruir el recorrido (4d).', referencia_escenario: '4d'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-04'}) SET n += {nombre: 'Varios identificadores por documento', descripcion: 'Número del emisor, folio de recepción y a veces un tercer folio interno (2b, 2c).', referencia_escenario: '2b, 2c'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-05'}) SET n += {nombre: 'Movimientos fuera del registro', descripcion: 'Entregas en mano, turnos directos entre áreas, fotos por WhatsApp y copias archivadas sin registro (3c).', referencia_escenario: '3c'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-06'}) SET n += {nombre: 'Registros editables sin rastro', descripcion: 'En el Excel cualquiera modifica o borra filas sin dejar constancia (10c).', referencia_escenario: '10c'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-07'}) SET n += {nombre: 'Información heterogénea por tipo', descripcion: 'Cada tipo de documento trae datos distintos: anexos, puntos de auditoría, solicitantes de transparencia (2a, 2e).', referencia_escenario: '2a, 2e'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-08'}) SET n += {nombre: 'Memoria institucional frágil', descripcion: 'Los asuntos se ligan por la memoria de las personas y se pierden con los cambios de administración (5f, 11c).', referencia_escenario: '5f, 11c'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-09'}) SET n += {nombre: 'Atención sin oficio', descripcion: 'Asuntos resueltos por teléfono o reunión quedan pendientes para siempre en el control (5d).', referencia_escenario: '5d'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-10'}) SET n += {nombre: 'Respuestas integradas de varias áreas', descripcion: 'Los requerimientos de auditoría se contestan por partes y alguien integra una sola respuesta (5c).', referencia_escenario: '5c'};
 MERGE (n:Nodo:`Requerimiento` {id: 'RF-01'}) SET n += {nombre: 'Registrar documentos', descripcion: 'Registrar documentos.', estado: 'activo'};
 MERGE (n:Nodo:`Requerimiento` {id: 'RF-02'}) SET n += {nombre: 'Varios identificadores y detección de duplicados', descripcion: 'Número del emisor, folio de recepción y UUID; detección de duplicados por número, emisor y año de fecha_documento.', estado: 'activo'};
 MERGE (n:Nodo:`Requerimiento` {id: 'RF-03'}) SET n += {nombre: 'Turnos con rol: responsable, apoyo o conocimiento', descripcion: 'Turnos con rol: responsable, apoyo o conocimiento.', estado: 'activo'};
@@ -134,14 +134,14 @@ MERGE (n:Nodo:`Entregable` {id: 'E-5'}) SET n += {nombre: 'Catálogo de operacio
 MERGE (n:Nodo:`Entregable` {id: 'E-6'}) SET n += {nombre: 'Backend y API', descripcion: 'Entregable 6 de la guía.', estado: 'pendiente'};
 MERGE (n:Nodo:`Entregable` {id: 'E-7'}) SET n += {nombre: 'Aplicación e integración', descripcion: 'Entregable 7 de la guía.', estado: 'pendiente'};
 MERGE (n:Nodo:`Entregable` {id: 'E-8'}) SET n += {nombre: 'Pruebas, documentación y despliegue', descripcion: 'Entregable 8 de la guía.', estado: 'pendiente'};
-MERGE (n:Nodo:`Contexto` {id: 'CTX-05'}) SET n += {nombre: 'Entrevista complementaria', descripcion: 'Seis preguntas de seguimiento a la encargada de la Oficialía de Partes. Las referencias como 2c-1 remiten a sus respuestas.'};
+MERGE (n:Nodo:`Contexto` {id: 'CTX-05'}) SET n += {nombre: 'Escenario hipotético complementario', descripcion: 'Seis preguntas de seguimiento dentro del mismo escenario simulado. Sus respuestas se tratan como supuestos; las referencias como 2c-1 remiten a ellas.'};
 MERGE (n:Nodo:`Contexto` {id: 'CTX-06'}) SET n += {nombre: 'Retroalimentación del profesor', descripcion: 'Pidió casos de uso con sus flujos, distinguir qué consulta es de grafo y qué es de documento, y justificar PostgreSQL con volumen y frecuencia.'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-11'}) SET n += {nombre: 'Documentos confidenciales y visibilidad entre áreas', descripcion: 'Personal, quejas y denuncias, jurídicos y algunos de auditoría solo los ven el jefe y quien atiende. De otras áreas basta saber estado y responsable (2c-3).', referencia_entrevista: '2c-3'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-12'}) SET n += {nombre: 'Registro doble por correo y papel', descripcion: 'El escaneado se registra al llegar por correo y el original otra vez en ventanilla; el sello del papel debería ser la fecha oficial. La numeración del emisor suele reiniciar cada año, con excepciones (2c-1).', referencia_entrevista: '2c-1'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-13'}) SET n += {nombre: 'Pendientes heredados y responsabilidad en el tiempo', descripcion: 'Al cambiar el titular, los pendientes se quedan sin dueño; para quejas importa quién era titular cuando se turnó, no quién lo es hoy (2c-2).', referencia_entrevista: '2c-2'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-14'}) SET n += {nombre: 'Asuntos ligados al responder, no al registrar', descripcion: 'Nadie decide formalmente qué documentos forman un asunto; lo hace quien atiende, casi siempre al contestar (2c-4).', referencia_entrevista: '2c-4'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-15'}) SET n += {nombre: 'Devoluciones legítimas frente a rebotes', descripcion: 'Devolución normal: motivo concreto y regresa a quien envió. Rebote: sin motivo, \'no es de nuestra competencia\' sin redirigir o tres o más áreas (2c-5).', referencia_entrevista: '2c-5'};
-MERGE (n:Nodo:`Hallazgo` {id: 'H-16'}) SET n += {nombre: 'Citas a documentos no registrados y registros tardíos', descripcion: 'Es común citar oficios de otras instituciones, de administraciones anteriores o mal numerados; al localizarlos se registran tarde con la fecha de hoy (2c-6).', referencia_entrevista: '2c-6'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-11'}) SET n += {nombre: 'Documentos confidenciales y visibilidad entre áreas', descripcion: 'Personal, quejas y denuncias, jurídicos y algunos de auditoría solo los ven el jefe y quien atiende. De otras áreas basta saber estado y responsable (2c-3).', referencia_escenario: '2c-3'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-12'}) SET n += {nombre: 'Registro doble por correo y papel', descripcion: 'El escaneado se registra al llegar por correo y el original otra vez en ventanilla; el sello del papel debería ser la fecha oficial. La numeración del emisor suele reiniciar cada año, con excepciones (2c-1).', referencia_escenario: '2c-1'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-13'}) SET n += {nombre: 'Pendientes heredados y responsabilidad en el tiempo', descripcion: 'Al cambiar el titular, los pendientes se quedan sin dueño; para quejas importa quién era titular cuando se turnó, no quién lo es hoy (2c-2).', referencia_escenario: '2c-2'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-14'}) SET n += {nombre: 'Asuntos ligados al responder, no al registrar', descripcion: 'Nadie decide formalmente qué documentos forman un asunto; lo hace quien atiende, casi siempre al contestar (2c-4).', referencia_escenario: '2c-4'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-15'}) SET n += {nombre: 'Devoluciones legítimas frente a rebotes', descripcion: 'Devolución normal: motivo concreto y regresa a quien envió. Rebote: sin motivo, \'no es de nuestra competencia\' sin redirigir o tres o más áreas (2c-5).', referencia_escenario: '2c-5'};
+MERGE (n:Nodo:`Hallazgo` {id: 'H-16'}) SET n += {nombre: 'Citas a documentos no registrados y registros tardíos', descripcion: 'Es común citar oficios de otras instituciones, de administraciones anteriores o mal numerados; al localizarlos se registran tarde con la fecha de hoy (2c-6).', referencia_escenario: '2c-6'};
 MERGE (n:Nodo:`Concepto` {id: 'K-DNR'}) SET n += {nombre: 'Documento no registrado', descripcion: 'Documento citado que no está en el sistema: número y emisor en texto. Solo existe en Neo4j.'};
 MERGE (n:Nodo:`Operacion` {id: 'O-08'}) SET n += {nombre: 'Asignar documento a un asunto', descripcion: 'En cualquier momento, no en ventanilla (D-30); un documento puede pertenecer a varios asuntos', seccion: 'Relaciones y asuntos', roles: 'TI, PE', recibe: 'Id del documento e id del asunto', devuelve: 'Pertenencia creada', reglas: 'En cualquier momento, no en ventanilla (D-30); un documento puede pertenecer a varios asuntos', tipo_operacion: 'E', bases: 'NJ', frecuencia: 'Media', nucleo: true};
 MERGE (n:Nodo:`Regla` {id: 'RI-06'}) SET n += {nombre: 'Todo documento tiene emisor', descripcion: 'Un área emisora o un actor externo. Redacción reconstruida desde HU-EMI; confirmar contra E-2.', imposicion: 'PostgreSQL'};
@@ -167,7 +167,7 @@ MERGE (n:Nodo:`Hueco` {id: 'HU-C5'}) SET n += {nombre: 'Registro extemporáneo y
 MERGE (n:Nodo:`Hueco` {id: 'HU-MG1'}) SET n += {nombre: 'Tipo en MongoDB contradictorio', descripcion: 'MongoDB guarda id y tipo; el tipo es inmutable y se reconcilia.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-NJ1'}) SET n += {nombre: 'Asunto y referencias sin respaldo', descripcion: 'Unicidad, réplica que no borra y respaldo periódico.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PG'}) SET n += {nombre: 'Justificación de PostgreSQL por volumen', descripcion: 'Se justifica por garantías transaccionales, no por escala.', estado: 'resuelto'};
-MERGE (n:Nodo:`Hueco` {id: 'HU-VIS'}) SET n += {nombre: 'Reglas de visibilidad sin validar por dirección y Jurídico', descripcion: 'Se toma lo descrito por la entrevistada como supuesto declarado.', estado: 'aceptado'};
+MERGE (n:Nodo:`Hueco` {id: 'HU-VIS'}) SET n += {nombre: 'Reglas de visibilidad sin validar por dirección y Jurídico', descripcion: 'Se toma lo descrito en el escenario hipotético como supuesto declarado.', estado: 'aceptado'};
 MERGE (n:Nodo:`Alcance` {id: 'AL-01'}) SET n += {nombre: 'Fuera de alcance y limitaciones declaradas', descripcion: 'Plazos y días hábiles; historial de titulares, adscripciones y reestructuraciones; sugerencia automática de asuntos; extracción automática de referencias; archivos binarios de anexos; permisos configurables por persona. El sistema refleja registros, no la realidad.'};
 MERGE (n:Nodo:`DeudaTecnica` {id: 'DT-12'}) SET n += {nombre: 'Asunto y referencias sin réplica', descripcion: 'Solo viven en Neo4j; mitigada con unicidad, réplica que no borra y respaldo.', estado: 'parchada'};
 MERGE (n:Nodo:`DeudaTecnica` {id: 'DT-13'}) SET n += {nombre: 'Visibilidad solo en el servicio', descripcion: 'Ningún motor impone la visibilidad; un error en una consulta expone datos.', estado: 'aceptada'};
@@ -277,6 +277,7 @@ MERGE (n:Nodo:`Hueco` {id: 'HU-ASU2'}) SET n += {nombre: 'Documento en varios as
 MERGE (n:Nodo:`Hueco` {id: 'HU-EVI'}) SET n += {nombre: 'Borrar la evidencia de una conclusión', descripcion: 'La nota evidencia_atencion no se elimina con O-17.', estado: 'resuelto'};
 MERGE (n:Nodo:`DeudaTecnica` {id: 'DT-18'}) SET n += {nombre: 'Un solo proceso de outbox', descripcion: 'Limita el ritmo de réplica; suficiente para el volumen de la oficialía.', estado: 'aceptada'};
 MERGE (n:Nodo:`DeudaTecnica` {id: 'DT-19'}) SET n += {nombre: 'Pendientes calculados en cada consulta', descripcion: 'Sin tabla de estado; depende de un índice sobre la bitácora.', estado: 'aceptada'};
+MERGE (n:Nodo:`Decision` {id: 'D-65'}) SET n += {nombre: 'La entrevista se trata como escenario hipotético', descripcion: 'La entrevista de requerimientos fue simulada. Sus respuestas se presentan como supuestos explícitos de un escenario verosímil, no como hallazgos de una organización real, y así se declaran en los entregables.', estado: 'tomada'};
 
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-01'}) MERGE (a)-[:`SE_BASA_EN`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-02'}) MERGE (a)-[:`SE_RIGE_POR`]->(b);
@@ -1206,6 +1207,10 @@ MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-64'}) MERGE (a)-[:`TOMA`]->(b);
 MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'D-38'}) MERGE (a)-[:`DERIVA_DE`]->(b);
 MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-64'}), (b:Nodo {id: 'E-3'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-65'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'CTX-04'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'CTX-05'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-65'}), (b:Nodo {id: 'CTX-01'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 
@@ -1214,11 +1219,11 @@ MATCH (h:Hueco) WHERE h.estado IN ['abierto', 'parcial']
 OPTIONAL MATCH (h)-[:AFECTA|BLOQUEA]->(e:Entregable)
 RETURN h.id, h.nombre, h.estado, collect(e.id) AS entregables;
 
-// Rastrear una decisión hasta la entrevista: hallazgo que la justifica o que origina lo que afecta
+// Rastrear una decisión hasta el escenario hipotético: hallazgo que la justifica o que origina lo que afecta
 MATCH (d:Decision {id: 'D-29'})
 OPTIONAL MATCH (h:Hallazgo)-[:JUSTIFICA]->(d)
 OPTIONAL MATCH (d)-[:AFECTA]->(:Requerimiento)<-[:ORIGINA]-(h2:Hallazgo)
-RETURN d.nombre, collect(DISTINCT h.referencia_entrevista) + collect(DISTINCT h2.referencia_entrevista) AS referencias;
+RETURN d.nombre, collect(DISTINCT h.referencia_escenario) + collect(DISTINCT h2.referencia_escenario) AS referencias;
 
 // Deudas con la decisión que las genera y la que las mitiga
 MATCH (g:Decision)-[:GENERA]->(t:DeudaTecnica)

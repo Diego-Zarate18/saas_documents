@@ -1,8 +1,8 @@
 # Grafo de conocimiento del proyecto SIGEDOC
 
-Actualizado: 2026-11-21
+Actualizado: 2026-11-22
 
-Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta las entrevistas, la guía del proyecto o la retroalimentación del profesor.
+Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta el escenario hipotético de requerimientos, la guía del proyecto o la retroalimentación del profesor.
 
 ## Archivos
 
@@ -16,14 +16,14 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 274 nodos y 928 relaciones
+## Contenido: 275 nodos y 932 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
 | Proyecto | 1 | El sistema SIGEDOC |
-| Contexto | 6 | Organización, guía, alcance de evaluación, entrevistas y retroalimentación del profesor |
+| Contexto | 6 | Organización, guía, alcance de evaluación, escenario hipotético de requerimientos y retroalimentación del profesor |
 | Problema | 1 | El problema central |
-| Hallazgo | 16 | Problemas concretos detectados en las entrevistas |
+| Hallazgo | 16 | Problemas concretos del escenario hipotético (supuestos) |
 | Requerimiento | 16 | Requerimientos funcionales (activos y retirados) |
 | Rol | 5 | Roles de usuario y qué operaciones ejecutan |
 | Consulta | 5 | Consultas principales C1 a C5 |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 64 | Decisiones de diseño tomadas |
+| Decision | 65 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -60,7 +60,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | HU-C4 | Plazos en días hábiles | D-06 | Fuera de alcance. |
 | HU-E2 | Referencias capturadas a mano | AL-01 | No hay extracción automática; referencias_citadas es solo informativo. |
 | HU-G1 | El sistema refleja registros, no la realidad | AL-01 | Limitación declarada: movimientos no capturados no existen para el sistema. |
-| HU-VIS | Reglas de visibilidad sin validar por dirección y Jurídico | AL-01 | Se toma lo descrito por la entrevistada como supuesto declarado. |
+| HU-VIS | Reglas de visibilidad sin validar por dirección y Jurídico | AL-01 | Se toma lo descrito en el escenario hipotético como supuesto declarado. |
 
 ## Deudas técnicas
 
@@ -254,6 +254,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-62 | Vistas por rol: bandeja diferenciada y asuntos para Dirección | — | Bandeja con dos variantes propias, titular y personal del área, ambas con la tarjeta de acuses (D-58) porque el personal también concluye si su área es responsable (D-44); la diferencia está en la ficha, donde el personal no ve Devolver, Turnar ni Atraer. La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, solo de consulta: sin asignar documentos ni crear asuntos. |
 | D-63 | Interfaz primero con datos simulados | — | Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36). |
 | D-64 | Sistema visual del frontend desde el Figma | — | Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado. |
+| D-65 | La entrevista se trata como escenario hipotético | — | La entrevista de requerimientos fue simulada. Sus respuestas se presentan como supuestos explícitos de un escenario verosímil, no como hallazgos de una organización real, y así se declaran en los entregables. |
 
 ## Tipos de relación
 
@@ -261,7 +262,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 123 |
+| AFECTA | 126 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
@@ -303,7 +304,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 64 |
+| TOMA | 65 |
 | UNE | 2 |
 | USA | 64 |
 

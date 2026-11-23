@@ -1,0 +1,162 @@
+/* V-04, V-04b y V-04e Ficha del documento (Figma 37:231, 45:537, 65:2638). */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+}
+
+.migas a {
+  color: inherit;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-10);
+  margin-top: var(--espacio-2);
+  font: var(--cuerpo-s);
+}
+
+.meta svg {
+  flex: none;
+  color: var(--texto-secundario);
+}
+
+.secundario {
+  color: var(--texto-secundario);
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: var(--espacio-20);
+  align-items: start;
+}
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+}
+
+/* Tarjetas de la ficha: relleno de 24 px y cabecera con el origen de los datos. */
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+  padding: var(--espacio-24);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+}
+
+.cabecera h2 {
+  flex: 1;
+  font: var(--titulo-m);
+  letter-spacing: var(--titulo-m-espaciado);
+}
+
+.origen {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  color: var(--texto-secundario);
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(var(--columnas, 3), minmax(0, 1fr));
+  gap: var(--espacio-16) var(--espacio-20);
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.dato dt {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.dato dd {
+  font: var(--cuerpo-s);
+}
+
+.dato .folio {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.ancho {
+  grid-column: 1 / -1;
+}
+
+.subseccion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding-top: var(--espacio-4);
+}
+
+.subseccion svg {
+  flex: none;
+}
+
+.subseccion h3 {
+  flex: 1;
+  font: var(--titulo-s);
+  letter-spacing: var(--titulo-s-espaciado);
+}
+
+.elementos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+}
+
+.anexo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-10) var(--espacio-12);
+  border-radius: var(--radio-aviso);
+  background: var(--fondo-base);
+  font: var(--pie);
+}
+
+.anexo span:first-child {
+  font-weight: 500;
+}
+
+.nota {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-12);
+  border-radius: var(--radio-aviso);
+  background: color-mix(in srgb, var(--fondo-detalle-suave) 50%, transparent);
+  font: var(--cuerpo-s);
+}
+
+.nota span:first-child {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.vacio {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+/* Legibilidad a 1024 px (arquitectura, sección 8): recorrido y relaciones bajan bajo el expediente. */
+@media (max-width: 1279px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

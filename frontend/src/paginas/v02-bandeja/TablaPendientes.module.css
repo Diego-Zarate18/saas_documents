@@ -1,0 +1,119 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  padding: var(--espacio-14) var(--espacio-20);
+}
+
+.titulo {
+  flex: 1;
+  font: var(--titulo-m);
+  letter-spacing: var(--titulo-m-espaciado);
+}
+
+.folio {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+  text-decoration: none;
+}
+
+.folio:hover {
+  text-decoration: underline;
+}
+
+.documento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  min-width: 0;
+}
+
+.lineaTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  min-width: 0;
+}
+
+.asunto {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: var(--etiqueta-m);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asunto:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  overflow: hidden;
+  font: var(--pie);
+  color: var(--texto-secundario);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movimiento {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-6);
+  overflow: hidden;
+  font: var(--pie);
+  color: var(--texto-secundario);
+  white-space: nowrap;
+}
+
+.movimiento svg {
+  flex: none;
+}
+
+.dato {
+  font: var(--mono-dato);
+}
+
+.titular {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  font: var(--pie);
+}
+
+.sinTitular {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.noAdscrito {
+  color: var(--estado-posible-duplicado);
+}
+
+/* Fila elegida para la vista previa del recorrido (no la dibuja el Figma). */
+.elegida td {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 60%, transparent);
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-10) var(--espacio-20);
+  border-top: 1px solid var(--borde-tabla);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.pie p {
+  flex: 1;
+}

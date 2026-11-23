@@ -1,0 +1,24 @@
+/* Rol de turno (Figma 31:151). */
+.rol {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espacio-3) var(--espacio-8);
+  border-radius: var(--radio-rol);
+  font: var(--etiqueta-s);
+  white-space: nowrap;
+}
+
+.responsable {
+  background: var(--fondo-marca);
+  color: var(--texto-sobre-marca);
+}
+
+.apoyo {
+  background: var(--fondo-marca-suave);
+  color: var(--texto-marca);
+}
+
+.conocimiento {
+  border: 1px solid var(--borde-sutil);
+  color: var(--texto-secundario);
+}

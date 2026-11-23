@@ -1,0 +1,63 @@
+/* V-05 Turnar (Figma 39:320): una fila por área destino. */
+.columnas {
+  display: grid;
+  grid-template-columns: 190px 290px minmax(0, 1fr) 16px;
+  gap: var(--espacio-12);
+  padding-inline: calc(var(--espacio-10) + 1px);
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.filas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-18);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 190px 290px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: var(--espacio-12);
+  padding: var(--espacio-10);
+  border: 1px solid var(--borde-tabla);
+  border-radius: var(--radio-fila);
+  background: color-mix(in srgb, var(--fondo-superficie) 85%, transparent);
+}
+
+.instruccion {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--espacio-9) var(--espacio-12);
+  border: 0;
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+  font: var(--cuerpo-s);
+  resize: none;
+  field-sizing: content;
+}
+
+.instruccion:focus-visible {
+  box-shadow: var(--hundida-sombra), var(--foco-anillo);
+}
+
+.quitar {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-indicador);
+  background: transparent;
+  color: var(--texto-secundario);
+}
+
+.quitar:hover {
+  color: var(--texto-principal);
+}
+
+.agregar {
+  align-self: flex-start;
+}

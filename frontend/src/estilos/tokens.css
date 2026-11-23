@@ -1,0 +1,151 @@
+/*
+ * Tokens del sistema visual «Señal Guinda» (D-64), tomados del Figma «SIGEDOC»
+ * (archivo 9yljMLMqWHlIHQqRCsXEjV, páginas «01 · Identidad» y «02 · Sistema»).
+ * Los nombres son los de las variables del Figma en kebab-case.
+ * Es el único archivo donde se escriben colores; todo lo demás usa var(--…).
+ */
+
+:root {
+  /* ── Fondo ───────────────────────────────────────────────── */
+  --fondo-marca: #6d1f33;
+  --fondo-marca-profundo: #4a1422;
+  --fondo-marca-suave: #f6ecee;
+  --fondo-detalle: #b8925a;
+  --fondo-detalle-suave: #efe3cf;
+  --fondo-base: #f2efea;
+  --fondo-relieve: #f5f2ed;
+  --fondo-hundido: #eae5df;
+  --fondo-superficie: #ffffff;
+
+  /* ── Texto ───────────────────────────────────────────────── */
+  --texto-principal: #1f1b1c;
+  --texto-secundario: #6b6461;
+  --texto-marca: #6d1f33;
+  --texto-sobre-marca: #ffffff;
+  --texto-sobre-detalle: #1f1b1c;
+
+  /* ── Borde ───────────────────────────────────────────────── */
+  --borde-marca: #6d1f33;
+  --borde-sutil: #d6cec6;
+
+  /* ── Estados del documento y marcas ──────────────────────── */
+  --estado-en-tramite: #1f5a8a;
+  --estado-concluido: #2e6b4a;
+  --estado-cancelado: #6b6461;
+  --estado-sin-efecto: #5b4b8a;
+  --estado-posible-duplicado: #9a5b00;
+  --estado-rebote: #c2410c;
+  --estado-confidencial: #6d1f33;
+  --estado-error: #b42318;
+
+  /* Color de las sombras de los efectos del Figma (#17141F). */
+  --sombra: #17141f;
+
+  /* ── Tipografía ──────────────────────────────────────────── */
+  --fuente-display: 'Unbounded Variable', 'Unbounded', sans-serif;
+  --fuente-texto: 'Geist Variable', 'Geist', system-ui, sans-serif;
+  --fuente-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
+
+  /* Estilos de texto: tamaño, peso, interlineado y espaciado (el Figma da el espaciado en %). */
+  --display-l: 600 32px / normal var(--fuente-display);
+  --display-l-espaciado: -0.02em;
+  --titulo-l: 600 22px / normal var(--fuente-display);
+  --titulo-l-espaciado: -0.01em;
+  --titulo-m: 600 17px / normal var(--fuente-display);
+  --titulo-m-espaciado: -0.01em;
+  --titulo-s: 600 14px / normal var(--fuente-display);
+  --titulo-s-espaciado: -0.005em;
+  --cuerpo-m: 400 14px / 1.5 var(--fuente-texto);
+  --cuerpo-s: 400 13px / 1.45 var(--fuente-texto);
+  --etiqueta-m: 500 14px / normal var(--fuente-texto);
+  --etiqueta-s: 500 12px / normal var(--fuente-texto);
+  --pie: 400 12px / normal var(--fuente-texto);
+  --mono-folio: 500 12px / normal var(--fuente-mono);
+  --mono-folio-espaciado: 0.02em;
+  --mono-dato: 400 12px / normal var(--fuente-mono);
+  --mono-encabezado: 400 11px / normal var(--fuente-mono);
+  --mono-encabezado-espaciado: 0.06em;
+
+  /* ── Efectos (Estilos locales → Efectos del Figma) ───────── */
+  /* El desenfoque del Figma es el doble del de CSS: radio 28 = blur(14px). */
+  --vidrio-fondo: rgba(255, 255, 255, 0.55);
+  --vidrio-fondo-modal: rgba(255, 255, 255, 0.9);
+  --vidrio-borde: rgba(255, 255, 255, 0.85);
+  --vidrio-desenfoque: blur(14px);
+  --vidrio-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 12px 32px -8px rgba(23, 20, 31, 0.08);
+
+  --vidrio-oscuro-fondo: rgba(74, 20, 34, 0.94);
+  --vidrio-oscuro-desenfoque: blur(16px);
+  --vidrio-oscuro-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+
+  --relieve-sombra: 6px 6px 18px rgba(23, 20, 31, 0.1), -6px -6px 16px rgba(255, 255, 255, 0.9);
+  --hundida-sombra: inset 2px 2px 6px rgba(23, 20, 31, 0.09), inset -2px -2px 6px rgba(255, 255, 255, 0.9);
+  --solida-sombra: 0 2px 8px rgba(23, 20, 31, 0.05);
+
+  /* Indicador destacado (degradado guinda) y segmento elegido. */
+  --destacado-fondo: linear-gradient(90deg, var(--fondo-marca), var(--fondo-marca-profundo));
+  --destacado-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 24px -6px rgba(109, 31, 51, 0.3);
+  --segmento-sombra: 0 1px 3px rgba(26, 13, 20, 0.1);
+
+  /* Velo de los modales. */
+  --velo-fondo: rgba(74, 20, 34, 0.45);
+  --velo-desenfoque: blur(3px);
+
+  /* Superficies semitransparentes sobre la barra lateral. */
+  --sobre-marca-activo: rgba(255, 255, 255, 0.12);
+  --sobre-marca-tarjeta: rgba(255, 255, 255, 0.06);
+  --sobre-marca-borde: rgba(255, 255, 255, 0.12);
+  --sobre-marca-tenue: rgba(255, 255, 255, 0.55);
+  --sobre-marca-secundario: rgba(255, 255, 255, 0.6);
+
+  /* Brillos difusos del fondo (círculos con desenfoque de 80 px). */
+  --brillo-marca: rgba(109, 31, 51, 0.13);
+  --brillo-marca-tenue: rgba(109, 31, 51, 0.09);
+  --brillo-detalle: rgba(184, 146, 90, 0.26);
+  --brillo-desenfoque: blur(80px);
+  /* V-01 usa los mismos brillos un poco más intensos. */
+  --brillo-acceso-marca: rgba(109, 31, 51, 0.16);
+  --brillo-acceso-marca-tenue: rgba(109, 31, 51, 0.1);
+  --brillo-acceso-detalle: rgba(184, 146, 90, 0.3);
+
+  /* Tintes de 12 %, 10 % y 30 % que el Figma aplica sobre los colores de estado. */
+  --tinte-estado: 12%;
+  --tinte-aviso: 10%;
+  --tinte-borde-aviso: 30%;
+  --borde-tabla: color-mix(in srgb, var(--borde-sutil) 70%, transparent);
+  --borde-tarjeta: color-mix(in srgb, var(--borde-sutil) 60%, transparent);
+  --fondo-encabezado-tabla: color-mix(in srgb, var(--fondo-base) 60%, transparent);
+
+  /* ── Radios ──────────────────────────────────────────────── */
+  --radio-indicador: 2px;
+  --radio-rol: 6px;
+  --radio-segmento: 8px;
+  --radio-control: 10px;
+  --radio-aviso: 12px;
+  --radio-fila: 14px;
+  --radio-tarjeta: 20px;
+  --radio-modal: 24px;
+  --radio-pildora: 999px;
+
+  /* ── Espaciados (los valores que usa el Figma) ───────────── */
+  --espacio-2: 2px;
+  --espacio-3: 3px;
+  --espacio-4: 4px;
+  --espacio-6: 6px;
+  --espacio-8: 8px;
+  --espacio-9: 9px;
+  --espacio-10: 10px;
+  --espacio-12: 12px;
+  --espacio-14: 14px;
+  --espacio-16: 16px;
+  --espacio-18: 18px;
+  --espacio-20: 20px;
+  --espacio-24: 24px;
+  --espacio-32: 32px;
+  --espacio-40: 40px;
+  --espacio-96: 96px;
+
+  /* ── Foco (no lo dibuja el Figma; anillo guinda) ─────────── */
+  --foco-anillo: 0 0 0 2px var(--fondo-superficie), 0 0 0 4px var(--borde-marca);
+  --foco-anillo-sobre-marca: 0 0 0 2px var(--fondo-detalle);
+}

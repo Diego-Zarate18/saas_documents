@@ -1,0 +1,60 @@
+/* Campo (Figma 31:172): superficie hundida. Estados normal, foco, error y deshabilitado. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiqueta {
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.caja {
+  width: 100%;
+  padding: var(--espacio-10) var(--espacio-12);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+  font: var(--cuerpo-m);
+  color: var(--texto-principal);
+}
+
+textarea.caja {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.caja::placeholder {
+  color: var(--texto-secundario);
+}
+
+/* Foco: borde guinda de 1.5 px, como la variante Foco. */
+.caja:focus-visible {
+  outline: none;
+  border-color: var(--borde-marca);
+  box-shadow:
+    var(--hundida-sombra),
+    0 0 0 0.5px var(--borde-marca);
+}
+
+.caja[aria-invalid='true'] {
+  border-color: var(--estado-error);
+}
+
+.caja:disabled {
+  background: var(--fondo-hundido);
+  color: var(--texto-secundario);
+  cursor: not-allowed;
+}
+
+.ayuda {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.error {
+  font: var(--pie);
+  color: var(--estado-error);
+}

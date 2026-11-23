@@ -1,0 +1,64 @@
+/* Botón (Figma 31:119). Hover y deshabilitado no los dibuja el Figma: se derivan de los tokens. */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-10) var(--espacio-16);
+  border: 0;
+  border-radius: var(--radio-control);
+  background: transparent;
+  font: var(--etiqueta-m);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.boton:disabled,
+.boton[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.primario {
+  background: var(--fondo-marca);
+  color: var(--texto-sobre-marca);
+}
+
+.primario:not(:disabled):hover {
+  background: var(--fondo-marca-profundo);
+}
+
+.secundario {
+  background: var(--fondo-superficie);
+  border: 1px solid var(--borde-marca);
+  color: var(--texto-marca);
+}
+
+.secundario:not(:disabled):hover {
+  background: var(--fondo-marca-suave);
+}
+
+.fantasma {
+  color: var(--texto-principal);
+}
+
+.fantasma:not(:disabled):hover {
+  background: color-mix(in srgb, var(--fondo-hundido) 70%, transparent);
+}
+
+.peligro {
+  background: var(--estado-error);
+  color: var(--texto-sobre-marca);
+}
+
+.peligro:not(:disabled):hover {
+  background: color-mix(in srgb, var(--estado-error) 85%, var(--texto-principal));
+}
+
+.ancho {
+  width: 100%;
+}
+
+.icono {
+  flex: none;
+}

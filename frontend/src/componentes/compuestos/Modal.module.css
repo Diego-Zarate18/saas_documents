@@ -1,0 +1,83 @@
+/* Modal con velo (V-05): velo guinda profundo al 45 % y panel de vidrio casi opaco. */
+.velo {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--velo-fondo);
+  backdrop-filter: var(--velo-desenfoque);
+}
+
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-18);
+  width: min(var(--ancho, 780px), calc(100vw - 2 * var(--espacio-32)));
+  max-height: calc(100vh - 2 * var(--espacio-32));
+  padding: var(--espacio-32);
+  overflow-y: auto;
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-modal);
+  background: var(--vidrio-fondo-modal);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+  transform: translate(-50%, -50%);
+}
+
+.panel:focus-visible {
+  box-shadow: var(--vidrio-sombra), var(--foco-anillo);
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-12);
+}
+
+.textos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  min-width: 0;
+}
+
+.folio {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.titulo {
+  font: var(--titulo-l);
+  letter-spacing: var(--titulo-l-espaciado);
+}
+
+.descripcion {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.cerrar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-segmento);
+  background: transparent;
+  color: var(--texto-secundario);
+}
+
+.cerrar:hover {
+  color: var(--texto-principal);
+}
+
+.pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-10);
+}

@@ -1,0 +1,11 @@
+/* Chip de asunto (V-04 «Relaciones y asuntos»). */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espacio-6) var(--espacio-12);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-marca-suave);
+  color: var(--texto-marca);
+  font: var(--etiqueta-s);
+  white-space: nowrap;
+}

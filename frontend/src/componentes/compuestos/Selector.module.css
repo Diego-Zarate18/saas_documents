@@ -1,0 +1,117 @@
+/* Selector: «Área:» (V-02, hundido), filtros «Tipo:» y «Antigüedad:» (V-02, píldora) y área destino (V-05, fila).
+   La lista desplegada no la dibuja el Figma: usa la superficie de vidrio de los menús. */
+.disparador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  border: 0;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--texto-principal);
+}
+
+.hundido {
+  padding: var(--espacio-10) var(--espacio-14);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+}
+
+.hundido .prefijo {
+  font: var(--cuerpo-s);
+}
+
+.hundido .valor {
+  font: var(--etiqueta-m);
+}
+
+.pildora {
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-12);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-pildora);
+  background: transparent;
+}
+
+.pildora .prefijo {
+  font: var(--pie);
+}
+
+.pildora .valor {
+  font: var(--etiqueta-s);
+}
+
+.fila {
+  width: 190px;
+  padding: var(--espacio-9) var(--espacio-12);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+}
+
+.fila .valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--etiqueta-s);
+}
+
+.prefijo {
+  color: var(--texto-secundario);
+}
+
+.marcador {
+  color: var(--texto-secundario);
+}
+
+.disparador[data-placeholder] .valor {
+  color: var(--texto-secundario);
+}
+
+.disparador:focus-visible {
+  box-shadow: var(--foco-anillo);
+}
+
+.flecha {
+  flex: none;
+  color: var(--texto-secundario);
+}
+
+.lista {
+  z-index: 20;
+  min-width: var(--radix-select-trigger-width);
+  max-height: var(--radix-select-content-available-height);
+  padding: var(--espacio-4);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-aviso);
+  background: var(--vidrio-fondo-modal);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-8) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  cursor: pointer;
+  outline: none;
+}
+
+.opcion[data-highlighted] {
+  background: var(--fondo-marca-suave);
+}
+
+.opcion[data-state='checked'] {
+  font-weight: 500;
+  color: var(--texto-marca);
+}
+
+.marca {
+  margin-left: auto;
+  color: var(--texto-marca);
+}

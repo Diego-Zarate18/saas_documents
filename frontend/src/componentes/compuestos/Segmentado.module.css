@@ -1,0 +1,47 @@
+/* Segmentado del rol en V-05: canal hundido con el segmento elegido en relieve. */
+.grupo {
+  display: inline-flex;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3);
+  margin: 0;
+  border: 0;
+  border-radius: var(--radio-control);
+  background: var(--fondo-hundido);
+  box-shadow: var(--hundida-sombra);
+}
+
+.segmento {
+  position: relative;
+  padding: var(--espacio-6) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  font: var(--pie);
+  color: var(--texto-secundario);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.segmento:hover {
+  color: var(--texto-principal);
+}
+
+.segmento:has(input:checked) {
+  background: var(--fondo-superficie);
+  box-shadow: var(--segmento-sombra);
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.segmento.marca:has(input:checked) {
+  background: var(--fondo-marca);
+  color: var(--texto-sobre-marca);
+}
+
+.segmento:has(input:focus-visible) {
+  box-shadow: var(--foco-anillo);
+}
+
+.segmento input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}

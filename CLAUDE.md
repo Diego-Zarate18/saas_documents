@@ -17,7 +17,19 @@ Sistema de Seguimiento de Documentos entre Departamentos. Proyecto final de base
 
 ## Comandos
 
-Los define T-01 y se mantienen aquí. Hasta entonces, no existen.
+Interfaz, desde `frontend/` (Node 24 LTS, npm):
+
+```powershell
+npm ci              # instala las dependencias exactas de package-lock.json
+npm run dev         # servidor de desarrollo en http://localhost:5173 (modo simulado)
+npm run lint        # oxlint con reglas de React, hooks y jsx-a11y; falla ante cualquier aviso
+npm run typecheck   # tsc -b, TypeScript estricto
+npm test            # Vitest y Testing Library (vitest run)
+npm run build       # tsc -b y vite build a frontend/dist/
+npm run preview     # sirve la versión compilada
+```
+
+Backend y bases: los define T-03.
 
 ## Recordatorios que no se negocian
 

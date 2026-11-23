@@ -1,0 +1,47 @@
+/* Paso del recorrido (V-02 vista previa y V-04): punto guinda con línea al siguiente paso;
+   la ubicación actual lleva punto arena con borde guinda. */
+.paso {
+  display: flex;
+  gap: var(--paso-separacion, var(--espacio-12));
+}
+
+.marcador {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-4);
+  width: 12px;
+}
+
+.marcador::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-marca);
+}
+
+.marcador::after {
+  content: '';
+  flex: 1;
+  width: 2px;
+  background: color-mix(in srgb, var(--fondo-marca) 40%, transparent);
+}
+
+.actual .marcador::before {
+  border: 2px solid var(--borde-marca);
+  background: var(--fondo-detalle);
+}
+
+.actual .marcador::after {
+  display: none;
+}
+
+.contenido {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding-bottom: var(--paso-pie, var(--espacio-12));
+}

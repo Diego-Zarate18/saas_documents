@@ -2115,7 +2115,7 @@
       "id": "D-58",
       "tipo": "Decision",
       "nombre": "Oficialía registra el acuse; el área responsable concluye",
-      "descripcion": "O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Salida con acuse». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo».",
+      "descripcion": "O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Acuses». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo».",
       "estado": "tomada"
     },
     {

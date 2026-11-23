@@ -1,32 +1,28 @@
-# T-01: Interfaz base desde el maquetado de Figma
+# T-01b: Correcciones y movimiento de la interfaz base
 
-- Asignada: 2026-11-21
-- Depende de: maquetado aprobado (Figma «SIGEDOC»)
+- Asignada: 2026-11-22
+- Depende de: T-01 (commit `993c254`, ya integrado en `develop`)
 - Fuentes:
-  - `docs/arquitectura.md`, secciones 2, 4 y 8.
-  - Grafo: D-29, D-36, D-38, D-44, D-53, D-57 a D-64; roles ROL-OF, ROL-DI, ROL-TI, ROL-PE y ROL-AD; operaciones O-03, O-11, O-14, O-36 y O-37.
-  - `docs/operaciones/catalogo.json`: qué recibe y qué devuelve O-03, O-11 y O-14.
-  - Figma, archivo `9yljMLMqWHlIHQqRCsXEjV`.
+  - `ai/handoff/historial/T-01-asignacion.md` y `T-01-reporte.md`: lo que se pidió y lo que se hizo.
+  - `PRODUCT.md` y `DESIGN.md` en la raíz.
+  - Grafo: D-63, D-64 (sistema visual); `docs/arquitectura.md`, sección 8.
+  - Figma, archivo `9yljMLMqWHlIHQqRCsXEjV` (solo para comparar; no se modifica).
 
 ## Objetivo
 
-Levantar el frontend de SIGEDOC con su arquitectura definitiva, el sistema visual del Figma convertido en código, el marco de la aplicación por rol y las vistas núcleo funcionando con datos simulados (D-63). Lo que se construya aquí se reutiliza tal cual en T-02 (el resto de las vistas) y en T-15 (conexión a la API real), así que la estructura importa tanto como el resultado visual.
+Cerrar lo que dejó la revisión de la T-01, agregar a la interfaz un movimiento sobrio (esqueletos de carga, estados pendientes, transiciones e íconos con micro-movimiento) y auditarla completa con las skills instaladas. No se agregan vistas nuevas: eso es T-02.
 
 ## Forma de trabajo
 
 ### Skills
 
-Carga las skills en la fase que les corresponde, no todas al inicio:
-
 | Skill | Uso en esta tarea |
 | --- | --- |
-| `handoff`, `consultar-grafo` | Protocolo y consulta de los ids citados |
-| Figma (`figma-design-to-code` antes de `get_design_context`) | Leer cada vista, las variables (`get_variable_defs`), los componentes y los íconos |
-| `impeccable` | Contexto del producto y del sistema visual (PRODUCT.md y DESIGN.md en la raíz), y `audit` y `polish` al cerrar. Modo **Operate**. **El Figma es el brief aprobado: refinas, no rediseñas.** No cambies paleta, tipografía, composición ni textos; si crees que algo del Figma debe cambiar, va a «Dudas». |
-| `accesslint` | Revisión de accesibilidad de cada vista al cerrar |
-| `ponytail` | Nivel por fase (tabla siguiente) y `/ponytail-review` del cambio completo al final |
-
-Si la conexión de Figma no está disponible en tu sesión, detente con estado `bloqueada`: sin ella no puedes cumplir la fidelidad que pide la tarea. No trabajes con capturas.
+| `handoff` | Protocolo, cierre y reporte |
+| `impeccable` | Modo **Operate**. En la fase 2, su guía de movimiento (su comando de animación, si tu versión lo trae). En la fase 3, `audit`, `critique` (si existe) y `polish`. El Figma sigue siendo el brief aprobado: no cambies paleta, tipografía, composición ni textos. |
+| `accesslint` | Revisión de accesibilidad de cada vista y de sus estados nuevos, al cerrar |
+| `ponytail` | Nivel por fase (tabla siguiente) y `/ponytail-review` al final |
+| Figma | Solo para comparar; si no está disponible, no es motivo de bloqueo en esta tarea |
 
 ### Fases y nivel de ponytail
 
@@ -34,142 +30,164 @@ Al empezar cada fase escribe en el chat una línea como `Fase 2 · Ponytail → 
 
 | Fase | Contenido | Ponytail | Por qué |
 | --- | --- | --- | --- |
-| 0. Preparación | Leer la asignación, el grafo y el Figma. Ejecutar `impeccable` para dejar PRODUCT.md y DESIGN.md a partir del Figma (identidad «Señal Guinda»). No se escribe código todavía. | **off** | Es lectura y documentación de diseño |
-| 1. Proyecto y arquitectura | Plantilla de Vite, dependencias, TypeScript, ESLint, Vitest, estructura de carpetas, rutas, TanStack Query, capa `src/api` con su fuente simulada y sesión simulada | **full** | Evita abstracciones y configuración que nadie pidió |
-| 2. Sistema visual | `tokens.css`, tipografía, efectos, íconos y componentes base y compuestos | **off** | La fidelidad al Figma manda; ponytail tendería a cambiar componentes por controles nativos |
-| 3. Vistas | Las vistas del alcance, compuestas con el sistema visual y los datos simulados | **full** | Páginas delgadas, sin duplicar lógica |
-| 4. Verificación y cierre | `impeccable audit` y `polish`, `accesslint`, comparación con el Figma, criterios de aceptación y reporte. Al final, `/ponytail-review` sobre todo el cambio. | **off** (full solo para `/ponytail-review`) | Pulido y revisión completos |
+| 0. Preparación | Leer esta asignación, `DESIGN.md`, el reporte y la revisión de la T-01 | **off** | Es lectura |
+| 1. Correcciones | Parte A | **full** | Son arreglos pequeños; sin abstracciones nuevas |
+| 2. Movimiento | Parte B | **off** | Es diseño de interacción; ponytail tendería a quitar lo que se pide |
+| 3. Auditoría y cierre | Parte C, criterios de aceptación y reporte. Al final, `/ponytail-review`. | **off** (full solo para `/ponytail-review`) | Revisión completa |
 
 ### Dudas
 
-Si una duda no te impide avanzar, toma la opción más conservadora (la que respeta el Figma y el grafo), sigue trabajando y escríbela en «Dudas y huecos propuestos» con la opción que tomaste. Detente solo si no puedes avanzar sin una respuesta.
-
-## Referencias del Figma
-
-Página «03 · Vistas» (`30:3`); sistema en «02 · Sistema» (`30:2`); identidad en `0:1`. Debajo de cada vista hay un recuadro «Notas · V-xx» con las operaciones y decisiones que la respaldan, y el frame `32:2` es el mapa de todas las vistas.
-
-| Vista | Nodo | Rol |
-| --- | --- | --- |
-| V-01 Inicio de sesión | `34:115` | Todos |
-| V-02 Bandeja (oficialía) | `34:157` | OF, DI |
-| V-02b Bandeja (titular de área) | `62:3141` | TI |
-| V-02c Bandeja (personal del área) | `62:3523` | PE |
-| V-04 Ficha del documento (oficialía) | `37:231` | OF |
-| V-04b Ficha (titular de área) | `45:537` | TI |
-| V-04e Ficha (personal del área) | `65:2638` | PE |
-| V-05 Turnar (modal) | `39:320` | OF, DI, TI |
-
-Componentes del Figma, que deben tener su equivalente en código:
-
-| Componente | Nodo |
-| --- | --- |
-| Íconos | `31:2` a `31:95` |
-| Botón | `31:119` |
-| Estado | `31:144` |
-| Rol de turno | `31:151` |
-| Campo | `31:172` |
-| Navegación | `31:187` |
-
-Usuarios de prueba, tomados del Figma:
-
-| Rol | Usuario | Área |
-| --- | --- | --- |
-| OF | Marta Flores | Oficialía de partes |
-| DI | Lic. Ana López | Dirección General |
-| TI | Ing. Raúl Pérez | Compras |
-| TI | C.P. Elena Díaz | Finanzas |
-| PE | Jorge Ruiz | Compras |
-| AD | Mtro. Luis Gómez | Administración |
+Si una duda no te impide avanzar, toma la opción más conservadora, sigue y escríbela en «Dudas y huecos propuestos» con la opción que tomaste. Detente solo si no puedes avanzar sin una respuesta.
 
 ## Alcance
 
-1. **Proyecto** en `frontend/` con la plantilla `react-ts` de Vite:
-   - TypeScript estricto, con `noUncheckedIndexedAccess`.
-   - `engines.node >= 24`.
-   - Scripts `dev`, `build`, `preview`, `lint`, `typecheck` y `test`.
-   - Dependencias permitidas, y ninguna otra:
-     - Ejecución: las de la plantilla, `react-router`, `@tanstack/react-query`, `radix-ui`, `@fontsource-variable/unbounded`, `@fontsource-variable/geist` y `@fontsource-variable/geist-mono`.
-     - Desarrollo: las de la plantilla, `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` y `eslint-plugin-jsx-a11y`.
-   - Si un paquete no existe o no sirve, no lo sustituyas por tu cuenta: repórtalo.
-2. **Arquitectura** según `docs/arquitectura.md`, sección 2 (árbol de `frontend/src/`) y sección 8:
-   - **`src/api/`:**
-     - Tipos escritos a mano que siguen el contrato de la sección 4: `snake_case`, UUID, fechas ISO, errores con `codigo` y listados `{ elementos, total }`. Se reemplazan por los generados en T-15.
-     - Una función por lectura o escritura, por ejemplo `obtenerBandeja` (O-14), `obtenerFicha` (O-11) y `turnar` (O-03).
-     - Hooks de TanStack Query que las envuelven.
-   - **`src/api/simulado/`:**
-     - Un conjunto de datos coherente: los mismos folios, áreas, personas y recorridos que muestra el Figma.
-     - Latencia simulada corta.
-     - `turnar` modifica los datos en memoria e invalida las consultas, para que el flujo turnar → bandeja → ficha se vea completo.
-     - `VITE_API_MODO` elige la fuente; en esta tarea solo existe `simulado`.
-   - **Visibilidad:** la capa simulada aplica la visibilidad de D-29 por rol y área, como lo hará el servicio real. Por ejemplo, el personal de Compras no ve el contenido de un documento confidencial ajeno.
-   - **`src/sesion/`:**
-     - Sesión simulada: V-01 permite entrar como cualquiera de los usuarios de prueba y «Cerrar sesión» vuelve a V-01.
-     - Guarda la sesión en `sessionStorage`, envuelto en `try/catch`.
-   - **`src/rutas/`:**
-     - Rutas protegidas.
-     - El menú por rol según el Figma y D-62:
-       - OF: 9 opciones.
-       - DI: Bandeja, Buscar, Asuntos, Rebotes y Organización.
-       - TI y PE: Bandeja, Buscar, Asuntos y Organización.
-       - AD: Organización, Áreas, Personas y usuarios, y Actores externos.
-     - Las opciones cuyas vistas llegan en T-02 abren una página «Vista en construcción» con el id de la vista y su nodo en el Figma.
-     - Un rol que entra a una ruta que no le corresponde ve un aviso de «sin permiso», no una página rota.
-3. **Sistema visual** (D-64):
-   - `src/estilos/tokens.css` con todas las variables del Figma: colores de fondo, texto, borde y estados; estilos de texto; efectos `glass`, `glassDark`, `relief`, `inset` y `solid`; radios y espaciados. Usa los nombres del Figma en kebab-case (`--fondo-marca`, `--estado-rebote`…).
-   - Fuentes autoalojadas.
-   - Los 26 íconos exportados del Figma como componentes.
-   - Componentes base equivalentes a los del Figma, con sus variantes y estados. Estado y Rol se basan en las variantes de D-32 y D-44; Campo, en sus estados normal, foco, error y deshabilitado.
-   - Componentes compuestos que se repiten en las vistas: tarjeta (glass, relieve y hundida), indicador, aviso, chip, tabla, selector, opción de radio, segmentado, modal con velo, encabezado de página y marco con barra lateral.
-   - Cada componente con foco visible, roles ARIA correctos y navegación por teclado. Los modales usan el diálogo de Radix: atrapan el foco, cierran con Esc y devuelven el foco al botón que los abrió.
-4. **Vistas** V-01, V-02, V-02b, V-02c, V-04, V-04b, V-04e y V-05, fieles al Figma en composición, tipografía, colores, espaciado y textos:
-   - La bandeja muestra lo que corresponde a cada rol: oficialía con selector de área, aviso de duplicados y tarjeta de rebotes; titular y personal con el área fija y la tarjeta «Acuses» (D-58).
-   - La ficha muestra las acciones de cada rol (D-44, D-62).
-   - V-05 Turnar funciona con los datos simulados y respeta un solo responsable por grupo de turno (RI-10).
-   - Agrega solo los estados que el Figma no dibuja y que la vista necesita: cargando, lista vacía y error de la fuente. Hazlos sobrios, con los tokens existentes, y anótalos en el reporte como diseño propio para revisar.
-5. **Pruebas** con Vitest y Testing Library, solo de lo que tiene lógica:
-   - Menú por rol.
-   - Protección de rutas.
-   - Visibilidad en la fuente simulada.
-   - `turnar` con un solo responsable por grupo.
-   - Teclado y foco del modal.
-   - Nombra las pruebas con su id: `o14_…`, `o03_…`, `d29_…`.
-6. **Documentación:**
-   - PRODUCT.md y DESIGN.md en la raíz (fase 0, con `impeccable`).
-   - Sección «Interfaz (modo simulado)» en `README.md`, con requisitos e instrucciones para Windows.
-   - Sección «Comandos» de `CLAUDE.md` con los comandos reales del frontend; no cambies nada más de `CLAUDE.md`.
+### Parte A. Correcciones de la revisión
+
+1. **Bandeja: fila resaltada y recorrido coherentes.** Hoy la tabla resalta la primera fila de la lista filtrada, pero la tarjeta «Recorrido» muestra el primer pendiente sin filtrar.
+   - Calcula la fila elegida una sola vez en `Bandeja` y pásala a la tabla y a la vista previa como prop.
+   - Regla: es la fila que el usuario eligió si sigue en la lista filtrada; si no, la primera de la lista filtrada.
+   - Borra el cálculo propio de la tabla.
+   - Prueba `o14_…` que lo demuestre con el filtro «Tipo».
+2. **`Tarjeta`:** quita la opción `como` (nadie la usa) y deja `section` fijo.
+3. **`.claude/launch.json`:** versiónalo. Es la configuración del navegador de vista previa. Contenido:
+   ```json
+   {
+     "version": "0.0.1",
+     "configurations": [
+       {
+         "name": "frontend",
+         "runtimeExecutable": "npm",
+         "runtimeArgs": ["run", "dev", "--prefix", "frontend", "--", "--port", "5173", "--strictPort"],
+         "port": 5173
+       }
+     ]
+   }
+   ```
+4. **Contraste del borde de los campos** (WCAG 1.4.11 pide 3:1; hoy es 1.36:1).
+   - Crea el token `--borde-campo` con un valor que alcance 3:1 contra el fondo contiguo del campo, y úsalo en el borde de Campo, Selector, opción de radio y segmentado.
+   - No cambies `--borde-sutil` de tarjetas y tablas.
+   - Parte de los colores del Figma: el más oscuro de la paleta que cumpla; si ninguno, calcula uno de la misma familia. Anota el valor y su contraste en `DESIGN.md` y en el reporte. El revisor ajusta el Figma después.
+5. **No toques** las diferencias con el Figma que ya reportaste (3 días contra 1 día, la vista previa por omisión, los estados de la identidad, el color de las pastillas, las superficies en gris): las corrige el revisor en el Figma.
+
+El bloque `prefers-reduced-motion` de `base.css` **se conserva**: la Parte B lo usa.
+
+### Parte B. Movimiento sobrio
+
+SIGEDOC es de una institución gubernamental: el movimiento informa (que algo carga, que algo respondió, qué cambió de estado) y no decora.
+
+**Reglas generales**
+
+- Solo CSS. Sin bibliotecas ni dependencias nuevas.
+- Se anima `opacity` y `transform`. Solo en hover y foco se permiten además `background-color`, `border-color` y `box-shadow`.
+- Sin rebotes ni curvas elásticas. Sin animaciones de entrada de página ni transiciones entre rutas.
+- Ninguna animación provoca desplazamiento del diseño.
+- Tokens en `tokens.css` con nombres propios en kebab-case, por ejemplo:
+  - `--mov-instantaneo: 100ms`, `--mov-corto: 150ms`, `--mov-medio: 220ms`;
+  - `--curva-salida: cubic-bezier(0.2, 0, 0, 1)` y `--curva-estandar: cubic-bezier(0.4, 0, 0.2, 1)`.
+- Ningún valor de duración ni de curva escrito fuera de los tokens.
+- Todo es diseño propio, porque el Figma no dibuja movimiento: anótalo en el reporte «para revisar».
+
+**Animaciones aprobadas.** No agregues otras.
+
+| Elemento | Qué se mueve | Duración | Curva |
+| --- | --- | --- | --- |
+| Esqueleto | Brillo que lo recorre (`translateX` de un pseudoelemento), en bucle | 1400 ms | lineal |
+| Contenido tras el esqueleto | `opacity` 0 → 1 | `--mov-corto` | salida |
+| Botón (hover y foco) | Fondo y sombra | `--mov-corto` | estándar |
+| Botón (`:active`) | `scale(0.98)` | `--mov-instantaneo` | estándar |
+| Spinner de botón pendiente | `rotate` en bucle | 800 ms | lineal |
+| Navegación lateral (hover) | Fondo; el ícono se desplaza `translateX(2px)` | `--mov-corto` | estándar |
+| Navegación lateral (activa) | La barra arena aparece con `scaleY` 0 → 1 | `--mov-corto` | salida |
+| Fila de tabla (hover y elegida) | Fondo | `--mov-corto` | estándar |
+| Chevron de selector y de «Ver todos» | `rotate` 0 → 180° | `--mov-corto` | estándar |
+| Lista desplegable del selector | `opacity` y `translateY(-4px → 0)` | `--mov-corto` | salida |
+| Modal: velo | `opacity` | `--mov-medio` (al cerrar, `--mov-corto`) | salida |
+| Modal: panel | `opacity` y `translateY(8px → 0)` | `--mov-medio` (al cerrar, `--mov-corto`) | salida |
+| Avisos (errores, RI-10) | `opacity` | `--mov-corto` | salida |
+| Flecha de «Cerrar sesión» y de botones con flecha (hover) | `translateX(2px)` | `--mov-corto` | estándar |
+
+Los modales siguen siendo de Radix: anima con sus atributos `data-state`, de modo que el cierre espere a que termine la animación y el foco siga volviendo al control que lo abrió.
+
+**Esqueletos de carga**
+
+Reemplazan los «—» y cualquier estado de carga vacío. Cubren:
+
+- Bandeja: los cuatro indicadores, la tabla de pendientes (6 filas), la tarjeta «Recorrido» y la tarjeta «Acuses».
+- Ficha: encabezado, registro, ubicación actual, expediente y recorrido.
+- Turnar (V-05): la lista de áreas del selector mientras carga.
+- Ruta protegida mientras se resuelve la sesión: pantalla neutra con el isotipo y «Cargando…».
+
+Cada esqueleto:
+
+- Tiene las mismas dimensiones y esquinas que el contenido real, para que al llegar los datos nada se mueva (CLS ≤ 0.01).
+- Usa solo tokens existentes, con `color-mix`.
+- Marca su contenedor con `aria-busy="true"`, lleva un único `role="status"` con el texto «Cargando…» y oculta las formas con `aria-hidden`.
+
+**Estado pendiente de las acciones**
+
+- «Turnar a N áreas», «Entrar» (V-01) y «Cerrar sesión» muestran un spinner dentro del botón mientras la operación está en curso: `aria-busy`, deshabilitado, texto conservado y el mismo ancho.
+- El spinner es un anillo SVG con `currentColor`, sin importarlo del Figma (diseño propio).
+- Los errores de la fuente siguen con su reintento actual.
+
+**Íconos con micro-movimiento.** Solo los de la tabla anterior: navegación lateral, chevrons, flechas y spinner. Ningún movimiento de ícono pasa de 2 px de desplazamiento o 180° de giro.
+
+**Movimiento reducido**
+
+Con `prefers-reduced-motion: reduce`:
+
+- El brillo del esqueleto se detiene; el esqueleto queda estático y visible.
+- Se anulan los desplazamientos, escalas y giros.
+- Los modales y avisos aparecen solo con `opacity`, sin duración perceptible.
+- El spinner se conserva, porque indica trabajo en curso, pero a 1600 ms.
+
+**Latencia de la fuente simulada**
+
+Para que los esqueletos se vean en desarrollo, agrega `VITE_API_LATENCIA_MS` (por omisión 450; en pruebas, 0). Documéntala en `.env.example` y en el README.
+
+### Parte C. Auditoría con las skills
+
+Al cerrar, y con el movimiento ya incorporado:
+
+1. `impeccable audit`, `critique` (si existe) y `polish` sobre las 8 vistas. Corrige lo crítico y lo grave; lista lo demás.
+2. `accesslint` sobre cada una de las 8 vistas en tres estados: cargando (esqueleto), con datos y con el modal abierto (V-05, y la ficha con su aviso «Vista en construcción»). Repite el escaneo con `prefers-reduced-motion` activo.
+3. Contraste: texto ≥ 4.5:1; bordes de controles y anillo de foco ≥ 3:1.
+4. Desplazamiento del diseño: mide el `layout-shift` (CLS) en bandeja y ficha, de la carga hasta el contenido, con Chrome sin interfaz.
+5. `/ponytail-review` sobre el cambio completo. Corrige lo «must fix» y lista el resto.
 
 ## Fuera de alcance
 
-- El resto de las vistas y sus variantes (T-02).
-- Backend, docker-compose, bases de datos, proxy a la API y cliente generado del OpenAPI (T-03 y T-15).
-- Diseño para móvil.
-- Modo oscuro.
-- Animaciones que el Figma no muestra.
-- Pruebas en navegador con Playwright (T-16).
+- Vistas nuevas y las acciones que abren «Vista en construcción» (T-02).
+- Cambios al Figma.
+- Dependencias nuevas, modo oscuro, diseño para móvil.
+- Transiciones entre rutas y animaciones fuera de la tabla de arriba.
+- Backend y API real (T-03 y T-15).
 - Cualquier cambio a los documentos que la regla 1 del handoff protege.
 
 ## Criterios de aceptación
 
-Ejecuta cada uno y pon su resultado resumido en el reporte. La evidencia va en `docs/pruebas/T-01-interfaz.md`.
+Ejecuta cada uno y pon su resultado resumido en el reporte. La evidencia va en `docs/pruebas/T-01b-correcciones.md`, con los scripts en `docs/pruebas/T-01b-verificacion/` y las capturas de los estados de carga en `docs/pruebas/T-01b-capturas/`.
 
-1. En `frontend/`: `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` y `npm run build`, todos sin errores ni advertencias.
-2. Con `npm run dev`, cada uno de los seis usuarios de prueba:
-   - entra, ve su menú exacto y su bandeja;
-   - abre una ficha;
-   - cierra la sesión.
-   Además, el flujo oficialía → Turnar → bandeja de Compras muestra el documento turnado.
-3. Fidelidad al Figma: cada vista del alcance capturada a 1440 px de ancho junto a la captura del mismo nodo del Figma, en `docs/pruebas/T-01-capturas/`. Usa el navegador de vista previa de Claude Code; si no puedes capturar el navegador, dilo en el reporte y Diego hará esa parte. En `T-01-interfaz.md`, una tabla de vista, nodo del Figma, capturas y diferencias conocidas.
-4. Accesibilidad:
-   - `accesslint` y `impeccable audit` sin hallazgos críticos ni graves en ninguna vista; los menores quedan listados.
-   - Todo se puede usar con teclado y el contraste cumple WCAG 2.2 AA.
-5. Ningún color escrito fuera de los tokens: `grep -rnE "#[0-9a-fA-F]{3,8}\b|rgba?\(" frontend/src --include=*.css --include=*.tsx --include=*.ts` solo encuentra resultados en `src/estilos/tokens.css` (y en los SVG de íconos, si usan `currentColor` no cuentan).
-6. `/ponytail-review` sobre el cambio completo. Corrige lo que marque como «must fix» y lista el resto en el reporte.
-7. Un solo commit `T-01: …` sin líneas de coautoría (verifícalo con `git log -1 --format=%B`). `git status` queda limpio y `git ls-files` no incluye `node_modules`, `dist` ni `.env`.
+1. En `frontend/`: `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` y `npm run build`, todos sin errores ni advertencias. El número de pruebas no baja de 45.
+2. Parte A:
+   - Con el filtro «Tipo» en la bandeja de oficialía, la fila resaltada y el recorrido corresponden al mismo documento (prueba `o14_…` y comprobación en el navegador).
+   - `Tarjeta` sin la opción `como`.
+   - `.claude/launch.json` versionado.
+   - `--borde-campo` ≥ 3:1, con su valor y su contraste en `DESIGN.md`.
+3. Esqueletos: cada vista de la lista muestra su esqueleto con `aria-busy` y un único `role="status"`; al llegar los datos el contenido aparece sin desplazamiento (CLS ≤ 0.01 en bandeja y ficha). Pruebas con nombre `o14_…`, `o11_…` y `o03_…` para esqueleto, botón pendiente y modal.
+4. Movimiento:
+   - `DESIGN.md` tiene una sección «Movimiento» con los tokens y la tabla de animaciones aprobadas.
+   - `grep` de `transition` y `animation` en `src/**/*.css`: toda duración y curva sale de un token.
+   - Ninguna animación sobrepasa `--mov-medio`, salvo el brillo del esqueleto y el spinner.
+5. Movimiento reducido: con `prefers-reduced-motion: reduce` emulado (por CDP), el brillo y los desplazamientos quedan anulados. Déjalo como captura o salida en la evidencia.
+6. Accesibilidad: `accesslint` e `impeccable audit` sin hallazgos críticos ni graves en las 8 vistas y en los tres estados; los menores quedan listados. El falso positivo de V-05 (`aria-hidden-focus` con `#root` inerte) se mantiene documentado.
+7. Ningún color escrito fuera de los tokens (el mismo `grep` de la T-01) y sin dependencias nuevas en `package.json`.
+8. `/ponytail-review` hecho y lo «must fix» corregido.
+9. Un solo commit `T-01b: …` sin líneas de coautoría (verifícalo con `git log -1 --format=%B`). `git status` queda limpio y `git ls-files` no incluye `node_modules`, `dist` ni `.env`.
 
 ## Notas del revisor
 
 - Diego trabaja en Windows y usa Claude Code desde la aplicación de escritorio. Usa comandos que funcionen en PowerShell.
-- **Validación en dos pasos.** Primero el revisor revisa el código y el reporte contra esta asignación y el grafo. Después Diego valida visualmente en el navegador. Las correcciones llegan como una asignación nueva; no las adelantes.
+- La sesión puede abrir en un worktree. Si el commit queda en la rama del worktree, dilo en el reporte; Diego lo integra en `develop`.
+- **Validación en dos pasos**, como en la T-01: primero el revisor revisa el código y el reporte; después Diego valida visualmente. Las correcciones llegan como una asignación nueva; no las adelantes.
 - **Textos.** Son los del Figma, en español, con acentos en la interfaz. Los nombres de código siguen la regla 12 del handoff (sin acentos ni ñ).
-- **Datos simulados.** El conjunto simulado es la semilla que usará la interfaz hasta T-15. Hazlo legible y en un solo lugar, no repartido por las páginas.
-- **Dependencias del Figma.** Si una vista depende de algo que el Figma no resuelve, como el comportamiento de un filtro, elige lo más simple que respete el grafo y anótalo.
+- Todo lo que el Figma no dibuja y se agrega aquí (esqueletos, spinner, movimiento) va en el reporte como «diseño propio para revisar».

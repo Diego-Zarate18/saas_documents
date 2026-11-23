@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useAreas, useBandeja, usePosiblesDuplicados, useRecorrido } from '../../api/consultas'
-import type { PendienteBandeja, Sesion } from '../../api/tipos'
+import type { PendienteBandeja, Sesion, TipoDocumento } from '../../api/tipos'
 import { Boton, BotonEnlace } from '../../componentes/base/Boton'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { EncabezadoPagina } from '../../componentes/compuestos/EncabezadoPagina'
@@ -38,18 +38,20 @@ function BandejaDe({ sesion }: { sesion: Sesion }) {
   // Sin filtros es la misma consulta que `todos` (las claves sin valor no cuentan): una sola lectura.
   const filtrada = useBandeja({
     id_area: idArea,
-    tipo: tipo === TODOS ? undefined : tipo,
+    tipo: tipo === TODOS ? undefined : (tipo as TipoDocumento),
     antiguedad_minima: antiguedad === '0' ? undefined : Number(antiguedad),
   })
   // La fila elegida por el usuario si sigue en la lista filtrada; si no, la primera de la lista.
   const lista = filtrada.data?.elementos ?? []
   const elegida = lista.find((p) => p.id_documento === seleccion?.id_documento) ?? lista[0]
-  // En la carga inicial la columna lateral entera queda en esqueleto hasta que llega el recorrido
-  // elegido por omisión: su alto depende de cuántos pasos tenga, y la tarjeta de abajo se movería.
+  // Solo en la carga inicial (sin filtros) la columna lateral entera queda en esqueleto hasta que llega
+  // el recorrido elegido por omisión: su alto depende de cuántos pasos tenga, y la tarjeta de abajo se
+  // movería. Después, al cambiar un filtro o la fila, solo la tarjeta «Recorrido» muestra su esqueleto.
   // Sin pendiente la consulta está deshabilitada y TanStack la da por pendiente: no hay nada que esperar.
   const recorrido = useRecorrido(elegida?.id_documento)
-  const columnaCargando =
-    filtrada.isPending || (seleccion === undefined && elegida !== undefined && recorrido.isPending)
+  const [columnaLista, setColumnaLista] = useState(false)
+  if (!columnaLista && !filtrada.isPending && !(elegida !== undefined && recorrido.isPending)) setColumnaLista(true)
+  const columnaCargando = !columnaLista
   const duplicados = usePosiblesDuplicados(sesion.rol === 'OF')
 
   const elementos = todos.data?.elementos ?? []
@@ -70,7 +72,7 @@ function BandejaDe({ sesion }: { sesion: Sesion }) {
               <Selector
                 variante="hundido"
                 prefijo="Área:"
-                valor={idArea}
+                valor={idArea ?? ''}
                 cargando={areas.isPending}
                 opciones={(areas.data?.elementos ?? []).map((a) => ({ valor: a.id, texto: a.nombre }))}
                 alCambiar={(valor) => {
@@ -140,7 +142,10 @@ function BandejaDe({ sesion }: { sesion: Sesion }) {
         />
         {/* La clave cambia al terminar la carga: el esqueleto se sustituye de una vez, sin deslizarse. */}
         <div className={estilos.columna} key={columnaCargando ? 'esqueleto' : 'datos'}>
-          <VistaPreviaRecorrido pendiente={columnaCargando ? undefined : elegida} cargando={columnaCargando} />
+          <VistaPreviaRecorrido
+            pendiente={columnaCargando ? undefined : elegida}
+            cargando={columnaCargando || filtrada.isPending}
+          />
           {eligeArea ? <TarjetaRebotes cargando={columnaCargando} /> : <TarjetaAcuses cargando={columnaCargando} />}
         </div>
       </div>

@@ -1,0 +1,178 @@
+import { useState } from 'react'
+import { useQuitarRelacion, useRelacionar } from '../../api/consultas'
+import type { DocumentoEncontrado, Ficha, TipoRelacion } from '../../api/tipos'
+import { Boton } from '../../componentes/base/Boton'
+import { Campo } from '../../componentes/base/Campo'
+import { TEXTO_ESTADO, TEXTO_RELACION } from '../../componentes/base/textos'
+import { Aviso } from '../../componentes/compuestos/Aviso'
+import { BuscadorDocumento } from '../../componentes/compuestos/BuscadorDocumento'
+import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
+import { GrupoOpciones } from '../../componentes/compuestos/GrupoOpciones'
+import { Modal } from '../../componentes/compuestos/Modal'
+import { OpcionRadio } from '../../componentes/compuestos/OpcionRadio'
+import { Segmentado } from '../../componentes/compuestos/Segmentado'
+import estilos from './Relacionar.module.css'
+
+/** Las cuatro relaciones de D-05 con las descripciones de V-10. */
+const TIPOS: { valor: TipoRelacion; descripcion: string }[] = [
+  { valor: 'responde_a', descripcion: 'Este documento contesta al otro' },
+  { valor: 'da_seguimiento_a', descripcion: 'Continúa un trámite anterior' },
+  { valor: 'en_alcance_a', descripcion: 'Complementa o amplía al otro' },
+  { valor: 'sustituye_a', descripcion: 'Solo entre registrados: el otro queda sin efecto' },
+]
+
+type Destino = 'registrado' | 'no_registrado'
+
+interface Props {
+  ficha: Ficha
+  abierto: boolean
+  alCambiar: (abierto: boolean) => void
+}
+
+/** V-10 Relacionar documentos (O-07) y quitar una relación capturada por error (O-18). */
+export function Relacionar({ ficha, abierto, alCambiar }: Props) {
+  const [tipo, setTipo] = useState<TipoRelacion>()
+  const [destino, setDestino] = useState<Destino>('registrado')
+  const [documento, setDocumento] = useState<DocumentoEncontrado | null>(null)
+  const [numero, setNumero] = useState('')
+  const [emisor, setEmisor] = useState('')
+  const relacionar = useRelacionar(ficha.registro.id)
+  const quitar = useQuitarRelacion(ficha.registro.id)
+  const noRegistrado = destino === 'no_registrado'
+  const listo = tipo !== undefined && (noRegistrado ? numero.trim() !== '' && emisor.trim() !== '' : documento !== null)
+
+  function cerrar(abrir: boolean) {
+    if (!abrir) {
+      setTipo(undefined)
+      setDestino('registrado')
+      setDocumento(null)
+      setNumero('')
+      setEmisor('')
+      relacionar.reset()
+      quitar.reset()
+    }
+    alCambiar(abrir)
+  }
+
+  function elegirDestino(d: Destino) {
+    setDestino(d)
+    // «Sustituye a» solo entre registrados (D-14).
+    if (d === 'no_registrado' && tipo === 'sustituye_a') setTipo(undefined)
+  }
+
+  function enviar() {
+    if (!tipo) return
+    relacionar.mutate(
+      { tipo, destino: noRegistrado ? { numero, emisor } : { id_documento: documento?.id ?? '' } },
+      { onSuccess: () => cerrar(false) },
+    )
+  }
+
+  const relaciones = ficha.relaciones ?? []
+
+  return (
+    <Modal
+      abierto={abierto}
+      alCambiar={cerrar}
+      folio={ficha.registro.folio}
+      titulo="Relacionar documentos"
+      descripcion="La relación sale de este documento hacia otro y se guarda en el grafo. Sirve para seguir el hilo de un asunto."
+      ancho={660}
+      pie={
+        <>
+          {relaciones.length > 0 && <p className={estilos.notaPie}>Quitar corrige solo capturas por error.</p>}
+          <Boton variante="fantasma" onClick={() => cerrar(false)}>
+            Cancelar
+          </Boton>
+          <Boton icono="enlace" disabled={!listo} pendiente={relacionar.isPending} onClick={enviar}>
+            Relacionar
+          </Boton>
+        </>
+      }
+    >
+      <GrupoOpciones leyenda="Tipo de relación" columnas={2}>
+        {TIPOS.map((t) => (
+          <OpcionRadio
+            key={t.valor}
+            name="tipo-relacion"
+            texto={TEXTO_RELACION[t.valor]}
+            codigo={t.valor.toUpperCase()}
+            descripcion={t.descripcion}
+            checked={tipo === t.valor}
+            disabled={t.valor === 'sustituye_a' && noRegistrado}
+            onChange={() => setTipo(t.valor)}
+          />
+        ))}
+      </GrupoOpciones>
+      <div className={estilos.seccion}>
+        <p className={estilos.leyenda} aria-hidden="true">
+          Documento destino
+        </p>
+        <Segmentado
+          ancho
+          etiqueta="Documento destino"
+          valor={destino}
+          alCambiar={elegirDestino}
+          opciones={[
+            { valor: 'registrado', texto: 'Registrado en SIGEDOC' },
+            { valor: 'no_registrado', texto: 'No registrado' },
+          ]}
+        />
+        {noRegistrado ? (
+          <div className={estilos.columnas}>
+            <Campo blanco etiqueta="Número del documento" value={numero} onChange={(e) => setNumero(e.target.value)} />
+            <Campo blanco etiqueta="Emisor" value={emisor} onChange={(e) => setEmisor(e.target.value)} />
+          </div>
+        ) : (
+          <BuscadorDocumento etiqueta="Documento" elegido={documento} alElegir={setDocumento} excluir={ficha.registro.id} />
+        )}
+      </div>
+      {noRegistrado && (
+        <Aviso tono="info" icono="enlace">
+          Se crea o reutiliza un documento no registrado con el mismo número y emisor. Si después se registra, se liga a mano.
+          «Sustituye a» no está disponible: cambia el estado del otro documento.
+        </Aviso>
+      )}
+      {tipo === 'sustituye_a' && (
+        <Aviso tono="error" rol="status">
+          «Sustituye a» deja al otro documento sin efecto.
+        </Aviso>
+      )}
+      {relaciones.length > 0 && (
+        <div className={estilos.seccion}>
+          <h3 className={estilos.leyenda}>Relaciones actuales</h3>
+          <ul className={estilos.actuales}>
+            {relaciones.map((r) => (
+              <li key={`${r.tipo} ${r.referencia} ${r.descripcion}`} className={estilos.actual}>
+                <div className={estilos.textos}>
+                  <p className={estilos.tipo}>
+                    {TEXTO_RELACION[r.tipo]} <span className={estilos.referencia}>{r.referencia}</span>
+                  </p>
+                  {r.id_documento ? (
+                    <p className={estilos.descripcion}>
+                      {r.descripcion}
+                      {r.estado && ` · ${TEXTO_ESTADO[r.estado]}`}
+                    </p>
+                  ) : (
+                    <p className={estilos.noRegistrado}>No registrado: citado en el oficio</p>
+                  )}
+                </div>
+                <Boton
+                  variante="fantasma"
+                  icono="cerrar"
+                  aria-label={`Quitar ${TEXTO_RELACION[r.tipo].toLowerCase()} ${r.referencia}`}
+                  pendiente={quitar.isPending && quitar.variables.referencia === r.referencia}
+                  disabled={quitar.isPending}
+                  onClick={() => quitar.mutate({ tipo: r.tipo, referencia: r.referencia, emisor: r.id_documento ? null : r.descripcion })}
+                >
+                  Quitar
+                </Boton>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <ErrorOperacion error={relacionar.error ?? quitar.error} que="guardar la relación" />
+    </Modal>
+  )
+}

@@ -2,7 +2,7 @@
 import { Link } from 'react-router'
 import type { Ficha, Movimiento } from '../../api/tipos'
 import { RolTurno } from '../../componentes/base/RolTurno'
-import { TEXTO_ESTADO, TEXTO_MOTIVO, TEXTO_RELACION } from '../../componentes/base/textos'
+import { TEXTO_ESTADO, TEXTO_RELACION, textoMovimiento } from '../../componentes/base/textos'
 import { Chip } from '../../componentes/compuestos/Chip'
 import { PasoRecorrido } from '../../componentes/compuestos/PasoRecorrido'
 import { Tarjeta } from '../../componentes/compuestos/Tarjeta'
@@ -12,18 +12,19 @@ import estilos from './Ficha.module.css'
 import propios from './Laterales.module.css'
 import { Cabecera, OCULTO } from './Secciones'
 
-/** Agrupa los movimientos de un mismo turno simultáneo (D-18). */
+/** Agrupa los turnos simultáneos (D-18); una corrección del mismo grupo es un paso aparte (O-25). */
 function agrupar(movimientos: Movimiento[]) {
   const grupos: Movimiento[][] = []
   for (const m of movimientos) {
     const ultimo = grupos.at(-1)
-    if (m.id_grupo_turno && ultimo?.[0]?.id_grupo_turno === m.id_grupo_turno) ultimo.push(m)
+    if (m.tipo === 'turno' && m.id_grupo_turno && ultimo?.[0]?.tipo === 'turno' && ultimo[0].id_grupo_turno === m.id_grupo_turno)
+      ultimo.push(m)
     else grupos.push([m])
   }
   return grupos
 }
 
-function Paso({ grupo }: { grupo: Movimiento[] }) {
+function Paso({ grupo, corregidos }: { grupo: Movimiento[]; corregidos: Set<string> }) {
   const [m] = grupo
   if (!m) return null
   const quien = `${m.persona} · ${diaHora(m.fecha_hora)}`
@@ -38,30 +39,29 @@ function Paso({ grupo }: { grupo: Movimiento[] }) {
             <li key={g.id}>
               {g.area_destino}
               <RolTurno rol={g.rol} />
+              {corregidos.has(g.id) && <span className={propios.corregido}>corregido</span>}
             </li>
           ))}
         </ul>
       </PasoRecorrido>
     )
-  const lugar = m.tipo === 'devolucion' ? `${m.area_origen ?? ''} → ${m.area_destino}` : m.area_destino
-  const que =
-    m.tipo === 'registro'
-      ? 'Registro'
-      : m.tipo === 'devolucion'
-        ? `Devolución · ${m.motivo ? TEXTO_MOTIVO[m.motivo] : ''}`
-        : m.rol === 'conocimiento'
-          ? 'Turno para conocimiento'
-          : `Turno como ${m.rol}`
+  const conOrigen = (m.tipo === 'devolucion' || m.tipo === 'atraccion') && m.area_origen
+  const lugar = conOrigen ? `${m.area_origen} → ${m.area_destino}` : m.area_destino
   return (
     <PasoRecorrido>
       <p className={propios.lugar}>{lugar}</p>
-      <p className={propios.que}>{que}</p>
+      <p className={propios.que}>
+        {textoMovimiento(m)}
+        {corregidos.has(m.id) && <span className={propios.corregido}>corregido</span>}
+      </p>
       <p className={propios.quien}>{quien}</p>
     </PasoRecorrido>
   )
 }
 
 export function RecorridoFicha({ ficha }: { ficha: Ficha }) {
+  // O-25: el original queda en el recorrido marcado como corregido.
+  const corregidos = new Set(ficha.recorrido?.flatMap((m) => (m.id_corrige ? [m.id_corrige] : [])))
   const ultimoTurno = ficha.recorrido?.findLast((m) => m.tipo === 'turno' && m.rol === 'responsable')
   return (
     <Tarjeta material="vidrio" className={`${estilos.seccion} ${propios.recorrido}`} aria-labelledby="titulo-recorrido">
@@ -71,7 +71,7 @@ export function RecorridoFicha({ ficha }: { ficha: Ficha }) {
       ) : (
         <ol className={propios.pasos}>
           {agrupar(ficha.recorrido).map((grupo) => (
-            <Paso key={grupo[0]?.id} grupo={grupo} />
+            <Paso key={grupo[0]?.id} grupo={grupo} corregidos={corregidos} />
           ))}
           {ficha.ubicacion_actual.map((u) => (
             <PasoRecorrido key={u.area} actual>
@@ -104,7 +104,7 @@ export function RelacionesFicha({ ficha }: { ficha: Ficha }) {
         <>
           {ficha.relaciones.length === 0 && <p className={estilos.vacio}>Sin relaciones con otros documentos.</p>}
           {ficha.relaciones.map((r) => (
-            <div key={r.tipo + r.referencia} className={propios.relacion}>
+            <div key={`${r.tipo} ${r.referencia} ${r.descripcion}`} className={propios.relacion}>
               <p className={propios.tipoRelacion}>
                 {TEXTO_RELACION[r.tipo]}
                 {r.id_documento ? (

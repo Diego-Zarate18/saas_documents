@@ -4,8 +4,10 @@ import { useFicha } from '../../api/consultas'
 import type { Ficha as DatosFicha, Sesion } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Estado } from '../../componentes/base/Estado'
+import { TEXTO_TIPO } from '../../componentes/base/textos'
 import { EncabezadoPagina } from '../../componentes/compuestos/EncabezadoPagina'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
+import { Menu, type OpcionMenu } from '../../componentes/compuestos/Menu'
 import { Modal } from '../../componentes/compuestos/Modal'
 import { Icono } from '../../iconos/Icono'
 import { OPCIONES } from '../../rutas/menu'
@@ -13,28 +15,33 @@ import { accionesFicha } from '../../sesion/permisos'
 import { useSesion } from '../../sesion/sesion'
 import { dias } from '../formato'
 import { Turnar } from '../v05-turnar/Turnar'
+import { Devolver } from '../v07-devolver/Devolver'
+import { Atraer } from '../v08-atraer/Atraer'
+import { Concluir } from '../v09-concluir/Concluir'
+import { Relacionar } from '../v10-relacionar/Relacionar'
+import { Cancelar } from '../v15-oficialia/Cancelar'
+import { Corregir } from '../v15-oficialia/Corregir'
+import { SegundaRecepcion } from '../v15-oficialia/SegundaRecepcion'
 import estilos from './Ficha.module.css'
 import { FichaEsqueleto } from './FichaEsqueleto'
 import { RecorridoFicha, RelacionesFicha } from './Laterales'
 import { Expediente, Registro } from './Secciones'
 
-/** Acciones cuyas vistas llegan en T-02: abren un aviso con la vista y el nodo del Figma. */
+/** Acciones sin vista en el Figma de T-02a: abren un aviso con la vista o la operación. */
 interface Pendiente {
   titulo: string
   vistas: string
 }
 
 const PENDIENTES = {
-  masOficialia: { titulo: 'Más acciones', vistas: 'V-04d · nodo del Figma 51:1778' },
-  mas: { titulo: 'Más', vistas: 'V-10 · nodo del Figma 48:1119 y V-11b · nodo del Figma 48:1407' },
-  relacionar: { titulo: 'Relacionar', vistas: 'V-10 · nodo del Figma 48:1119' },
-  devolver: { titulo: 'Devolver', vistas: 'V-07 · nodo del Figma 46:707' },
-  concluir: { titulo: 'Concluir', vistas: 'V-09 · nodo del Figma 47:1192' },
+  asunto: { titulo: 'Asignar a un asunto', vistas: 'V-11b · nodo del Figma 48:1407 (T-02b)' },
   anexo: { titulo: 'Agregar anexo', vistas: 'O-28 (sin vista propia en el Figma)' },
   nota: { titulo: 'Agregar nota', vistas: 'O-29 (sin vista propia en el Figma)' },
 } satisfies Record<string, Pendiente>
 
-/** V-04 (oficialía), V-04b (titular) y V-04e (personal): O-11. */
+type Accion = 'turnar' | 'devolver' | 'atraer' | 'concluir' | 'relacionar' | 'cancelar' | 'corregir' | 'recepcion'
+
+/** V-04 (oficialía), V-04b (titular), V-04d («Más acciones») y V-04e (personal): O-11. */
 export function Ficha() {
   const { id = '' } = useParams()
   const sesion = useSesion().data
@@ -48,12 +55,38 @@ export function Ficha() {
 }
 
 function FichaDe({ ficha, sesion }: { ficha: DatosFicha; sesion: Sesion }) {
-  const [turnando, setTurnando] = useState(false)
+  const [accion, setAccion] = useState<Accion>()
   const [pendiente, setPendiente] = useState<Pendiente>()
   const puede = accionesFicha(sesion, ficha)
   const r = ficha.registro
+  const areaPropia = sesion.nombre_area ?? ''
   const ubicacion = ficha.ubicacion_actual.find((u) => u.rol === 'responsable') ?? ficha.ubicacion_actual[0]
-  const abrir = (p: Pendiente) => () => setPendiente(p)
+  // Devolver regresa al área que lo envió en el último movimiento que llegó a la propia (O-22).
+  const origen =
+    ficha.recorrido?.findLast((m) => m.area_destino === areaPropia && m.rol !== 'conocimiento' && m.tipo !== 'correccion')
+      ?.area_origen ?? null
+  const abrir = (a: Accion) => () => setAccion(a)
+  const modal = (a: Accion) => ({ abierto: accion === a, alCambiar: (abierto: boolean) => setAccion(abierto ? a : undefined) })
+
+  const relacionar: OpcionMenu = { texto: 'Relacionar con otro documento', icono: 'enlace', operacion: 'O-07', alElegir: abrir('relacionar') }
+  const menu: OpcionMenu[] =
+    puede.menu === 'oficialia'
+      ? [
+          ...(puede.relacionar ? [relacionar] : []),
+          {
+            texto: 'Registrar segunda recepción',
+            icono: 'registrar',
+            operacion: 'O-19',
+            alElegir: abrir('recepcion'),
+            deshabilitado: r.segunda_recepcion !== null,
+          },
+          { texto: 'Corregir un movimiento', icono: 'reloj', operacion: 'O-25', alElegir: abrir('corregir') },
+          { texto: 'Cancelar documento', icono: 'cerrar', operacion: 'O-24', alElegir: abrir('cancelar'), peligro: true },
+        ]
+      : [relacionar, { texto: 'Asignar a un asunto', icono: 'asunto', operacion: 'O-08', alElegir: () => setPendiente(PENDIENTES.asunto) }]
+  // Una sola acción primaria (DESIGN.md): concluir; si no, atraer cuando no se puede turnar; si no, turnar.
+  const primaria = puede.concluir ? 'concluir' : puede.atraer && !puede.turnar ? 'atraer' : 'turnar'
+  const variante = (a: Accion) => (a === primaria ? 'primario' : 'secundario')
 
   return (
     <div className={estilos.pagina}>
@@ -71,7 +104,8 @@ function FichaDe({ ficha, sesion }: { ficha: DatosFicha; sesion: Sesion }) {
             <Estado estado={r.estado} />
             {r.confidencial && <Estado estado="confidencial" />}
             {r.posible_duplicado && <Estado estado="posible_duplicado" />}
-            <span className={estilos.secundario}>{r.tipo}</span>
+            {r.extemporaneo && <Estado estado="extemporaneo" />}
+            <span className={estilos.secundario}>{TEXTO_TIPO[r.tipo]}</span>
             {ubicacion && (
               <>
                 <span className={estilos.secundario} aria-hidden="true">
@@ -87,28 +121,29 @@ function FichaDe({ ficha, sesion }: { ficha: DatosFicha; sesion: Sesion }) {
         }
         acciones={
           <>
-            {puede.masAcciones && (
-              <Boton variante="fantasma" icono="abajo" onClick={abrir(sesion.rol === 'OF' ? PENDIENTES.masOficialia : PENDIENTES.mas)}>
-                {sesion.rol === 'OF' ? 'Más acciones' : 'Más'}
-              </Boton>
-            )}
-            {puede.relacionar && (
-              <Boton variante="secundario" icono="enlace" onClick={abrir(PENDIENTES.relacionar)}>
+            {puede.menu && <Menu texto={puede.menu === 'oficialia' ? 'Más acciones' : 'Más'} opciones={menu} />}
+            {puede.relacionar && puede.menu === 'oficialia' && (
+              <Boton variante="secundario" icono="enlace" onClick={abrir('relacionar')}>
                 Relacionar
               </Boton>
             )}
             {puede.devolver && (
-              <Boton variante="secundario" icono="devolver" onClick={abrir(PENDIENTES.devolver)}>
+              <Boton variante="secundario" icono="devolver" onClick={abrir('devolver')}>
                 Devolver
               </Boton>
             )}
             {puede.turnar && (
-              <Boton variante={puede.concluir ? 'secundario' : 'primario'} icono="turnar" onClick={() => setTurnando(true)}>
+              <Boton variante={variante('turnar')} icono="turnar" onClick={abrir('turnar')}>
                 Turnar
               </Boton>
             )}
+            {puede.atraer && (
+              <Boton variante={variante('atraer')} icono="atraer" onClick={abrir('atraer')}>
+                Atraer
+              </Boton>
+            )}
             {puede.concluir && (
-              <Boton icono="check" onClick={abrir(PENDIENTES.concluir)}>
+              <Boton icono="check" onClick={abrir('concluir')}>
                 Concluir
               </Boton>
             )}
@@ -122,8 +157,8 @@ function FichaDe({ ficha, sesion }: { ficha: DatosFicha; sesion: Sesion }) {
           {ficha.acceso === 'completo' && (
             <Expediente
               ficha={ficha}
-              agregarAnexo={puede.agregarAnexo ? abrir(PENDIENTES.anexo) : undefined}
-              agregarNota={puede.agregarNota ? abrir(PENDIENTES.nota) : undefined}
+              agregarAnexo={puede.agregarAnexo ? () => setPendiente(PENDIENTES.anexo) : undefined}
+              agregarNota={puede.agregarNota ? () => setPendiente(PENDIENTES.nota) : undefined}
             />
           )}
         </div>
@@ -133,13 +168,24 @@ function FichaDe({ ficha, sesion }: { ficha: DatosFicha; sesion: Sesion }) {
         </div>
       </div>
 
-      {puede.turnar && <Turnar idDocumento={r.id} folio={r.folio} abierto={turnando} alCambiar={setTurnando} />}
+      {puede.turnar && <Turnar idDocumento={r.id} folio={r.folio} {...modal('turnar')} />}
+      {puede.devolver && <Devolver ficha={ficha} areaPropia={areaPropia} origen={origen} {...modal('devolver')} />}
+      {puede.atraer && <Atraer ficha={ficha} areaPropia={areaPropia} {...modal('atraer')} />}
+      {puede.concluir && <Concluir ficha={ficha} areaPropia={areaPropia} {...modal('concluir')} />}
+      {puede.relacionar && <Relacionar ficha={ficha} {...modal('relacionar')} />}
+      {puede.menu === 'oficialia' && (
+        <>
+          <SegundaRecepcion idDocumento={r.id} {...modal('recepcion')} />
+          <Corregir ficha={ficha} {...modal('corregir')} />
+          <Cancelar ficha={ficha} {...modal('cancelar')} />
+        </>
+      )}
       <Modal
         abierto={pendiente !== undefined}
         alCambiar={(abierto) => !abierto && setPendiente(undefined)}
         folio={r.folio}
         titulo={pendiente?.titulo ?? ''}
-        descripcion="Vista en construcción: llega en T-02."
+        descripcion="Vista en construcción."
         ancho={480}
         pie={
           <Boton variante="secundario" onClick={() => setPendiente(undefined)}>

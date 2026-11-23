@@ -1,0 +1,32 @@
+/* Resumen de los modales (V-09 «Al concluir», V-15a «Al cancelar», V-15b y V-15c): marfil con radio de fila. */
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: var(--espacio-14);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-base);
+  font: var(--cuerpo-s);
+}
+
+.borde {
+  border: 1px solid var(--borde-sutil);
+}
+
+.titulo {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.efectos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+}
+
+.efectos li::before {
+  content: '·';
+  margin-right: var(--espacio-8);
+}

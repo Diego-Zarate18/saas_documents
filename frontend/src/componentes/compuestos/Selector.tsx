@@ -10,22 +10,38 @@ export interface OpcionSelector {
 }
 
 interface Props {
-  variante: 'hundido' | 'pildora' | 'fila'
+  variante: 'hundido' | 'pildora' | 'fila' | 'campo'
   /** Prefijo visible («Área:», «Tipo:»). */
   prefijo?: string
   /** Nombre accesible cuando no hay prefijo visible. */
   etiqueta?: string
-  valor: string | undefined
+  /** Siempre controlado: la cadena vacía muestra el marcador. */
+  valor: string
   opciones: OpcionSelector[]
   alCambiar: (valor: string) => void
   marcador?: string
   deshabilitado?: boolean
   /** Las opciones todavía se leen: el valor y la lista muestran formas en su lugar. */
   cargando?: boolean
+  /** Id de la ayuda o del error que describe al selector. */
+  describidoPor?: string
+  invalido?: boolean
 }
 
 /** Selector con la lista accesible de Radix (teclado, búsqueda por letra, foco). */
-export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambiar, marcador, deshabilitado, cargando }: Props) {
+export function Selector({
+  variante,
+  prefijo,
+  etiqueta,
+  valor,
+  opciones,
+  alCambiar,
+  marcador,
+  deshabilitado,
+  cargando,
+  describidoPor,
+  invalido,
+}: Props) {
   const id = useId()
   return (
     <Select.Root value={valor} onValueChange={alCambiar} disabled={deshabilitado}>
@@ -33,6 +49,8 @@ export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambi
       <Select.Trigger
         className={`${estilos.disparador} ${estilos[variante] ?? ''}`}
         aria-labelledby={`${id}-prefijo ${id}-valor`}
+        aria-describedby={describidoPor}
+        aria-invalid={invalido || undefined}
       >
         <span id={`${id}-prefijo`} className={prefijo ? estilos.prefijo : 'solo-lector'}>
           {prefijo ?? etiqueta}
@@ -41,7 +59,7 @@ export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambi
           {cargando && valor ? <Forma ancho="9ch" /> : <Select.Value placeholder={marcador} />}
         </span>
         <Select.Icon className={estilos.flecha}>
-          <Icono nombre="abajo" tamano={variante === 'hundido' ? 16 : 14} />
+          <Icono nombre="abajo" tamano={variante === 'hundido' || variante === 'campo' ? 16 : 14} />
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
@@ -78,5 +96,32 @@ export function Selector({ variante, prefijo, etiqueta, valor, opciones, alCambi
         </Select.Content>
       </Select.Portal>
     </Select.Root>
+  )
+}
+
+interface PropsCampo extends Omit<Props, 'variante' | 'prefijo' | 'describidoPor' | 'invalido' | 'etiqueta'> {
+  etiqueta: string
+  ayuda?: string
+  error?: string
+  /** Caja blanca de los modales; sin ella, hundida como en V-03. */
+  blanco?: boolean
+}
+
+/** Selector con etiqueta arriba y ayuda o error abajo, como un Campo (V-03, V-07b, V-13b, V-15b). */
+export function CampoSelector({ etiqueta, ayuda, error, blanco, ...resto }: PropsCampo) {
+  const id = useId()
+  const nota = error ?? ayuda
+  return (
+    <div className={`${estilos.envoltura} ${blanco ? estilos.blanco : ''}`}>
+      <span className={estilos.etiquetaCampo} aria-hidden="true">
+        {etiqueta}
+      </span>
+      <Selector variante="campo" etiqueta={etiqueta} describidoPor={nota ? `${id}-nota` : undefined} invalido={Boolean(error)} {...resto} />
+      {nota && (
+        <p id={`${id}-nota`} className={error ? estilos.error : estilos.ayuda}>
+          {nota}
+        </p>
+      )}
+    </div>
   )
 }

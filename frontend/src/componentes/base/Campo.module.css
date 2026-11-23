@@ -58,3 +58,14 @@ textarea.caja {
   font: var(--pie);
   color: var(--estado-error);
 }
+
+/* Campos de los modales (V-07 a V-15c): caja blanca sin sombra hundida. */
+.blanco {
+  background: var(--fondo-superficie);
+  box-shadow: none;
+  font: var(--cuerpo-s);
+}
+
+.blanco:focus-visible {
+  box-shadow: 0 0 0 0.5px var(--borde-marca);
+}

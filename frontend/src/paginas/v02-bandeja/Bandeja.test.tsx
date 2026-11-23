@@ -55,6 +55,26 @@ describe('V-02 Bandeja: fila elegida y recorrido (O-14, C1)', () => {
     expect(document.querySelector('[class*="forma"]')).toBeNull()
   })
 
+  it('o14_cambiar_un_filtro_no_vuelve_a_esqueletizar_rebotes', async () => {
+    const usuario = userEvent.setup()
+    await entrarComo(USUARIO.marta)
+    montarApp('/bandeja')
+    await screen.findByRole('button', { name: 'Requerimiento de información', pressed: true })
+    await waitFor(() => expect(document.querySelector('[aria-busy="true"]')).toBeNull())
+
+    // Registra cada estado intermedio de la columna lateral mientras cambia el filtro.
+    let rebotesEnEsqueleto = false
+    const observador = new MutationObserver(() => {
+      rebotesEnEsqueleto ||= document.querySelector('[aria-labelledby="titulo-rebotes"][aria-busy="true"]') !== null
+    })
+    observador.observe(document.body, { subtree: true, childList: true, attributes: true })
+    await usuario.click(within(pendientes()).getByRole('combobox', { name: /^Tipo:/ }))
+    await usuario.click(await screen.findByRole('option', { name: 'Solicitud de transparencia' }))
+    await waitFor(() => expect(folioDelRecorrido()).toHaveTextContent('OP-2026-0141'))
+    observador.disconnect()
+    expect(rebotesEnEsqueleto).toBe(false)
+  })
+
   it('o14_area_sin_pendientes_no_deja_la_columna_en_esqueleto', async () => {
     const usuario = userEvent.setup()
     await entrarComo(USUARIO.ana)

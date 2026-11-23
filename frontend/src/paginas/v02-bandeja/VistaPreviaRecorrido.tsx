@@ -1,7 +1,7 @@
 import { useRecorrido } from '../../api/consultas'
 import type { Movimiento, PendienteBandeja } from '../../api/tipos'
 import { Boton, BotonEnlace } from '../../componentes/base/Boton'
-import { TEXTO_MOTIVO } from '../../componentes/base/textos'
+import { textoMovimiento } from '../../componentes/base/textos'
 import { Forma } from '../../componentes/compuestos/Esqueleto'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
 import { PasoRecorrido } from '../../componentes/compuestos/PasoRecorrido'
@@ -10,12 +10,7 @@ import { diaHora } from '../formato'
 import estilos from './TarjetasLaterales.module.css'
 
 /** «Turno como responsable · 18 nov 11:40», como en V-02 y V-02b. */
-function detalle(m: Movimiento) {
-  const cuando = diaHora(m.fecha_hora, false)
-  if (m.tipo === 'registro') return `Registro · ${cuando}`
-  if (m.tipo === 'devolucion') return `Devolución · ${m.motivo ? TEXTO_MOTIVO[m.motivo] : ''} · ${cuando}`
-  return m.rol === 'conocimiento' ? `Turno para conocimiento · ${cuando}` : `Turno como ${m.rol} · ${cuando}`
-}
+const detalle = (m: Movimiento) => `${textoMovimiento(m)} · ${diaHora(m.fecha_hora, false)}`
 
 // Pasos del esqueleto: los del recorrido más corto, el de un documento recién registrado.
 const esqueleto = (

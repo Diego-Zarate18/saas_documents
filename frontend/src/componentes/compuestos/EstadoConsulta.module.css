@@ -11,7 +11,7 @@
 
 .error {
   color: var(--estado-error);
-  animation: aparecer var(--mov-corto) var(--curva-salida);
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
 }
 
 /* El contenido que sustituye al esqueleto aparece con un fundido. El envoltorio no crea caja,
@@ -22,11 +22,5 @@
 
 .contenido > *,
 .aparecer {
-  animation: aparecer var(--mov-corto) var(--curva-salida);
-}
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
-  }
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
 }

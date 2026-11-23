@@ -160,3 +160,9 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Puntos de un requerimiento de auditoría en «Datos del tipo» (D-66). */
+.puntos {
+  padding-left: 1.4em;
+  list-style: decimal;
+}

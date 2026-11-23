@@ -1,0 +1,269 @@
+/* V-03 Registrar documento (Figma 36:128): formulario de 768 px y columna derecha de 340 px. */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 768px) 340px;
+  gap: var(--espacio-20);
+  align-items: start;
+}
+
+/* Por debajo de 1280 px la columna derecha baja, como en la bandeja y la ficha. */
+@media (width < 1280px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-18);
+  padding: 28px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+}
+
+.cabecera h2 {
+  flex: 1;
+  font: var(--titulo-m);
+  letter-spacing: var(--titulo-m-espaciado);
+}
+
+.origen {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.dos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-16) var(--espacio-24);
+  align-items: start;
+}
+
+.emisor {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--espacio-16);
+  align-items: start;
+}
+
+.fechas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--espacio-16);
+  align-items: start;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+/* El segmentado mide lo mismo que la caja de un campo (44 px). */
+.grupo fieldset {
+  min-height: 44px;
+}
+
+.grupo label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.etiqueta {
+  padding: 0;
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.nota {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+  padding-top: var(--espacio-18);
+  border-top: 1px solid var(--borde-sutil);
+}
+
+.contenido .nota {
+  margin-top: calc(-1 * var(--espacio-8));
+}
+
+/* Puntos de auditoría: renglones marfil numerados en mono guinda, con quitar a la derecha. */
+.puntos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.puntos legend {
+  float: left;
+  margin-bottom: var(--espacio-8);
+}
+
+.renglones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  clear: both;
+}
+
+.renglon {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  padding: 0 var(--espacio-12);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+}
+
+.renglon:focus-within {
+  border-color: var(--borde-marca);
+}
+
+.renglon input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--espacio-10) 0;
+  border: 0;
+  background: transparent;
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  outline: none;
+}
+
+.numeroPunto {
+  font: var(--mono-dato);
+  color: var(--texto-marca);
+}
+
+.quitar {
+  display: grid;
+  place-items: center;
+  padding: var(--espacio-4);
+  border: 0;
+  border-radius: var(--radio-indicador);
+  background: transparent;
+  color: var(--texto-secundario);
+}
+
+.quitar:hover {
+  color: var(--texto-principal);
+}
+
+.quitar:focus-visible {
+  box-shadow: var(--foco-anillo);
+}
+
+.agregar {
+  align-self: flex-start;
+}
+
+/* Columna derecha. */
+.lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+}
+
+.folio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: var(--espacio-24);
+}
+
+.folio .origen {
+  font-weight: 400;
+}
+
+/* El Figma lo dibuja grande, en mono guinda; no hay estilo de texto para este tamaño. */
+.numero {
+  font: 500 28px / normal var(--fuente-mono);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.duplicado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+  padding: var(--espacio-20);
+}
+
+.alerta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.tituloDuplicado {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  font: var(--titulo-s);
+  letter-spacing: var(--titulo-s-espaciado);
+  color: var(--texto-principal);
+}
+
+.tituloDuplicado svg {
+  color: var(--estado-posible-duplicado);
+}
+
+.existente {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-12);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-aviso);
+  background: var(--fondo-superficie);
+  font: var(--cuerpo-s);
+}
+
+.folioExistente {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.botones {
+  display: flex;
+  gap: var(--espacio-8);
+}
+
+.recordatorio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-16);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-base);
+}
+
+.recordatorio h2 {
+  font: var(--etiqueta-s);
+}

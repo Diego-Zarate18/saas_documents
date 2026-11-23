@@ -1,7 +1,9 @@
 // Columna izquierda de la ficha: Registro (PostgreSQL) y Expediente (MongoDB).
 import type { CSSProperties, ReactNode } from 'react'
+import { useCatalogos } from '../../api/consultas'
 import type { Ficha } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
+import { TEXTO_CANAL } from '../../componentes/base/textos'
 import { Tarjeta } from '../../componentes/compuestos/Tarjeta'
 import { Icono, type NombreIcono } from '../../iconos/Icono'
 import { diaHora, fecha, fechaHora } from '../formato'
@@ -42,9 +44,15 @@ export function Registro({ ficha }: { ficha: Ficha }) {
         <Dato etiqueta="Emisor">
           {r.emisor} · {r.tipo_emisor === 'area' ? 'área interna' : 'externo'}
         </Dato>
-        <Dato etiqueta="Fecha del documento">{fecha(r.fecha_documento)}</Dato>
+        <Dato etiqueta="Fecha del documento">{r.fecha_documento ? fecha(r.fecha_documento) : '—'}</Dato>
         <Dato etiqueta="Recepción">
-          {r.medio_recepcion} · {fechaHora(r.fecha_recepcion)}
+          {TEXTO_CANAL[r.canal]} · {fechaHora(r.fecha_recepcion)}
+          {r.segunda_recepcion && (
+            <>
+              <br />
+              {TEXTO_CANAL[r.segunda_recepcion.canal]} · {fechaHora(r.segunda_recepcion.fecha_recepcion)}
+            </>
+          )}
         </Dato>
         <Dato etiqueta="Fecha oficial">
           {fecha(r.fecha_oficial)} ({r.origen_fecha_oficial})
@@ -81,6 +89,8 @@ interface PropsExpediente {
 
 export function Expediente({ ficha, agregarAnexo, agregarNota }: PropsExpediente) {
   const e = ficha.expediente
+  // D-66: el bloque «Datos del tipo» sale de la tabla de campos del catálogo; los tipos sin campos no lo tienen.
+  const campos = useCatalogos().data?.campos_tipo[ficha.registro.tipo] ?? []
   return (
     <Tarjeta material="solida" className={estilos.seccion} aria-labelledby="titulo-expediente">
       <Cabecera id="titulo-expediente" titulo="Expediente" origen="MONGODB" />
@@ -88,14 +98,30 @@ export function Expediente({ ficha, agregarAnexo, agregarNota }: PropsExpediente
         <p className={estilos.vacio}>{ficha.contenido_oculto ? OCULTO : 'Solo ves el estado y el responsable de los documentos de otras áreas.'}</p>
       ) : (
         <>
-          {e.campos.length > 0 && (
-            <dl className={estilos.datos} style={{ '--columnas': 2 } as CSSProperties}>
-              {e.campos.map((c) => (
-                <Dato key={c.etiqueta} etiqueta={c.etiqueta}>
-                  {c.valor}
-                </Dato>
-              ))}
-            </dl>
+          {campos.length > 0 && (
+            <section aria-labelledby="titulo-datos-tipo" className={estilos.elementos}>
+              <h3 id="titulo-datos-tipo" className="solo-lector">
+                Datos del tipo
+              </h3>
+              <dl className={estilos.datos} style={{ '--columnas': 2 } as CSSProperties}>
+                {campos.map((c) => {
+                  const valor = e.datos_tipo[c.clave]
+                  return (
+                    <Dato key={c.clave} etiqueta={c.etiqueta} ancho={c.forma === 'lista'}>
+                      {Array.isArray(valor) ? (
+                        <ol className={estilos.puntos}>
+                          {valor.map((v) => (
+                            <li key={v}>{v}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                        (valor ?? '—')
+                      )}
+                    </Dato>
+                  )
+                })}
+              </dl>
+            </section>
           )}
           <Subseccion icono="anexo" titulo={`Anexos · ${e.anexos.length}`} agregar={agregarAnexo} />
           {e.anexos.length === 0 && <p className={estilos.vacio}>Sin anexos.</p>}

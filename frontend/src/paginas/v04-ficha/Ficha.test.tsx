@@ -20,8 +20,13 @@ describe('O-11 Ficha: acciones por rol (D-44, D-62)', () => {
     ['OF', USUARIO.marta, 'OP-2026-0139', ['Más acciones', 'Relacionar', 'Turnar']],
     ['DI', USUARIO.ana, 'OP-2026-0139', ['Turnar']],
     ['TI', USUARIO.raul, 'OP-2026-0152', ['Más', 'Devolver', 'Turnar', 'Concluir']],
-    ['TI apoyo', USUARIO.raul, 'OP-2026-0148', ['Más', 'Devolver', 'Turnar']],
+    // Con el documento como apoyo, el titular también puede atraerlo (O-23).
+    ['TI apoyo', USUARIO.raul, 'OP-2026-0148', ['Más', 'Devolver', 'Turnar', 'Atraer']],
+    // V-08: Finanzas lo recibió para conocimiento; solo puede atraerlo.
+    ['TI conocimiento', USUARIO.elena, 'OP-2026-0139', ['Más', 'Atraer']],
     ['PE', USUARIO.jorge, 'OP-2026-0152', ['Más', 'Concluir']],
+    // Confidencial sin movimiento (D-29): sin ver el contenido no se ofrece relacionar ni asignar asunto.
+    ['PE confidencial', USUARIO.jorge, 'OP-2026-0124', ['Concluir']],
   ])('o11_acciones_%s', async (_rol, correo, folio, esperadas) => {
     await entrarComo(correo)
     montarApp(`/documentos/${idPorFolio(folio)}`)
@@ -36,13 +41,15 @@ describe('O-11 Ficha: acciones por rol (D-44, D-62)', () => {
     expect(screen.queryByText('Anexos · 0')).not.toBeInTheDocument()
   })
 
-  it('o11_accion_de_t02_abre_aviso_en_construccion', async () => {
-    await entrarComo(USUARIO.marta)
-    montarApp(`/documentos/${idPorFolio('OP-2026-0139')}`)
+  it('o11_asignar_a_un_asunto_abre_aviso_en_construccion', async () => {
+    await entrarComo(USUARIO.raul)
+    montarApp(`/documentos/${idPorFolio('OP-2026-0152')}`)
     const { default: userEvent } = await import('@testing-library/user-event')
-    await userEvent.setup().click(await screen.findByRole('button', { name: 'Relacionar' }))
-    const dialogo = await screen.findByRole('dialog', { name: 'Relacionar' })
-    expect(dialogo).toHaveTextContent('V-10 · nodo del Figma 48:1119')
+    const usuario = userEvent.setup()
+    await usuario.click(await screen.findByRole('button', { name: 'Más' }))
+    await usuario.click(await screen.findByRole('menuitem', { name: /Asignar a un asunto/ }))
+    const dialogo = await screen.findByRole('dialog', { name: 'Asignar a un asunto' })
+    expect(dialogo).toHaveTextContent('V-11b · nodo del Figma 48:1407 (T-02b)')
   })
 
   it('o11_esqueleto_de_la_sesion_y_de_la_ficha', async () => {

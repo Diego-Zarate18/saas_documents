@@ -118,3 +118,12 @@ a.referencia:hover {
   font: var(--pie);
   color: var(--texto-secundario);
 }
+
+/* O-25: el movimiento original sigue en el recorrido, marcado (V-15b: «visible en el recorrido marcado como corregido»). */
+.corregido {
+  margin-left: var(--espacio-6);
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}

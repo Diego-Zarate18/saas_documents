@@ -48,3 +48,28 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* A todo lo ancho (V-07, V-15b, V-15c, V-03): segmentos iguales, centrados, con Etiqueta/S. */
+.ancho {
+  display: flex;
+  width: 100%;
+}
+
+.ancho .segmento {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-14);
+  font: var(--etiqueta-s);
+}
+
+.segmento:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segmento:has(input:disabled):hover {
+  color: var(--texto-secundario);
+}

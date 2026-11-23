@@ -158,3 +158,60 @@
   margin-left: auto;
   color: var(--texto-marca);
 }
+
+/* Variante de campo (V-03, V-07b, V-13b, V-15b): mide y se ve como la caja de Campo. */
+.envoltura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiquetaCampo {
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.campo {
+  width: 100%;
+  padding: var(--espacio-10) var(--espacio-12);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+}
+
+.blanco .campo {
+  background: var(--fondo-superficie);
+  box-shadow: none;
+}
+
+.campo .valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--cuerpo-m);
+}
+
+.blanco .campo .valor {
+  font: var(--cuerpo-s);
+}
+
+.campo[aria-invalid='true'] {
+  border-color: var(--estado-error);
+}
+
+.campo:focus-visible {
+  border-color: var(--borde-marca);
+  box-shadow: var(--foco-anillo);
+}
+
+.ayuda {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.error {
+  font: var(--pie);
+  color: var(--estado-error);
+}

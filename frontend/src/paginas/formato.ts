@@ -35,3 +35,33 @@ export function diaHora(iso: string, coma = true) {
 
 /** «1 día», «12 días». */
 export const dias = (n: number) => `${n} ${n === 1 ? 'día' : 'días'}`
+
+/** «18 nov». */
+export function diaMes(iso: string) {
+  const { dia, mes } = piezas(iso)
+  return `${dia} ${mes}`
+}
+
+/** Valor de un <input type="datetime-local"> en America/Mexico_City («2026-11-22T10:32»). */
+export function aHoraLocal(iso: string) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Mexico_City',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(new Date(iso))
+      .map((x) => [x.type, x.value]),
+  )
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`
+}
+
+/**
+ * ISO 8601 con zona desde un <input type="datetime-local">, que se captura en hora de Ciudad de México.
+ * shortcut: −06:00 fijo porque México no tiene horario de verano desde 2022; si vuelve, usar una biblioteca de zonas.
+ */
+export const deHoraLocal = (local: string) => (local ? `${local}:00-06:00` : '')

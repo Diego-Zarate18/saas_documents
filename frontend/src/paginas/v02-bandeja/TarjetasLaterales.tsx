@@ -31,14 +31,13 @@ interface Props {
 
 /** Resumen de C3 para oficialía y dirección (D-32). */
 export function TarjetaRebotes({ cargando }: Props) {
-  const consulta = useRebotes(true)
-  const rebotes = { ...consulta, isPending: consulta.isPending || cargando }
+  const rebotes = useRebotes(true)
   return (
     <Tarjeta
       material="relieve"
       className={`${estilos.tarjeta} ${estilos.relieve}`}
       aria-labelledby="titulo-rebotes"
-      aria-busy={rebotes.isPending || undefined}
+      aria-busy={rebotes.isPending || cargando || undefined}
     >
       <div className={estilos.cabecera}>
         <h2 id="titulo-rebotes" className={estilos.titulo}>
@@ -46,7 +45,7 @@ export function TarjetaRebotes({ cargando }: Props) {
         </h2>
         <Estado estado="rebote" />
       </div>
-      <EstadoConsulta consulta={rebotes} que="los rebotes" esqueleto={esqueleto} vacio={(d) => (d.total === 0 ? 'Sin rebotes detectados.' : null)}>
+      <EstadoConsulta consulta={rebotes} cargando={cargando} que="los rebotes" esqueleto={esqueleto} vacio={(d) => (d.total === 0 ? 'Sin rebotes detectados.' : null)}>
         {({ elementos }) => (
           <ul className={estilos.lista}>
             {elementos.map((r) => (
@@ -70,15 +69,14 @@ export function TarjetaRebotes({ cargando }: Props) {
 
 /** Salidas con acuse cuyo documento está pendiente en el área como responsable (D-58). */
 export function TarjetaAcuses({ cargando }: Props) {
-  const consulta = useAcuses(true)
-  const acuses = { ...consulta, isPending: consulta.isPending || cargando }
-  const primero = acuses.isPending ? undefined : acuses.data?.elementos[0]
+  const acuses = useAcuses(true)
+  const primero = acuses.isPending || cargando ? undefined : acuses.data?.elementos[0]
   return (
     <Tarjeta
       material="relieve"
       className={`${estilos.tarjeta} ${estilos.relieve}`}
       aria-labelledby="titulo-acuses"
-      aria-busy={acuses.isPending || undefined}
+      aria-busy={acuses.isPending || cargando || undefined}
     >
       <div className={estilos.cabecera}>
         <h2 id="titulo-acuses" className={estilos.titulo}>
@@ -88,6 +86,7 @@ export function TarjetaAcuses({ cargando }: Props) {
       </div>
       <EstadoConsulta
         consulta={acuses}
+        cargando={cargando}
         que="los acuses"
         esqueleto={esqueleto}
         vacio={(d) => (d.total === 0 ? 'Ninguna salida acusada espera conclusión.' : null)}

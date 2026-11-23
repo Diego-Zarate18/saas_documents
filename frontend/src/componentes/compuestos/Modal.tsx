@@ -42,6 +42,11 @@ export function Modal({ abierto, alCambiar, folio, titulo, descripcion, ancho = 
           onOpenAutoFocus={() => {
             origen.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
           }}
+          // Radix oye Esc en la captura del documento, antes que el campo: con la lista de un combobox
+          // abierta (BuscadorDocumento), Esc cierra la lista y no el modal.
+          onEscapeKeyDown={(evento) => {
+            if (evento.target instanceof HTMLElement && evento.target.getAttribute('aria-expanded') === 'true') evento.preventDefault()
+          }}
           onCloseAutoFocus={(evento) => {
             evento.preventDefault()
             document.getElementById('root')?.removeAttribute('inert')

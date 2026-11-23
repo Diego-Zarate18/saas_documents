@@ -11,7 +11,7 @@
    desmontar el diálogo, así que el foco vuelve al control que lo abrió después del cierre. */
 .velo[data-state='open'],
 .panel[data-state='open'] {
-  animation: aparecer var(--mov-medio) var(--curva-salida);
+  animation: global(aparecer) var(--mov-medio) var(--curva-salida);
 }
 
 .velo[data-state='closed'],
@@ -26,12 +26,6 @@
 
   .panel[data-state='closed'] {
     animation-name: bajar;
-  }
-}
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
   }
 }
 

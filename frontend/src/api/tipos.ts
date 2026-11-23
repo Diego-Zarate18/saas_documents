@@ -11,7 +11,20 @@ export type Fecha = string
 export type Rol = 'OF' | 'DI' | 'TI' | 'PE' | 'AD'
 export type RolTurno = 'responsable' | 'apoyo' | 'conocimiento'
 export type EstadoDocumento = 'en_tramite' | 'concluido' | 'cancelado' | 'sin_efecto'
-export type TipoMovimiento = 'registro' | 'turno' | 'devolucion'
+/** Devolver y returnar (O-22) son ambos «devolucion»; atraer (O-23), concluir (O-05) y corregir (O-25) dejan su movimiento. */
+export type TipoMovimiento = 'registro' | 'turno' | 'devolucion' | 'atraccion' | 'conclusion' | 'correccion'
+/** Los siete tipos de D-65. */
+export type TipoDocumento =
+  | 'oficio'
+  | 'solicitud_material_pago'
+  | 'requerimiento_auditoria'
+  | 'solicitud_transparencia'
+  | 'memorandum'
+  | 'circular'
+  | 'informe'
+export type Canal = 'correo' | 'papel'
+/** Catálogo cerrado de D-59. */
+export type FormaConclusion = 'con_respuesta' | 'atencion_sin_oficio' | 'enterado' | 'no_procede' | 'duplicado'
 /** Catálogo cerrado de D-32. */
 export type MotivoDevolucion =
   | 'falta_informacion'
@@ -38,6 +51,17 @@ export interface Problema {
   status: number
   detail?: string
   codigo: CodigoError
+  /** Con DUPLICADO (O-01, D-27): el documento que ya existe. */
+  existente?: DocumentoExistente
+}
+
+export interface DocumentoExistente {
+  id: Uuid
+  folio: string
+  numero_emisor: string
+  emisor: string
+  canal: Canal
+  fecha_recepcion: FechaHora
 }
 
 export class ErrorDeApi extends Error {
@@ -84,7 +108,7 @@ export interface Area {
 export interface FiltrosBandeja {
   /** Oficialía y dirección eligen el área; titular y personal siempre ven la suya. */
   id_area?: Uuid
-  tipo?: string
+  tipo?: TipoDocumento
   antiguedad_minima?: number
   pagina?: number
   tamano?: number
@@ -94,7 +118,7 @@ export interface PendienteBandeja {
   id_documento: Uuid
   folio: string
   asunto: string
-  tipo: string
+  tipo: TipoDocumento
   emisor: string
   rol: Exclude<RolTurno, 'conocimiento'>
   /** Días naturales desde que el área lo recibió (D-07). */
@@ -106,9 +130,25 @@ export interface PendienteBandeja {
   confidencial: boolean
 }
 
+/**
+ * Un campo propio de un tipo (D-66). El formulario de registro y la ficha se dibujan con esta tabla;
+ * T-05 la reemplaza por el esquema versionado de MongoDB (D-55).
+ */
+export interface CampoTipo {
+  clave: string
+  etiqueta: string
+  forma: 'texto' | 'lista'
+  obligatorio: boolean
+}
+
+/** Contenido según el tipo: texto o lista de textos, por clave de campo. */
+export type DatosTipo = Record<string, string | string[]>
+
 /** Catálogos (O-31). */
 export interface Catalogos {
-  tipos_documento: string[]
+  tipos_documento: TipoDocumento[]
+  /** Solo los tipos con campos propios tienen entrada (D-66). */
+  campos_tipo: Partial<Record<TipoDocumento, CampoTipo[]>>
 }
 
 /** Documento marcado como posible duplicado que espera revisión (O-26). */
@@ -139,13 +179,18 @@ export interface Acuse {
 export interface Movimiento {
   id: Uuid
   tipo: TipoMovimiento
+  /** Con «correccion»: el movimiento original, que queda intacto (O-25). */
+  id_corrige: Uuid | null
   /** Mismo valor en los movimientos de un turno simultáneo (D-18). */
   id_grupo_turno: Uuid | null
   area_origen: string | null
   area_destino: string
   rol: RolTurno
+  /** Instrucción del turno, justificación de la atracción o motivo de la corrección. */
   instruccion: string | null
   motivo: MotivoDevolucion | null
+  /** Con «conclusion» (D-59). */
+  forma_conclusion: FormaConclusion | null
   persona: string
   titular_al_turnar: string | null
   fecha_hora: FechaHora
@@ -165,25 +210,25 @@ export interface RegistroDocumento {
   folio: string
   /** Nulo cuando el documento es de otra área y el usuario solo ve estado y responsable (D-29). */
   asunto: string | null
-  tipo: string
+  tipo: TipoDocumento
   estado: EstadoDocumento
   confidencial: boolean
   posible_duplicado: boolean
+  extemporaneo: boolean
   numero_emisor: string | null
   emisor: string
   tipo_emisor: 'area' | 'externo'
-  fecha_documento: Fecha
-  medio_recepcion: string
+  /** Nula si el documento no trae fecha (queda como posible duplicado). */
+  fecha_documento: Fecha | null
+  /** Primera recepción; el folio se asigna con ella (D-28). */
+  canal: Canal
   fecha_recepcion: FechaHora
+  /** Segunda recepción por el otro canal (O-19). */
+  segunda_recepcion: { canal: Canal; fecha_recepcion: FechaHora } | null
   fecha_oficial: Fecha
   origen_fecha_oficial: string
   /** Nula si el contenido está oculto por D-29. */
   sintesis: string | null
-}
-
-export interface CampoExpediente {
-  etiqueta: string
-  valor: string
 }
 
 export interface Anexo {
@@ -195,6 +240,8 @@ export interface Anexo {
 
 export interface Nota {
   id: Uuid
+  /** «evidencia_atencion» sostiene una conclusión sin oficio (D-19) y no se elimina. */
+  tipo: 'general' | 'evidencia_atencion'
   area: string
   autor: string
   fecha_hora: FechaHora
@@ -202,7 +249,8 @@ export interface Nota {
 }
 
 export interface Expediente {
-  campos: CampoExpediente[]
+  /** Datos del tipo (D-66); vacío en los tipos sin campos propios. */
+  datos_tipo: DatosTipo
   anexos: Anexo[]
   notas: Nota[]
 }
@@ -212,6 +260,7 @@ export interface Relacion {
   /** Nulo si el destino no está registrado (D-33). */
   id_documento: Uuid | null
   referencia: string
+  /** Asunto del registrado o emisor del no registrado (D-33). */
   descripcion: string | null
   estado: EstadoDocumento | null
 }
@@ -249,4 +298,92 @@ export interface DestinoTurno {
 export interface ResultadoTurno {
   id_grupo_turno: Uuid
   movimientos: Movimiento[]
+}
+
+// ── Registro y recepción (O-01, O-19, O-24, O-25) ──────────────────────────
+
+export interface NuevoDocumento {
+  tipo: TipoDocumento
+  numero_emisor: string | null
+  tipo_emisor: 'area' | 'externo'
+  /** Nombre del área interna o del actor externo (RI-06). */
+  emisor: string
+  fecha_documento: Fecha | null
+  canal: Canal
+  fecha_recepcion: FechaHora
+  /** Texto corto para listados y búsqueda (D-43); también es el asunto. */
+  sintesis: string
+  confidencial: boolean
+  extemporaneo: boolean
+  datos_tipo: DatosTipo
+}
+
+export interface DocumentoRegistrado {
+  id: Uuid
+  folio: string
+}
+
+/** O-25: qué cambia en un movimiento de turno. Solo el rol, como dibuja V-15b. */
+export interface Correccion {
+  rol: RolTurno
+  motivo: string
+}
+
+// ── Recorrido (O-22, O-23, O-05) ───────────────────────────────────────────
+
+export interface Devolucion {
+  motivo: MotivoDevolucion
+  /** Con área, returna: esa área lo recibe como responsable. Sin área, regresa a quien lo envió. */
+  id_area_sugerida: Uuid | null
+  nota: string
+}
+
+export interface Conclusion {
+  forma: FormaConclusion
+  /** Obligatorio con «con_respuesta»: documento registrado o salida que responde a este. */
+  id_respuesta: Uuid | null
+  /** Obligatorio con «duplicado» (D-27). */
+  id_original: Uuid | null
+  /** Obligatoria con «atencion_sin_oficio» (evidencia) y «no_procede» (motivo). */
+  nota: string
+}
+
+// ── Relaciones (O-07, O-18) y búsqueda para elegir un documento (O-30) ─────
+
+export type DestinoRelacion = { id_documento: Uuid } | { numero: string; emisor: string }
+
+/** Resultado de buscar un documento o una salida para relacionarlo o concluir con él. */
+export interface DocumentoEncontrado {
+  id: Uuid
+  folio: string
+  asunto: string
+  fecha: FechaHora
+}
+
+// ── Salidas externas (O-20, O-21) ──────────────────────────────────────────
+
+export interface NuevaSalida {
+  tipo: TipoDocumento
+  numero: string
+  id_area_emisora: Uuid
+  destinatario: string
+  sintesis: string
+  id_responde_a: Uuid | null
+}
+
+export interface Salida {
+  id: Uuid
+  folio: string
+  sintesis: string
+  destinatario: string
+  id_responde_a: Uuid | null
+  acuse: { fecha_hora: FechaHora; recibio: string } | null
+}
+
+// ── Expediente (O-28, O-29) ────────────────────────────────────────────────
+
+export interface NuevoAnexo {
+  titulo: string
+  hojas: number
+  ubicacion: string
 }

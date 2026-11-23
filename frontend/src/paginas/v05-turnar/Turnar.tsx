@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useAreas, useTurnar } from '../../api/consultas'
 import { validarGrupoTurno } from '../../api/reglas'
-import { ErrorDeApi, type RolTurno, type Uuid } from '../../api/tipos'
+import type { RolTurno, Uuid } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Aviso } from '../../componentes/compuestos/Aviso'
+import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
 import { Modal } from '../../componentes/compuestos/Modal'
 import { Segmentado } from '../../componentes/compuestos/Segmentado'
 import { Selector } from '../../componentes/compuestos/Selector'
@@ -97,7 +98,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
                 variante="fila"
                 etiqueta={`Área destino ${i + 1}`}
                 marcador="Elige un área"
-                valor={f.id_area || undefined}
+                valor={f.id_area}
                 cargando={consultaAreas.isPending}
                 opciones={areas.filter((a) => a.id !== idPropia).map((a) => ({ valor: a.id, texto: a.nombre }))}
                 alCambiar={(id_area) => cambiar(f.clave, { id_area })}
@@ -151,11 +152,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
           .
         </Aviso>
       )}
-      {turnar.error && (
-        <Aviso tono="error" rol="alert">
-          {turnar.error instanceof ErrorDeApi ? turnar.error.problema.title : 'No se pudo turnar el documento.'}
-        </Aviso>
-      )}
+      <ErrorOperacion error={turnar.error} que="turnar el documento" />
     </Modal>
   )
 }

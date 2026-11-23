@@ -9,12 +9,16 @@
 
 import type {
   AsuntoResumen,
+  CampoTipo,
+  Canal,
   EstadoDocumento,
   Expediente,
+  FormaConclusion,
   MotivoDevolucion,
   Relacion,
   Rol,
   RolTurno,
+  TipoDocumento,
   TipoMovimiento,
   Uuid,
 } from '../tipos'
@@ -100,36 +104,40 @@ export interface DocumentoSemilla {
   id: Uuid
   folio: string
   asunto: string
-  tipo: string
+  tipo: TipoDocumento
   estado: EstadoDocumento
   confidencial: boolean
   posible_duplicado: boolean
+  extemporaneo: boolean
   numero_emisor: string | null
   emisor: string
   tipo_emisor: 'area' | 'externo'
-  /** Cómo llegó a oficialía, para «Registro en ventanilla». */
-  via_registro: 'en ventanilla' | 'por correo'
-  fecha_documento: string
-  medio_recepcion: string
+  fecha_documento: string | null
+  canal: Canal
   fecha_recepcion: string
+  segunda_recepcion: { canal: Canal; fecha_recepcion: string } | null
   fecha_oficial: string
   origen_fecha_oficial: string
   sintesis: string
   expediente: Expediente
   relaciones: Relacion[]
   asuntos: AsuntoResumen[]
+  /** O-24 (D-20): el documento no se borra; se guarda por qué se canceló. */
+  motivo_cancelacion: string | null
 }
 
 export interface MovimientoSemilla {
   id: Uuid
   id_documento: Uuid
   tipo: TipoMovimiento
+  id_corrige: Uuid | null
   id_grupo_turno: Uuid | null
   id_area_origen: Uuid | null
   id_area_destino: Uuid
   rol: RolTurno
   instruccion: string | null
   motivo: MotivoDevolucion | null
+  forma_conclusion: FormaConclusion | null
   id_persona: Uuid
   id_titular_al_turnar: Uuid | null
   fecha_hora: string
@@ -141,16 +149,16 @@ export const movimientos: MovimientoSemilla[] = []
 let siguiente = 1000
 const nuevoId = () => uuid(siguiente++)
 
-const expedienteVacio = (): Expediente => ({ campos: [], anexos: [], notas: [] })
+const expedienteVacio = (): Expediente => ({ datos_tipo: {}, anexos: [], notas: [] })
 
 interface DatosDocumento {
   folio: string
   asunto: string
-  tipo: string
+  tipo: TipoDocumento
   emisor: string
   tipo_emisor?: 'area' | 'externo'
   registro: string
-  via?: 'en ventanilla' | 'por correo'
+  canal?: Canal
   estado?: EstadoDocumento
   confidencial?: boolean
   posible_duplicado?: boolean
@@ -169,31 +177,35 @@ function documento(d: DatosDocumento, extra: Partial<DocumentoSemilla> = {}): Uu
     estado: d.estado ?? 'en_tramite',
     confidencial: d.confidencial ?? false,
     posible_duplicado: d.posible_duplicado ?? false,
+    extemporaneo: false,
     numero_emisor: d.numero_emisor ?? null,
     emisor: d.emisor,
     tipo_emisor: d.tipo_emisor ?? 'externo',
-    via_registro: d.via ?? 'en ventanilla',
     fecha_documento: d.registro.slice(0, 10),
-    medio_recepcion: 'Papel',
+    canal: d.canal ?? 'papel',
     fecha_recepcion: d.registro,
+    segunda_recepcion: null,
     fecha_oficial: d.registro.slice(0, 10),
-    origen_fecha_oficial: 'sello',
+    origen_fecha_oficial: d.canal === 'correo' ? 'correo' : 'sello',
     sintesis: d.sintesis ?? d.asunto,
     expediente: expedienteVacio(),
     relaciones: [],
     asuntos: [],
+    motivo_cancelacion: null,
     ...extra,
   })
   movimientos.push({
     id: nuevoId(),
     id_documento: id,
     tipo: 'registro',
+    id_corrige: null,
     id_grupo_turno: null,
     id_area_origen: null,
     id_area_destino: AREA.oficialia,
     rol: 'responsable',
     instruccion: null,
     motivo: null,
+    forma_conclusion: null,
     id_persona: PERSONA.marta,
     id_titular_al_turnar: null,
     fecha_hora: d.registro,
@@ -213,12 +225,14 @@ function turno(idDoc: Uuid, fecha: string, origen: Uuid, persona: Uuid, destinos
       id: nuevoId(),
       id_documento: idDoc,
       tipo: 'turno',
+      id_corrige: null,
       id_grupo_turno: grupo,
       id_area_origen: origen,
       id_area_destino: area,
       rol,
       instruccion: instruccion ?? null,
       motivo: null,
+      forma_conclusion: null,
       id_persona: persona,
       id_titular_al_turnar: titular === undefined ? titularDe(area) : titular,
       fecha_hora: fecha,
@@ -239,22 +253,24 @@ function devolucion(
     id: nuevoId(),
     id_documento: idDoc,
     tipo: 'devolucion',
+    id_corrige: null,
     id_grupo_turno: null,
     id_area_origen: origen,
     id_area_destino: destino,
     rol: 'responsable',
     instruccion: null,
     motivo,
+    forma_conclusion: null,
     id_persona: persona,
     id_titular_al_turnar: titular,
     fecha_hora: fecha,
   })
 }
 
-const SOLICITUD = 'Solicitud de material o pago'
-const AUDITORIA = 'Requerimiento de auditoría'
-const TRANSPARENCIA = 'Solicitud de transparencia'
-const OFICIO = 'Oficio'
+const SOLICITUD = 'solicitud_material_pago'
+const AUDITORIA = 'requerimiento_auditoria'
+const TRANSPARENCIA = 'solicitud_transparencia'
+const OFICIO = 'oficio'
 const OIC = 'Órgano Interno de Control'
 
 // ── Documentos del Figma ───────────────────────────────────────────────────
@@ -288,10 +304,8 @@ export const ID_0139 = documento(
   {
     fecha_documento: '2026-11-17',
     expediente: {
-      campos: [
-        { etiqueta: 'Concepto', valor: 'Equipo de cómputo de escritorio (12 piezas)' },
-        { etiqueta: 'Monto estimado', valor: '$ 184,500.00 MXN' },
-      ],
+      // El Figma dibuja también «Monto estimado», de ejemplo; D-66 no admite montos por tipo.
+      datos_tipo: { concepto: 'Equipo de cómputo de escritorio (12 piezas)' },
       anexos: [
         { id: uuid(301), titulo: 'Cotización de proveedor', hojas: 4, ubicacion: 'Archivo de oficialía, gaveta 2' },
         { id: uuid(302), titulo: 'Ficha técnica de los equipos', hojas: 2, ubicacion: 'Archivo de oficialía, gaveta 2' },
@@ -299,6 +313,7 @@ export const ID_0139 = documento(
       notas: [
         {
           id: uuid(311),
+          tipo: 'general',
           area: 'Compras',
           autor: 'Ing. Raúl Pérez',
           fecha_hora: nov(21, '10:05'),
@@ -314,7 +329,8 @@ export const ID_0139 = documento(
         descripcion: 'Solicitud de equipamiento de laboratorios 2026',
         estado: 'concluido',
       },
-      { tipo: 'en_alcance_a', id_documento: null, referencia: 'SIS/0198/2026', descripcion: null, estado: null },
+      // No registrado: la descripción guarda su emisor (D-33).
+      { tipo: 'en_alcance_a', id_documento: null, referencia: 'SIS/0198/2026', descripcion: 'Sistemas', estado: null },
     ],
     asuntos: [{ id: uuid(401), nombre: 'Equipamiento de laboratorios 2026' }],
   },
@@ -326,23 +342,35 @@ turno(ID_0139, nov(18, '11:40'), AREA.oficialia, PERSONA.marta, [
 // El Figma (V-02) muestra a Ing. Raúl Pérez como titular al turnar de esta devolución.
 devolucion(ID_0139, nov(21, '10:05'), AREA.compras, AREA.oficialia, PERSONA.raul, 'falta_anexo', PERSONA.raul)
 
-documento({
-  folio: 'OP-2026-0143',
-  asunto: 'Requerimiento de información',
-  tipo: AUDITORIA,
-  emisor: OIC,
-  registro: nov(22, '08:30'),
-})
+documento(
+  {
+    folio: 'OP-2026-0143',
+    asunto: 'Requerimiento de información',
+    tipo: AUDITORIA,
+    emisor: OIC,
+    registro: nov(22, '08:30'),
+  },
+  {
+    expediente: {
+      datos_tipo: { ente_auditor: OIC, puntos: ['Contratos de servicios generales 2025'] },
+      anexos: [],
+      notas: [],
+    },
+  },
+)
 
-documento({
-  folio: 'OP-2026-0141',
-  asunto: 'Solicitud de acceso a la información',
-  tipo: TRANSPARENCIA,
-  emisor: 'Ciudadano',
-  registro: nov(21, '13:20'),
-  via: 'por correo',
-  posible_duplicado: true,
-})
+documento(
+  {
+    folio: 'OP-2026-0141',
+    asunto: 'Solicitud de acceso a la información',
+    tipo: TRANSPARENCIA,
+    emisor: 'Ciudadano',
+    registro: nov(21, '13:20'),
+    canal: 'correo',
+    posible_duplicado: true,
+  },
+  { expediente: { datos_tipo: { solicitante: 'Ciudadano' }, anexos: [], notas: [] } },
+)
 
 const d0137 = documento({
   folio: 'OP-2026-0137',
@@ -451,18 +479,44 @@ export const rebotes: { id_documento: Uuid; motivo: string }[] = [
   { id_documento: d0131, motivo: '3 devoluciones del mismo documento' },
 ]
 
-// Acuses de salida (D-58, O-21): el Figma los muestra en V-02b y V-02c.
-export const salidas: { id: Uuid; folio: string; id_documento: Uuid; acusado_por: string }[] = [
-  { id: uuid(501), folio: 'CO-2026-0048', id_documento: ID_0139, acusado_por: 'Sistemas' },
-  { id: uuid(502), folio: 'CO-2026-0049', id_documento: d0152, acusado_por: 'Administración' },
-  { id: uuid(503), folio: 'CO-2026-0046', id_documento: d0133, acusado_por: 'el OIC' },
+// Salidas externas (O-20) con su acuse (O-21, D-58): el Figma las muestra en V-02b, V-02c y V-09.
+export interface SalidaSemilla {
+  id: Uuid
+  folio: string
+  tipo: TipoDocumento
+  numero: string
+  id_area_emisora: Uuid
+  destinatario: string
+  sintesis: string
+  id_responde_a: Uuid | null
+  fecha_hora: string
+  acuse: { fecha_hora: string; recibio: string } | null
+}
+
+const salida = (n: number, folio: string, idRespondeA: Uuid, sintesis: string, recibio: string): SalidaSemilla => ({
+  id: uuid(n),
+  folio,
+  tipo: OFICIO,
+  numero: folio,
+  id_area_emisora: AREA.compras,
+  destinatario: recibio,
+  sintesis,
+  id_responde_a: idRespondeA,
+  fecha_hora: nov(20, '12:00'),
+  acuse: { fecha_hora: nov(21, '12:00'), recibio },
+})
+
+export const salidas: SalidaSemilla[] = [
+  salida(501, 'CO-2026-0048', ID_0139, 'Oficio de respuesta a Sistemas', 'Sistemas'),
+  salida(502, 'CO-2026-0049', d0152, 'Cotización de papelería enviada', 'Administración'),
+  salida(503, 'CO-2026-0046', d0133, 'Respuesta al requerimiento de auditoría', 'el OIC'),
 ]
 
 // ── Relleno: completa los totales que muestran los indicadores del Figma ──
 // Oficialía: 24 pendientes (18 como responsable, 6 como apoyo), el más antiguo de 12 días.
 // Compras: 9 pendientes después del turno de V-05 (7 responsable, 2 apoyo), el más antiguo de 8 días.
 
-const rellenoOficialia: [folio: string, asunto: string, tipo: string, emisor: string, dia: number][] = [
+const rellenoOficialia: [folio: string, asunto: string, tipo: TipoDocumento, emisor: string, dia: number][] = [
   ['OP-2026-0101', 'Solicitud de constancia de servicio', OFICIO, 'Ciudadano', 10],
   ['OP-2026-0103', 'Petición de información sobre licitación', TRANSPARENCIA, 'Ciudadano', 10],
   ['OP-2026-0102', 'Solicitud de prórroga de entrega', OFICIO, 'Proveedor externo', 10],
@@ -516,8 +570,26 @@ for (const [folio, asunto] of rellenoFinanzas) {
   turno(id, nov(17, '12:00'), AREA.oficialia, PERSONA.marta, [[AREA.finanzas, 'responsable']])
 }
 
-/** Tipos que aparecen en el Figma; el catálogo de los 7 tipos (D-17) se cierra en E-2. */
-export const tiposDocumento = [OFICIO, SOLICITUD, AUDITORIA, TRANSPARENCIA]
+/** Los siete tipos de D-65. */
+export const tiposDocumento: TipoDocumento[] = [
+  'oficio',
+  'solicitud_material_pago',
+  'requerimiento_auditoria',
+  'solicitud_transparencia',
+  'memorandum',
+  'circular',
+  'informe',
+]
+
+/** D-66: campos propios por tipo; los otros cuatro tipos no tienen. T-05 la reemplaza por el esquema de MongoDB (D-55). */
+export const camposTipo: Partial<Record<TipoDocumento, CampoTipo[]>> = {
+  requerimiento_auditoria: [
+    { clave: 'ente_auditor', etiqueta: 'Ente auditor', forma: 'texto', obligatorio: true },
+    { clave: 'puntos', etiqueta: 'Puntos de auditoría', forma: 'lista', obligatorio: false },
+  ],
+  solicitud_transparencia: [{ clave: 'solicitante', etiqueta: 'Solicitante', forma: 'texto', obligatorio: true }],
+  solicitud_material_pago: [{ clave: 'concepto', etiqueta: 'Concepto', forma: 'texto', obligatorio: false }],
+}
 
 /** Para las pruebas: id de un documento por su folio. */
 export const idPorFolio = (folio: string): Uuid => {

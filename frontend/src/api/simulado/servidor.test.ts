@@ -45,9 +45,9 @@ describe('O-14 Bandeja', () => {
 
   it('o14_filtros_tipo_y_antiguedad', async () => {
     await entrarComo(USUARIO.marta)
-    const { elementos } = await obtenerBandeja({ tipo: 'Solicitud de transparencia', antiguedad_minima: 1 })
+    const { elementos } = await obtenerBandeja({ tipo: 'solicitud_transparencia', antiguedad_minima: 1 })
     expect(elementos.length).toBeGreaterThan(0)
-    expect(elementos.every((p) => p.tipo === 'Solicitud de transparencia' && p.antiguedad_dias >= 1)).toBe(true)
+    expect(elementos.every((p) => p.tipo === 'solicitud_transparencia' && p.antiguedad_dias >= 1)).toBe(true)
   })
 
   it('d29_titular_y_personal_solo_ven_la_bandeja_de_su_area', async () => {

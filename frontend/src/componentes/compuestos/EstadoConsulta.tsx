@@ -19,14 +19,16 @@ interface Props<T> {
    * aria-busy y el anuncio «Cargando…» lo da AnuncioCarga, uno por vista.
    */
   esqueleto: ReactNode
+  /** Muestra el esqueleto aunque la consulta ya haya llegado (lo espera otra parte de la vista). */
+  cargando?: boolean
   /** Si los datos llegaron vacíos, este texto sustituye al contenido. */
   vacio?: (datos: T) => string | null
   children: (datos: T) => ReactNode
 }
 
 /** Muestra el esqueleto, el error (con reintento) o el vacío; si hay datos, el contenido aparece con un fundido. */
-export function EstadoConsulta<T>({ consulta, que, esqueleto, vacio, children }: Props<T>) {
-  if (consulta.isPending) return esqueleto
+export function EstadoConsulta<T>({ consulta, que, esqueleto, cargando, vacio, children }: Props<T>) {
+  if (consulta.isPending || cargando) return esqueleto
   if (consulta.error || consulta.data === undefined) {
     const detalle = consulta.error instanceof ErrorDeApi ? ` ${consulta.error.problema.title}` : ''
     return (

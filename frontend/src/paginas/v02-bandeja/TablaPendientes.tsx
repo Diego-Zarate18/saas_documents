@@ -5,6 +5,7 @@ import type { PendienteBandeja, TipoMovimiento } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Estado } from '../../componentes/base/Estado'
 import { RolTurno } from '../../componentes/base/RolTurno'
+import { TEXTO_TIPO } from '../../componentes/base/textos'
 import { Forma } from '../../componentes/compuestos/Esqueleto'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
 import { Selector } from '../../componentes/compuestos/Selector'
@@ -28,6 +29,9 @@ const ICONO_MOVIMIENTO: Record<TipoMovimiento, NombreIcono> = {
   registro: 'registrar',
   turno: 'turnar',
   devolucion: 'devolver',
+  atraccion: 'atraer',
+  conclusion: 'check',
+  correccion: 'turnar',
 }
 
 const COLUMNAS = [
@@ -137,7 +141,7 @@ export function TablaPendientes({
           valor={tipo}
           opciones={[
             { valor: TODOS, texto: 'Todos' },
-            ...(catalogos.data?.tipos_documento ?? []).map((t) => ({ valor: t, texto: t })),
+            ...(catalogos.data?.tipos_documento ?? []).map((t) => ({ valor: t, texto: TEXTO_TIPO[t] })),
           ]}
           alCambiar={alCambiarTipo}
         />
@@ -183,7 +187,7 @@ export function TablaPendientes({
                           {p.confidencial && <Estado estado="confidencial" />}
                         </div>
                         <p className={estilos.meta}>
-                          {p.tipo} · {p.emisor}
+                          {TEXTO_TIPO[p.tipo]} · {p.emisor}
                         </p>
                         <p className={estilos.movimiento}>
                           <Icono nombre={ICONO_MOVIMIENTO[p.ultimo_movimiento.tipo]} tamano={13} />

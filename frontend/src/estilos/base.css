@@ -144,6 +144,13 @@ a {
   color: var(--texto-secundario);
 }
 
+/* Fundido de entrada que comparten los avisos, el contenido tras el esqueleto y el modal. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Movimiento reducido: todo cambio es inmediato y ningún bucle se repite (el brillo de los esqueletos
    queda quieto). Los desplazamientos, escalas y giros solo se declaran con no-preference; el spinner
    conserva su giro, más lento, porque indica trabajo en curso (Giro.module.css). */

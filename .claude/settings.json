@@ -27,7 +27,6 @@
       "Bash(git commit *)",
       "Bash(npx tsc *)",
       "Bash(npx vitest *)",
-      "Bash(npx eslint *)",
       "Bash(npm test *)",
       "Bash(npm create vite@latest *)",
       "Bash(git show *)"

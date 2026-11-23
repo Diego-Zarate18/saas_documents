@@ -1,0 +1,37 @@
+/* V-13b (Figma 51:1700) y el panel «Registrar acuse» de V-13 (Figma 50:1425). */
+.fila {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-12);
+  align-items: start;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+  max-width: 640px;
+  padding: var(--espacio-24);
+}
+
+.folio {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.titulo {
+  margin-top: var(--espacio-4);
+  font: var(--titulo-m);
+  letter-spacing: var(--titulo-m-espaciado);
+}
+
+.secundario {
+  margin-top: var(--espacio-4);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.guardar {
+  align-self: flex-end;
+}

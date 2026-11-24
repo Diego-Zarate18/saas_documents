@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { useAcuses, useRebotes } from '../../api/consultas'
 import { BotonEnlace } from '../../componentes/base/Boton'
 import { Estado } from '../../componentes/base/Estado'
+import { TEXTO_REGLA_REBOTE } from '../../componentes/base/textos'
 import { Forma } from '../../componentes/compuestos/Esqueleto'
 import { EstadoConsulta } from '../../componentes/compuestos/EstadoConsulta'
 import { Tarjeta } from '../../componentes/compuestos/Tarjeta'
@@ -53,7 +54,7 @@ export function TarjetaRebotes({ cargando }: Props) {
                 <Link to={`/documentos/${r.id_documento}`} className={estilos.folio}>
                   {r.folio}
                 </Link>
-                <p>{r.motivo}</p>
+                <p>{r.reglas.map((regla) => TEXTO_REGLA_REBOTE[regla]).join(' · ')}</p>
               </li>
             ))}
           </ul>

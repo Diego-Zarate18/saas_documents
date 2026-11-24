@@ -1,0 +1,311 @@
+/* V-11 Asunto (Figma 49:1318), V-11c Asuntos de Dirección (65:2922) y V-11b Asignar a un asunto (48:1407). */
+.hilo,
+.alcance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-14);
+  padding: var(--espacio-24);
+}
+
+.cabecera {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espacio-12);
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-10);
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-14) var(--espacio-16);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-relieve);
+  box-shadow: var(--relieve-sombra);
+}
+
+.valor {
+  font: var(--display-l);
+  letter-spacing: var(--display-l-espaciado);
+}
+
+.concluido {
+  color: var(--estado-concluido);
+}
+
+.enTramite {
+  color: var(--estado-en-tramite);
+}
+
+.nodos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-12);
+}
+
+.enlace {
+  flex: none;
+  margin-left: var(--espacio-8);
+  color: var(--texto-secundario);
+}
+
+.nodo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--espacio-12);
+  min-width: 0;
+  padding: var(--espacio-12) var(--espacio-14);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+}
+
+/* Documento no registrado (D-33): borde discontinuo en arena. */
+.noRegistrado {
+  border: 1px dashed var(--fondo-detalle);
+  background: color-mix(in srgb, var(--fondo-detalle-suave) 50%, transparent);
+}
+
+.textosNodo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-width: 0;
+}
+
+.etiquetaNodo {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+/* WCAG 1.4.1 (accesslint link-in-text-block): el folio enlazado va junto al texto de la etiqueta; el color
+   solo no lo distingue, así que lleva subrayado. Diseño propio: el Figma no lo subraya. */
+.etiquetaNodo a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.folioNoRegistrado,
+.tituloNoRegistrado {
+  color: color-mix(in srgb, var(--estado-posible-duplicado) 80%, var(--texto-principal));
+}
+
+.folioNoRegistrado {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+}
+
+.tituloNoRegistrado {
+  font: var(--cuerpo-s);
+}
+
+.lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+}
+
+.areas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+  padding: 0;
+  list-style: none;
+}
+
+.area {
+  display: flex;
+  justify-content: space-between;
+  font: var(--cuerpo-s);
+}
+
+.barra {
+  display: block;
+  height: 4px;
+  margin-top: var(--espacio-6);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-hundido);
+}
+
+.barra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fondo-detalle);
+}
+
+.barra span.mayor {
+  background: var(--fondo-marca);
+}
+
+.personas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-6);
+  padding: 0;
+  list-style: none;
+}
+
+.persona {
+  padding: var(--espacio-4) var(--espacio-10);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-hundido);
+  font: var(--pie);
+}
+
+.filtrado {
+  display: flex;
+  gap: var(--espacio-10);
+  padding: var(--espacio-14) var(--espacio-16);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-relieve);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.filtrado svg {
+  flex: none;
+  margin-top: var(--espacio-2);
+}
+
+/* V-11b */
+.buscarAsunto {
+  position: relative;
+}
+
+.lupa {
+  position: absolute;
+  right: var(--espacio-12);
+  bottom: 13px;
+  color: var(--texto-secundario);
+  pointer-events: none;
+}
+
+.asuntos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: 0;
+  border: 0;
+}
+
+.leyenda {
+  margin-bottom: var(--espacio-8);
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.opcionAsunto {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-12);
+  padding: var(--espacio-12) var(--espacio-16);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+  cursor: pointer;
+  transition:
+    background-color var(--mov-corto) var(--curva-estandar),
+    border-color var(--mov-corto) var(--curva-estandar);
+}
+
+.opcionAsunto:has(input:checked) {
+  border-color: var(--borde-marca);
+  background: var(--fondo-marca-suave);
+}
+
+.opcionAsunto[data-pertenece] {
+  cursor: default;
+}
+
+.opcionAsunto[data-pertenece] .nombreAsunto {
+  color: var(--texto-secundario);
+}
+
+.circulo {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--fondo-marca);
+}
+
+.textosAsunto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.nombreAsunto {
+  font: var(--etiqueta-m);
+}
+
+.metaAsunto {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.yaPertenece {
+  padding: var(--espacio-3) var(--espacio-10);
+  border-radius: var(--radio-pildora);
+  background: color-mix(in srgb, var(--estado-concluido) var(--tinte-estado), transparent);
+  font: var(--pie);
+  color: color-mix(in srgb, var(--estado-concluido) 80%, var(--texto-principal));
+}
+
+.vacio {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.crear {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-14) var(--espacio-16);
+  border: 1px dashed var(--fondo-detalle);
+  border-radius: var(--radio-control);
+  background: color-mix(in srgb, var(--fondo-detalle-suave) 40%, transparent);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.crearTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  font: var(--etiqueta-m);
+  color: var(--texto-marca);
+}
+
+.nuevo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espacio-12);
+}
+
+.nuevo > button {
+  align-self: flex-start;
+}

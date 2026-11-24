@@ -1,256 +1,205 @@
-# Reporte T-02a: Flujo del documento en la interfaz (con datos simulados)
+# Reporte T-02b: Consulta, asuntos y administración en la interfaz (con datos simulados)
 
 - Estado: completa
 - Fecha: 2026-11-23
 
 ## Qué hice
 
-Seguí las cinco fases y anuncié en cada una el nivel de ponytail; Diego confirmó cada cambio (ver Desviaciones sobre los niveles). La evidencia completa está en `docs/pruebas/T-02a-flujo.md`.
+Seguí las cinco fases y anuncié en cada una el nivel de ponytail; Diego confirmó cada cambio (ver Desviaciones). La evidencia completa está en `docs/pruebas/T-02b-consulta-administracion.md`.
 
-1. **Comandos.** `npm ci`, `lint`, `typecheck`, `test` y `build` terminan con código 0 y sin advertencias, incluida la de `Select`. Hay 107 pruebas; en la T-01b había 52.
-2. **Parte 0.** Los seis puntos, cada uno con su comprobación:
-   - `Select` siempre controlado. `preparar.ts` hace fallar cualquier prueba que imprima en `console.error` o `console.warn`; con el código anterior fallan dos pruebas de Turnar.
-   - La columna lateral solo se pone en esqueleto en la carga inicial. Una prueba nueva lo comprueba y falla con el código anterior.
-   - `@keyframes aparecer` existe una sola vez, en `base.css`.
-   - `EstadoConsulta` recibe `cargando`.
-   - Precarga de las tres fuentes latinas: en el build, cada `href` coincide con la `url()` de su `@font-face`.
-   - Quité `npx eslint *` de `.claude/settings.json`.
-3. **Pruebas por operación y por regla.** Están en `operaciones.test.ts` (36), `modales.test.tsx` (16), `Ficha.test.tsx` y `Bandeja.test.tsx`, con los ids del catálogo (ver Desviaciones). Cubren:
-   - folio consecutivo sin huecos aunque falle un registro;
-   - duplicado detectado y segunda recepción;
-   - confidencial visible solo al titular y a quien tiene movimiento;
-   - las cinco formas de concluir y sus requisitos;
-   - quién concluye (D-44, D-58);
-   - campos obligatorios por tipo;
-   - el bloque «Datos del tipo» solo en tres tipos (servidor e interfaz);
-   - el turno de OF o DI sobre un pendiente de otra área no lo cierra (D-42).
+1. **Comandos:** `npm ci`, `lint`, `typecheck`, `test` y `build` terminan con código 0 y sin advertencias. Hay **166 pruebas** en 13 archivos (la T-02a dejó 107).
+2. **Parte 0:** los cinco puntos, cada uno con su prueba:
+   - **D-67:** la prueba `d42_…` ya cubría el caso; ahora se llama `d67_…`.
+   - **D-68:** atraer saca a todas las áreas responsables y las registra como orígenes del movimiento («Compras y Jurídico»). Probado con OP-2026-0152; la prueba falla sin la regla.
+   - **«Regresa a…»:** V-07 usa los roles corregidos (O-25), como el servidor.
+   - **Buscador:** espera 250 ms tras la última tecla antes de consultar O-30; probado con temporizadores simulados.
+   - **Anexo y nota:** ya son modales, con el patrón de la T-02a.
+3. **Parte B:** son las operaciones y consultas simuladas, con las convenciones de la T-02a (latencia, errores del contrato, D-29, D-44):
+   - O-30 completo;
+   - O-08, O-27 y la parte de O-18 que saca un documento de un asunto;
+   - C2 (hilo), C3 (rebotes, ahora también en la tarjeta de la bandeja) y C5 (alcance);
+   - O-26 con la comparación con el candidato;
+   - el listado de salidas;
+   - O-32 a O-35.
 
-   Además desactivé a propósito dos reglas (la corrección de O-25 y la salida del área anterior al atraer) y en cada caso falló su prueba.
-4. **Modales.** Los ocho modales nuevos tienen foco atrapado, Esc, foco devuelto, botón pendiente y error en línea. Hay una prueba por modal, más una del buscador de documento dentro del modal (Esc cierra su lista sin cerrar el modal), y lo revisé en el navegador.
-5. **Recorrido completo** con capturas, en Chrome sin interfaz y con los usuarios de prueba: registrar → turnar → devolver → atraer → relacionar → salida con acuse → concluir con respuesta. Las 14 comprobaciones de bandeja, ficha y acuses pasan con el código final (`T-02a-verificacion/recorrido-resultado.md`).
-6. **accesslint e impeccable** en los 20 estados (vistas, modales y estados de error nuevos): **0 hallazgos críticos.**
-   - Las vistas sin modal tienen 0 violaciones.
-   - En los modales y el menú solo aparecen los falsos positivos de Radix y del fondo inerte ya conocidos de la T-01: `aria-hidden-focus`, `focus-visible` y `focus-order` (graves o moderados), y `landmarks/region` (moderado). En V-10 comprobé que cada elemento marcado está dentro de `#root` inerte o es una guarda de foco de Radix.
-   - impeccable no tiene hallazgos en el código. En la página, el único hallazgo real fue el contraste del aviso informativo, ya corregido; el resto son avisos explicados.
-7. **Colores, dependencias y capas:** ningún color, duración ni curva fuera de los tokens; `package.json` sin cambios; nada fuera de `src/api/index.ts` importa `api/simulado` (`greps-resultado.txt`).
-8. **`/ponytail-review`** (nivel full): dio 9 hallazgos. Corregí el 1 y el 2, los dos «must fix»:
-   - «Relacionar» aparecía sin ver el contenido.
-   - Los documentos no registrados se identificaban solo por número.
-
-   Corregí también el 3, el 4, el 5 y el 8. La prueba del 5 encontró un defecto real: Esc en el buscador cerraba todo el modal. El 6 queda como duda y el 7 y el 9 como deuda, como pidió Diego (`ponytail-review.md`).
-9. **Commit:** uno solo, `T-02a: …`, sin coautoría.
+   Ya había un administrador (Mtro. Luis Gómez). Hay más de 50 pruebas nuevas con el id del catálogo en el nombre: `o30_`, `o08_`, `o26_`, `o27_`, `o18`, `o28_`, `o29_`, `o32_` a `o35_`, `c2_`, `c3_` y `c5_`.
+4. **Parte A:** construí las once vistas como están en el Figma y el emisor y el destinatario ahora se eligen del catálogo:
+   - V-06, V-11, V-11b, V-11c, V-12, V-13 (absorbe `/salidas`), V-14 y V-16 a V-19;
+   - emisor y destinatario en V-03, V-10 y V-13b son selectores del catálogo (RI-06), y el servidor rechaza los que no son un área o un actor activo.
+5. **Menú:** borré `EnConstruccion`. TypeScript exige una vista por opción, y la prueba `t02b_ninguna_opcion_del_menu_<ROL>_esta_en_construccion` recorre el menú de los cinco roles.
+6. **Modales nuevos** (anexo, nota, V-11b y «Asignar documento»): foco atrapado, Esc, foco devuelto, botón pendiente y error en línea, con prueba y revisados en el navegador.
+7. **Recorrido en el navegador:** 17 de 17 comprobaciones, con 17 capturas (`recorrido-resultado.md`).
+8. **accesslint e impeccable** en 27 estados: **0 hallazgos críticos.**
+   - Los graves que quedan son el falso positivo de la T-01 en los modales: `#root` inerte y guardas de Radix, comprobado en `inerte-resultado.md`.
+   - Corregí un `link-in-text-block` grave en el hilo de V-11 y un contraste de 4.46:1 en V-14.
+   - impeccable no tiene hallazgos en el código; el audit da 14/20, «Bueno», y los menores están listados.
+9. **Colores, dependencias y capas:** ningún color, duración ni curva fuera de los tokens; `package.json` sin cambios; nada fuera de `api/index.ts` importa `api/simulado` (`greps-resultado.txt`).
+10. **`/ponytail-review`** (full): dio 8 hallazgos, todos corregidos por pedido de Diego y con su prueba (`ponytail-review.md`).
+    - El *must fix* era que desactivar un área con hijas activas las sacaba del organigrama.
+    - Las pruebas del Intro durante la espera y de la relectura en V-14 se comprobaron por mutación.
 
 ## Archivos
 
 Creados:
 
 - **Vistas:**
-  - `frontend/src/paginas/v03-registrar/`: `Registrar.tsx`, `Puntos.tsx` y `Registrar.module.css` (V-03).
-  - `v07-devolver/Devolver.tsx` (V-07 y V-07b).
-  - `v08-atraer/Atraer.tsx` y `.module.css` (V-08).
-  - `v09-concluir/Concluir.tsx` (V-09 y V-09b).
-  - `v10-relacionar/Relacionar.tsx` y `.module.css` (V-10, con O-18).
-  - `v15-oficialia/`: `Cancelar.tsx`, `Corregir.tsx` con su `.module.css`, y `SegundaRecepcion.tsx` (V-15a, b y c).
-  - `v13b-salida/`: `RegistrarSalida.tsx`, `Salidas.tsx` y `Salidas.module.css` (V-13b y el panel de acuse).
-- **Componentes:**
-  - `componentes/base/Interruptor.tsx`: interruptor de V-03.
-  - `componentes/compuestos/`:
-    - `BuscadorDocumento.tsx`: combobox para elegir un documento o una salida.
-    - `GrupoOpciones.tsx`: catálogo de opciones de radio con leyenda.
-    - `Menu.tsx`: «Más acciones» y «Más» (Radix DropdownMenu).
-    - `Resumen.tsx`: cajas «Al concluir», «Al cancelar» y similares.
-    - `ErrorOperacion.tsx`: error en línea de una operación.
-    - Cada uno con su `.module.css`.
-- **Pruebas:** `frontend/src/api/simulado/operaciones.test.ts` y `frontend/src/paginas/modales.test.tsx`.
+  - `frontend/src/paginas/v06-buscar/` (`Buscar.tsx`, `.module.css` y `paginas.ts` con su prueba);
+  - `v11-asuntos/` (`Asuntos.tsx`, `Asignar.tsx` y `.module.css`): V-11, V-11c, V-11b y «Asignar documento»;
+  - `v12-rebotes/`, `v14-duplicados/`, `v16-organizacion/`, `v17-areas/`, `v18-personas/` y `v19-actores/`;
+  - `v04-ficha/AgregarAlExpediente.tsx`: O-28 y O-29;
+  - `paginas/listado.module.css`: piezas comunes de los listados con panel.
+- **Componentes:** `componentes/compuestos/CampoBusqueda.tsx` y `.module.css` (el buscador en píldora de V-16 a V-19).
+- **Pruebas:**
+  - `api/simulado/consultas.test.ts` (Parte B);
+  - `paginas/consulta.test.tsx` (vistas de consulta y asuntos);
+  - `paginas/administracion.test.tsx` (V-16 a V-19);
+  - `componentes/compuestos/BuscadorDocumento.test.tsx`;
+  - `paginas/v06-buscar/paginas.test.ts`.
 - **Evidencia:**
-  - `docs/pruebas/T-02a-flujo.md`.
-  - `docs/pruebas/T-02a-verificacion/`:
-    - scripts de CDP y del DOM (`cdp.mjs`, `dom.mjs`), `recorrido.mjs`, `auditar.mjs` y `greps.sh`;
-    - `inerte.mjs`: comprueba el falso positivo `aria-hidden-focus`.
-    - Sus resultados: `criterio1-resultado.txt`, `recorrido-resultado.md`, `greps-resultado.txt`, `inerte-resultado.md` y `auditoria/` (un JSON por estado y `resumen.md`).
-    - Los informes `impeccable-informe.md` y `ponytail-review.md`.
-  - `docs/pruebas/T-02a-capturas/`: capturas del Figma (`figma-*.png`), de las vistas (`app-*.png`) y del recorrido (`app-recorrido-*.png`).
-- `ai/handoff/historial/T-02a-asignacion.md` y `T-02a-reporte.md`.
+  - `docs/pruebas/T-02b-consulta-administracion.md`;
+  - `docs/pruebas/T-02b-verificacion/`:
+    - scripts: `cdp.mjs`, `dom.mjs`, `recorrido.mjs`, `auditar.mjs`, `inerte.mjs` y `greps.sh`;
+    - resultados: `criterio1-resultado.txt`, `recorrido-resultado.md`, `greps-resultado.txt`, `inerte-resultado.md`, `auditoria/` e `impeccable-fuente.json`;
+    - informes: `impeccable-informe.md` y `ponytail-review.md`.
+  - `docs/pruebas/T-02b-capturas/`: `figma-*.png`, `app-*.png` y `app-recorrido-*.png`.
+- **Historial:** `ai/handoff/historial/T-02b-asignacion.md` y `T-02b-reporte.md`.
 
 Modificados:
 
 - **API:**
-  - `tipos.ts`: siete tipos, tabla de campos, canal, movimientos nuevos y los datos de cada operación.
-  - `reglas.ts`: `validarDatosTipo` y `validarConclusion`, que comparten el servidor y los formularios.
-  - `index.ts` y `consultas.ts`: operaciones nuevas y `useEscritura`.
-  - `simulado/datos.ts`: ids de tipo, `camposTipo`, canal y salidas con acuse.
-  - `simulado/servidor.ts`: las operaciones de la Parte B.
-- **Componentes:**
-  - `Campo` (`AreaTexto` y variante blanca), `Selector` (`CampoSelector`), `Segmentado` (ancho, ícono y deshabilitado) y `OpcionRadio` (código).
-  - `EstadoConsulta` (`cargando`), `Aviso`, `Modal` y `base.css` (`@keyframes aparecer`), y `textos.ts` (tipos, canales, formas y `textoMovimiento`).
+  - `tipos.ts`: tipos de O-30, asuntos, C2, C3, C5, O-26, salidas y O-32 a O-35; los actores externos van en O-31.
+  - `index.ts` y `consultas.ts`: operaciones y hooks nuevos.
+  - `simulado/servidor.ts`: D-68, RI-06 y la Parte B.
+  - `simulado/datos.ts`: jerarquía y estado de áreas, baja de personas, actores, asuntos, OP-2026-0140, OP-2026-0109 y salidas de V-13.
 - **Vistas:**
-  - `Ficha.tsx` (acciones y menús), `Laterales.tsx` (recorrido y «corregido») y `Secciones.tsx` («Datos del tipo», canal y segunda recepción).
-  - `Bandeja.tsx`, `TarjetasLaterales.tsx`, `TablaPendientes.tsx` y `VistaPreviaRecorrido.tsx` (Parte 0 y tipos).
-  - `Turnar.tsx` (`Select` controlado), `EnConstruccion.tsx` (acciones) y `formato.ts` (fechas).
-- **Rutas y permisos:** `rutas.tsx` (`/registrar` y `/salidas`) y `permisos.ts` (Atraer y menús).
-- **Otros:**
-  - `preparar.ts`: falla ante advertencias.
-  - `index.html`: precarga de fuentes.
-  - `.claude/settings.json`: sin la regla de eslint.
-  - Pruebas de la T-01 actualizadas en `servidor.test.ts`, `Ficha.test.tsx` y `Bandeja.test.tsx`.
-  - `Modal.tsx`: Esc desde un combobox abierto no cierra el modal.
-  - `Aviso.module.css`: fondo opaco del aviso informativo, por contraste.
+  - `Ficha.tsx`: modales de anexo, nota y V-11b; «Regresa a…» con roles corregidos.
+  - `Salidas.tsx`: el listado V-13.
+  - `RegistrarSalida.tsx`, `Registrar.tsx` y `Relacionar.tsx`: selectores del catálogo.
+  - `TarjetasLaterales.tsx`: la tarjeta «Rebotes» usa C3.
+- **Componentes:** `BuscadorDocumento.tsx` (espera y solo documentos) y `textos.ts` (reglas de rebote, tipos de actor y roles).
+- **Rutas:** `rutas.tsx` (una vista por opción) y `menu.ts` (sin los datos del Figma que ya nadie leía).
+- **Configuración de pruebas:** `vite.config.ts` y `pruebas/preparar.ts` (ver Desviaciones).
+- **Pruebas de la T-02a ajustadas:** `operaciones.test.ts`, `modales.test.tsx`, `Ficha.test.tsx` y `rutas.test.tsx`.
+- **Borrado:** `paginas/en-construccion/EnConstruccion.tsx`.
 - `ai/handoff/reporte.md`: este reporte.
 
 ## Evidencia
 
-Detalle en `docs/pruebas/T-02a-flujo.md`.
+Detalle en `docs/pruebas/T-02b-consulta-administracion.md`.
 
 - **Criterio 1:**
   - `npm ci`: 0 vulnerabilidades.
   - `lint`: sin hallazgos.
   - `typecheck`: sin errores.
-  - `test`: 8 archivos, 107 pruebas pasadas, ninguna advertencia impresa (el control de `preparar.ts` hace fallar cualquier prueba que imprima una).
+  - `test`: 13 archivos, 166 pruebas pasadas.
   - `build`: sin advertencias.
   - Todos con código 0 (`criterio1-resultado.txt`).
-- **Criterio 2:** tabla de la Parte 0 en `T-02a-flujo.md`, con la comprobación de cada punto.
-- **Criterio 3:** `operaciones.test.ts`, `modales.test.tsx` y las dos comprobaciones por mutación.
-- **Criterio 4:** `modales.test.tsx`:
-  - foco, Esc y foco devuelto en los ocho modales;
-  - botón pendiente y refresco tras devolver;
-  - error del servidor en línea en V-10;
-  - campo con error en V-09b y V-03;
-  - teclado del buscador.
-
-  Capturas `app-v*-modal.png` y `app-recorrido-*.png`.
-- **Criterio 5:** `recorrido-resultado.md`, 14 de 14 comprobaciones y 17 capturas `app-recorrido-*`.
-- **Criterio 6:**
-  - `auditoria/resumen.md`, con un JSON de accesslint y otro de impeccable por estado.
-  - `inerte-resultado.md`: `#root.inert` es verdadero y los 19 elementos marcados en V-10 son el falso positivo.
-  - `impeccable-informe.md`: audit (14/20, «Bueno»), polish y la lista de hallazgos menores.
-  - En el menú V-04d, las 5 violaciones están sobre las dos guardas de foco de Radix (spans invisibles con `tabindex="0"` que solo devuelven el foco al menú) y el envoltorio del menú flotante.
-- **Criterio 7:** `greps-resultado.txt`: sin colores ni tiempos fuera de los tokens, sin cambios en las dependencias y sin importaciones de `api/simulado` fuera de `api/index.ts`.
-- **Criterio 8:** `ponytail-review.md`, con el resultado de cada hallazgo.
-- **Criterio 9:** `git log -1 --format=%B` muestra solo `T-02a: …`. `git status` queda limpio y `git ls-files` no incluye `node_modules`, `dist` ni `.env` (lo compruebo tras el commit).
+- **Criterio 2:** tabla de la Parte 0, con una comprobación por punto.
+- **Criterio 3:** tabla de lo que pide la asignación frente a las pruebas.
+- **Criterio 4:** la prueba del menú por rol, más el recorrido de todas las opciones en el navegador.
+- **Criterio 5:** las cuatro filas de foco nuevas en `modales.test.tsx`, las pruebas de pendiente y error, y capturas.
+- **Criterio 6:** `recorrido-resultado.md`, 17 de 17.
+- **Criterio 7:** `auditoria/resumen.md`, `inerte-resultado.md` e `impeccable-informe.md`.
+- **Criterio 8:** `greps-resultado.txt`.
+- **Criterio 9:** `ponytail-review.md`.
+- **Criterio 10:** `git log -1 --format=%B` muestra solo `T-02b: …`. `git status` queda limpio y `git ls-files` no incluye `node_modules`, `dist` ni `.env` (lo comprobé tras el commit).
 
 ## Decisiones que tomé
 
-- **Tipo de documento:** en el contrato es el id (`TipoDocumento`, D-65). Los nombres viven en `TEXTO_TIPO`, como `TEXTO_MOTIVO`.
-- **Tabla de campos por tipo (D-66):** es un dato de la semilla servido por O-31 (`campos_tipo`). El formulario, la ficha y el servidor la leen, y la validación es una sola función (`validarDatosTipo`). `Expediente.campos` (etiqueta y valor) pasa a `Expediente.datos_tipo`.
-- **O-01:**
-  - El asunto es la síntesis, porque V-03 no tiene campo de asunto y O-01 solo recibe síntesis.
-  - El folio usa las siglas del área de quien registra y el año del reloj simulado: es el máximo más uno entre documentos y salidas de esas siglas.
-  - La fecha oficial es el día de la recepción; su origen es «sello» si llegó en papel y «correo» si llegó por correo.
-- **Recepción:** `medio_recepcion` (texto) pasa a `canal` (`papel` o `correo`) más `segunda_recepcion`.
-- **O-22:** devolver y returnar son una sola operación. Sin área sugerida regresa al área que lo envió; con área, esa área lo recibe como responsable con su titular (D-31). Ambos dejan un movimiento «devolucion».
-- **O-23:** el movimiento «atraccion» tiene como origen el área responsable actual, así la regla de D-42 la deja sin pendiente. Atraer aparece al titular con acceso completo cuya área no es la responsable; eso incluye al área de apoyo, aunque el Figma solo dibuja el caso de conocimiento.
-- **O-05:**
-  - Deja un movimiento «conclusion» con `forma_conclusion`.
-  - Con respuesta, crea RESPONDE_A desde la respuesta; si la respuesta es una salida, usa su `id_responde_a`.
-  - La evidencia es una nota tipada `evidencia_atencion`.
-  - El duplicado también lleva nota, porque D-59 exige nota en toda forma salvo con respuesta y enterado.
-- **O-25:**
-  - Solo corrige el rol de un turno, que es lo que dibuja V-15b.
-  - Deja un movimiento «correccion» con `id_corrige`.
-  - Los pendientes se calculan con el rol corregido (`efectivos()`), y el original se marca «corregido» en el recorrido.
-- **O-24:** guarda `motivo_cancelacion`. Un documento cancelado no admite anexos ni notas (regla de O-09).
-- **Salidas:** `SalidaSemilla` con acuse (`fecha_hora`, `recibio`). El folio usa las siglas del área emisora (`CO-2026-…`, `FI-2026-…`).
-- **Caché tras escribir (`useEscritura`):** las consultas que no están en pantalla se descartan y las que sí están se releen antes de cerrar el modal. Sin esto, al volver a la bandeja se veía un instante la lista anterior a la operación; lo descubrí en el recorrido.
-- **Menú:** al elegir una opción, el foco pasa a «Más acciones» antes de abrir el modal, así el modal lo devuelve al cerrar.
-- **Relacionar (O-07):** se ofrece solo a quien ve el contenido (D-29). Sin verlo, el «Más» del área no aparece, porque sus dos acciones (relacionar y asunto) son sobre el contenido.
-- **No registrados (D-33):** se identifican por número y emisor; el emisor va en `descripcion`. La relación de la semilla `SIS/0198/2026` ahora lleva su emisor, «Sistemas».
-- **Esc en el modal:** si Esc viene de un combobox con la lista abierta (`aria-expanded="true"`), `Modal` no se cierra; Esc cierra primero la lista.
-- **Aviso informativo:** su fondo es `--fondo-base` opaco. Al 80 % sobre el vidrio del modal, el texto quedaba en 4.4:1; opaco da 5.06:1.
-- **Fechas:** los campos `datetime-local` se capturan en hora de Ciudad de México con −06:00 fijo; lleva su comentario `shortcut:`.
+- **D-68:** el movimiento de atracción guarda las áreas responsables adicionales en `otros_origenes`. `area_origen` las nombra juntas («Compras y Jurídico»). Si el área que atrae ya era una de dos responsables, atraer la deja como la única.
+- **C3:**
+  - Las «áreas distintas» cuentan las áreas que tuvieron el documento como responsables, sin oficialía, que es paso obligado (HU-F1). Si contara oficialía, el flujo normal oficialía → Dirección → área ya sería un rebote. Por eso OP-2026-0118 da 1 área y no las 3 del Figma.
+  - Solo cuenta documentos en trámite, con los movimientos del mes elegido.
+  - La devolución guarda `con_area_sugerida` para distinguir el returno de la «no competencia» sin área.
+- **O-26:**
+  - El candidato es el último documento registrado antes del mismo emisor con la misma fecha del documento, o con el mismo número si lo trae.
+  - La síntesis «coincide» si comparte la mitad de las palabras de cuatro letras o más.
+  - Sin candidato solo se puede decir «son distintos».
+- **O-30:** los filtros sobre lo que el usuario no ve (síntesis, campo propio, número de un documento de otra área) no se aplican a esos documentos, para no revelar su contenido.
+  - Fuera de la visibilidad se muestran folio, tipo, estado y responsable.
+  - En un confidencial ajeno también se muestra el número, como dibuja el Figma.
+- **C2:** las salidas que responden a un documento del hilo son nodos con RESPONDE_A.
+- **C5:** las personas salen solo de los documentos cuyo contenido se ve.
+- **O-27 desde V-11b:** crear con documento exige O-08 (TI o PE) y se valida antes de crear, para no dejar un asunto a medias.
+- **O-33:**
+  - Las siglas son de 2 a 5 letras.
+  - Un área nueva debe depender de otra; solo la raíz actual puede no depender de nadie.
+  - No se desactiva un área con áreas activas que dependan de ella (`/ponytail-review` 1).
+  - Renombrar un área actualiza el emisor de sus documentos, porque la semilla los liga por nombre; lleva comentario `shortcut:`.
+- **O-34:** el administrador no puede darse de baja a sí mismo. Un titular que cambia de área o se da de baja deja su área vacante. Una persona dada de baja ya no entra.
+- **O-35:** el nombre del actor es único. Renombrarlo actualiza documentos y salidas. No hay operación de borrar, solo desactivar.
+- **Semilla:**
+  - Agregué las áreas del Figma (Servicios Generales, Unidad de Transparencia bajo Jurídico, Vinculación vacante, Contraloría interna y Archivo de concentración inactiva) y sus titulares.
+  - Agregué a Lic. Carmen Ruiz como segunda persona de oficialía, sin ser titular.
+  - Agregué los actores de V-19 y como actores los emisores que ya usaban los documentos («Ciudadano», «Proveedor externo», «Órgano Interno de Control»…).
+  - Agregué tres asuntos, OP-2026-0140 (candidato de OP-2026-0141), OP-2026-0109 (confidencial de Jurídico) y cuatro salidas de V-13 con las siglas de su área.
+  - Se conservan los 24 pendientes de oficialía y los 9 de Compras.
+  - Pedro, Laura, Hugo, Irma y Óscar tienen usuario y entran con cualquier contraseña, como los demás.
+- **Pruebas:** con 13 archivos en paralelo, cuatro pruebas de la T-02a fallaban solo por tiempo. Subí el tiempo por prueba a 15 s (`vite.config.ts`) y la espera de `findBy` de 3 a 5 s (`preparar.ts`).
 
 **Diseño propio para revisar** (el Figma no lo dibuja o lo dibuja de otra forma):
 
-- **`/salidas`:**
-  - Sigue «en construcción», pero ya tiene la acción «Registrar salida» del encabezado de V-13, que abre V-13b.
-  - Al guardar la salida aparece el panel «Registrar acuse» de V-13 para esa salida.
-- **V-13b:** quité el aviso «El contenido según el tipo… se definirá con el modelo de datos (E-2)», porque D-66 ya lo cerró. El destinatario es un campo de texto y su ayuda no lleva «Proveedor.».
-- **V-10:**
-  - El emisor del documento no registrado es un campo de texto; el Figma dibuja un selector.
-  - Hay un aviso rojo al elegir «Sustituye a» y el campo «Documento» para elegir un registrado.
-- **V-09:**
-  - El aviso «puedes concluirlo» y el resumen «Al concluir» aparecen en todas las formas; V-09b los omite.
-  - Los campos de «No procede» (motivo) y «Duplicado» (documento original y nota) no tienen dibujo.
-- **V-07:**
-  - El botón lleva el nombre del área tal cual («Devolver a Oficialía de partes»); el Figma dice «Devolver a oficialía».
-  - El aviso rojo de rebote sin área sugerida usa texto propio.
-- **V-15b:** los roles que romperían RI-10 se deshabilitan, con la ayuda para el caso del responsable.
-- **V-03:**
-  - Ayuda «Sin fecha se marca posible duplicado.».
-  - Actor externo como campo de texto (actores externos es T-02b).
-  - La fecha y hora de recepción toma por omisión la hora actual.
-  - Al enviar con errores, el foco va al primer campo con error.
-- **Componentes y estilos:**
-  - Interruptor encendido en guinda, con la pista apagada en gris cálido para cumplir 3:1.
-  - La lista desplegada del buscador de documentos.
-  - El menú «Más» de titular y personal (Relacionar y «Asignar a un asunto», que abre el aviso en construcción de V-11b).
-  - El folio grande de V-03 en mono de 28 px.
+- **Anexo y nota:** los modales completos.
+- **V-06:**
+  - «Recibido» ofrece periodos fijos («Este mes», «En 2026»), porque el Figma dibuja un rango sin selector.
+  - El campo «Ente auditor contiene» / «Solicitante contiene» aparece al elegir uno de los dos tipos.
+  - El paginador muestra la primera, la última y las vecinas, con «…».
+  - La fila de otra área dice «De otra área: solo estado y responsable».
+- **V-11:**
+  - El selector «Asunto:» del encabezado y la dirección `?id=`: el Figma no dibuja una lista de asuntos.
+  - El modal «Asignar documento».
+  - El folio enlazado del hilo va subrayado (accesibilidad).
+  - Las barras de C5 van en guinda si el área tiene más de la mitad del máximo.
+- **V-11b:** el formulario «Crea un asunto nuevo» y el botón «Elegir un asunto existente».
+- **V-12:** la explicación de cada regla en el detalle y el filtro de periodo con los últimos doce meses.
+- **V-13:**
+  - El panel «Acuse registrado» de una salida que ya lo tiene.
+  - Una tarjeta por mes.
+- **V-14:** el texto cuando no hay candidato y la etiqueta en tinta sobre el verde (contraste).
+- **V-17 y V-19:** las ayudas de siglas y titular, y el aviso de actor inactivo.
+- **V-18:** el modo «Editar persona», «Dar de baja» y su aviso para un titular. El formulario abre en «Nueva persona», como el Figma.
+- **V-19:** el segmentado de tipo sin ancho completo, porque con ancho completo no cabía en el panel.
 
 ## Desviaciones
 
-- **Ponytail en la Fase 1:** la tabla pedía full y Diego respondió `/ponytail off`, así que se hizo en off, con cambios mínimos. Las demás fases siguieron la tabla: la 2 en full, la 3 y la 4 en off, y `/ponytail-review` en full.
-- **Ids de operación:** la asignación usa O-06 a O-13 para devolver, returnar, atraer, relacionar, cancelar, corregir, segunda recepción y salida. Esos ids no corresponden al catálogo ni a `arquitectura.md`, que mandan sobre `siguiente.md`. Usé los del catálogo, también en los nombres de las pruebas:
-
-  | Operación | Catálogo |
-  | --- | --- |
-  | Devolver o returnar | O-22 |
-  | Atraer | O-23 |
-  | Relacionar | O-07 |
-  | Quitar relación | O-18 |
-  | Cancelar | O-24 |
-  | Corregir movimiento | O-25 |
-  | Segunda recepción | O-19 |
-  | Salida externa | O-20 |
-  | Acuse | O-21 |
-  | Anexo y nota | O-28 y O-29 |
-
-  O-01 y O-05 coinciden.
-- **D-66 sobre el Figma:**
-  - V-03 dibuja «Número de auditoría» y V-04 «Monto estimado» de ejemplo. D-66 no los incluye, así que no los implementé.
-  - La semilla de OP-2026-0139 solo tiene «Concepto».
-- **Operaciones agregadas:**
-  - O-18 (Quitar relación): no está en la lista de la asignación, pero V-10 la dibuja.
-  - O-30 reducido (`buscarDocumentos`): lo necesitan los selectores de V-09, V-10 y V-13b. La vista V-06 sigue en T-02b.
-  - `obtenerFolioSiguiente`: lectura que V-03 necesita para mostrar el folio antes de guardar (ver huecos).
-- **Pruebas de la T-01 actualizadas:**
-  - `o11_acciones_TI apoyo` ahora espera también «Atraer».
-  - Hay un caso nuevo para el titular con el documento para conocimiento (V-08).
-  - El aviso en construcción se prueba con «Asignar a un asunto», porque Relacionar ya tiene modal.
-- **Worktree:** la sesión abrió en `claude/sigedoc-t-02a-handoff-dbedc5`, que partía de `main` (`2f69384`). Hice un avance rápido a `develop` (`b5ccdb5`). **El commit queda en esa rama**; Diego lo integra en `develop`.
+- **Ponytail:**
+  - La Fase 1 se hizo en full, como pedía la tabla. Diego respondió primero `off` y lo corrigió a `full`.
+  - Las fases 0, 2 y 3 se hicieron en off.
+  - La Fase 4 se hizo en full: la tabla pedía off con full solo para `/ponytail-review`, y Diego respondió `full`.
+- **Ids de operación:** los de la asignación coinciden con el catálogo.
+- **O-08 y oficialía:** el catálogo da O-08 solo a TI y PE. Oficialía ve V-11 con «Sacar» (O-18) pero sin «Asignar documento». Desde V-11b crea asuntos sin documento.
+- **Folio de salida:** V-13 dibuja `SAL-2026-0061`. Seguí la asignación: las siglas del área emisora (`UT-2026-0001`, D-21).
+- **Campo propio en V-06:** el Figma usa «Proveedor» de ejemplo. Seguí D-46: solo `ente_auditor` y `solicitante`.
+- **Rebote «sin motivo»:** su cifra es siempre 0, porque O-22 exige motivo, como dicen las notas de V-12. Los «tres casos» del criterio 3 son los otros tres.
+- **Pruebas de la T-02a ajustadas:**
+  - Las que verificaban el aviso «en construcción» ahora verifican V-11b y el menú por rol.
+  - Las que escribían emisores libres ahora los eligen del catálogo.
+  - `o21_solo_documentos_de_salida` comprueba las siglas del área emisora, porque ya hay salidas de varias áreas.
+- **Worktree:** la sesión abrió en `claude/sigedoc-t-02b-handoff-c55429`, que partía de `2f69384`. Hice un avance rápido a `develop` (`043b476`). **El commit queda en esa rama**; Diego lo integra en `develop`.
 
 ## Dudas y huecos propuestos
 
-- **HU-propuesto · Folio siguiente:**
-  - Qué falta: V-03 muestra el folio antes de guardar y el mapa de la API no tiene esa lectura.
-  - Qué afecta: T-15.
-  - Opciones: `GET /documentos/folio-siguiente`, o dejar de mostrarlo hasta guardar. Hoy es `obtenerFolioSiguiente()`.
-- **HU-propuesto · Punto de entrada de V-13b y del acuse:**
-  - Qué falta: V-13b y el panel «Registrar acuse» viven en V-13 (el listado, T-02b).
-  - Qué afecta: T-02b.
-  - Opciones: que T-02b absorba lo que hoy está en `/salidas`, o abrir V-13b también desde la ficha.
-- **HU-propuesto · Contenido por tipo en las salidas:**
-  - Qué falta: O-20 recibe «contenido», pero V-13b no lo captura.
-  - Opciones: reutilizar el bloque «Datos del tipo» de V-03 en V-13b.
-- **Folio de salida:** V-02b y V-09 usan `CO-2026-0048` (siglas del área) y V-13 usa `SAL-2026-0061`. Seguí las siglas del área (D-21). ¿Cuál es el correcto?
-- **Anexo y nota:** el Figma solo dibuja «+ Agregar». Las operaciones O-28 y O-29 existen en la fuente simulada y tienen pruebas, pero la interfaz sigue con el aviso en construcción.
-- **Rebotes (C3):** la tarjeta usa datos fijos. Una devolución `no_competencia` sin área sugerida no aparece ahí hasta que C3 se calcule (T-02b).
-- **V-04:** sus notas ponen «Relacionar» en «Más acciones» y además el dibujo lo muestra como botón. Seguí el dibujo (hay ambos).
-- **V-15b:** sus notas dicen que también se abre «desde un paso del recorrido». No lo hice, porque el Figma no lo dibuja.
-- **Emisor y destinatario:** son texto libre hasta que exista el catálogo de actores externos (O-35, T-02b).
-- **Atraer con dos responsables** (`/ponytail-review` 6): con el D-42 literal, un turno de OF o DI sobre un pendiente de otra área deja dos áreas responsables. Si después un titular atrae el documento, solo la primera deja de tenerlo pendiente, porque el movimiento tiene un único origen. Caso: OP-2026-0152 en Compras; oficialía lo turna a Jurídico como responsable; Finanzas lo atrae y Jurídico sigue con él. ¿Qué es «el área anterior» de O-23 cuando hay dos? Es la misma pregunta abierta desde la T-01 sobre el turno de Dirección. No lo parcheé.
+- **HU-propuesto · Lista de asuntos.**
+  - Qué falta: el menú «Asuntos» lleva a V-11, que es un solo asunto, y no hay operación ni vista para listarlos.
+  - Qué afecta: T-15 (API) y el Figma.
+  - Opciones: dibujar un índice de asuntos, o quedarse con el selector del encabezado. Hoy es `obtenerAsuntos()`, que también usa V-11b.
+- **HU-propuesto · Borrar actores sin documentos.**
+  - Qué falta: O-35 dice que no se eliminan si ya tienen documentos, lo que sugiere que sin documentos sí; el Figma solo dibuja «Desactivar».
+  - Opciones: agregar «Eliminar» cuando no tiene documentos, o solo desactivar. Hoy solo se desactiva.
+- **Rebotes, «tres áreas»:** ¿cuenta oficialía? Ver Decisiones; el Figma parece contarla.
+- **Salidas de la T-02a con destinatario interno:** CO-2026-0048, 0049 y 0046 tienen como destinatario «Sistemas», «Administración» y «el OIC», que no son actores externos. No las cambié, porque la bandeja de la T-02a las usa. ¿Se corrige la semilla?
+- **Oficialía sin titular:** V-16 dibuja a Lic. Carmen Ruiz como titular de Oficialía de partes; en la semilla está como persona de oficialía, no como titular, para no cambiar los titulares al turnar de los documentos de la T-01. ¿La hago titular?
+- **Contraste sobre el vidrio de los modales:** el texto secundario medido sobre el vidrio da 4.47 a 4.49:1. Viene de `--vidrio-fondo-modal` (T-01). ¿Se sube su opacidad?
+- **Relacionar con salidas:** el buscador de V-10 ofrece salidas, pero O-07 solo relaciona documentos registrados. Agregué `soloDocumentos` al buscador y lo uso en «Asignar documento»; ¿lo uso también en V-10?
 
 ## Deuda detectada
 
-- `shortcut:` quitar SUSTITUYE_A devuelve el documento a «en trámite» sin guardar el estado anterior; el servicio real lo leerá de la reconciliación (D-14).
-- `shortcut:` las fechas de `datetime-local` usan −06:00 fijo.
-- Reloj simulado: la recepción por omisión de V-03 es la hora real (23 nov), mientras los movimientos usan `HOY` fijo (22 nov); en el recorrido se ve la recepción un día después del registro. Desaparece con la API real (T-15).
-- **`/ponytail-review` 7:** el texto «Regresa a…» de V-07 y el área del botón se calculan con los roles sin corregir, y el servidor usa los corregidos. Solo cambia la etiqueta cuando el turno que llegó al área fue corregido de conocimiento a apoyo; el documento va al área correcta.
-- **`/ponytail-review` 9:** el buscador de documento consulta en cada tecla. En T-15, contra la API real, conviene esperar unos 250 ms tras la última tecla.
-- **Avisos que quedan del detector de impeccable**, explicados en `impeccable-informe.md`:
-  - `nested-cards`, por el bloque del usuario, el segmentado y el panel de duplicado, como dibuja el Figma;
-  - `cream-palette`, por el marfil de la paleta aprobada;
-  - `low-contrast` en los segmentos deshabilitados (WCAG exime los controles inactivos);
-  - `line-length` en un aviso de V-10.
+- `shortcut:` la semilla liga emisor y destinatario por nombre (áreas y actores); el servicio real usa ids.
+- `shortcut:` la contraseña inicial y su hash no se simulan (O-34).
+- Los periodos de V-12 y V-06 usan el reloj real, mientras la semilla usa `HOY` fijo (22 nov 2026). En diciembre, V-12 abre en un mes sin rebotes hasta que se elija noviembre. Desaparece con la API real (T-15).
+- Las pruebas de vista montan la aplicación completa y alargan la suite; por eso subí los tiempos de espera.
+- `cramped-padding` (7 px) en las tablas y `low-contrast` (advisory) sobre el vidrio de los modales: vienen de componentes de la T-01; están listados en `impeccable-informe.md`.
 
 ## Siguiente paso sugerido
 
-Validación visual de Diego (V-03, los nueve modales y el recorrido); después, T-02b (consulta, asuntos, salidas y administración).
+Validación visual de Diego de las once vistas y los cuatro modales nuevos; después, la siguiente tarea del plan de `docs/arquitectura.md`.

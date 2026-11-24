@@ -57,7 +57,7 @@ export function Registrar() {
   function validar(): Errores {
     const e: Errores = {}
     if (!tipo) e.tipo = 'Elige el tipo de documento.'
-    if (!emisor.trim()) e.emisor = tipoEmisor === 'area' ? 'Elige el área emisora.' : 'Escribe el actor externo.'
+    if (!emisor.trim()) e.emisor = tipoEmisor === 'area' ? 'Elige el área emisora.' : 'Elige el actor externo.'
     if (!recepcion) e.fecha_recepcion = 'Escribe la fecha y hora de recepción.'
     if (!sintesis.trim()) e.sintesis = 'Escribe la síntesis.'
     const deTipo = validarDatosTipo(campos, datos)
@@ -175,7 +175,17 @@ export function Registrar() {
                 alCambiar={(id) => setEmisor(areas.data?.elementos.find((a) => a.id === id)?.nombre ?? '')}
               />
             ) : (
-              <Campo etiqueta="Actor externo" error={errores.emisor} value={emisor} onChange={(e) => setEmisor(e.target.value)} />
+              // RI-06: el emisor externo es un actor activo del catálogo (O-31, O-35).
+              <CampoSelector
+                etiqueta="Actor externo"
+                ayuda={errores.emisor ? undefined : '¿No está? Regístralo en Actores externos.'}
+                error={errores.emisor}
+                marcador="Elige un actor externo"
+                valor={(catalogos.data?.actores_externos ?? []).find((a) => a.nombre === emisor)?.id ?? ''}
+                cargando={catalogos.isPending}
+                opciones={(catalogos.data?.actores_externos ?? []).map((a) => ({ valor: a.id, texto: a.nombre }))}
+                alCambiar={(id) => setEmisor(catalogos.data?.actores_externos.find((a) => a.id === id)?.nombre ?? '')}
+              />
             )}
           </div>
           <div className={estilos.fechas}>

@@ -3,7 +3,8 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { idPorFolio } from '../api/simulado/datos'
+import { corregirMovimiento, registrarDocumento, turnar } from '../api'
+import { AREA, idPorFolio } from '../api/simulado/datos'
 import { entrarComo, montarApp, USUARIO } from '../pruebas/utilidades'
 
 type Usuario = ReturnType<typeof userEvent.setup>
@@ -26,6 +27,10 @@ describe('Modales de la ficha y de salidas: teclado y foco', () => {
     ['o05', USUARIO.raul, '/documentos/OP-2026-0152', 'Concluir', undefined, 'Concluir documento'],
     ['o23', USUARIO.elena, '/documentos/OP-2026-0139', 'Atraer', undefined, 'Atraer documento'],
     ['o20', USUARIO.marta, '/salidas', 'Registrar salida', undefined, 'Registrar salida externa'],
+    ['o28', USUARIO.marta, '/documentos/OP-2026-0139', 'Agregar a Anexos', undefined, 'Agregar anexo'],
+    ['o29', USUARIO.marta, '/documentos/OP-2026-0139', 'Agregar a Notas', undefined, 'Agregar nota'],
+    ['o08', USUARIO.raul, '/documentos/OP-2026-0152', 'Más', 'Asignar a un asunto', 'Asignar a un asunto'],
+    ['o08', USUARIO.raul, '/asuntos', 'Asignar documento', undefined, 'Asignar documento'],
   ])('%s_modal_atrapa_el_foco_esc_cierra_y_devuelve_el_foco', async (_op, correo, ruta, boton, opcion, titulo) => {
     const usuario = userEvent.setup()
     await entrarComo(correo)
@@ -77,6 +82,81 @@ describe('V-07 Devolver (O-22)', () => {
     await usuario.click(await screen.findByRole('option', { name: 'Administración' }))
     expect(within(dialogo).getByRole('status')).toHaveTextContent('Administración lo recibe como responsable; titular: Mtro. Luis Gómez.')
     expect(within(dialogo).getByRole('button', { name: 'Returnar a Administración' })).toBeEnabled()
+  })
+
+  it('o22_o25_regresa_a_usa_los_roles_corregidos_como_el_servidor', async () => {
+    // Llega a Compras de oficialía como responsable y luego de Dirección para conocimiento, corregido a apoyo:
+    // el último envío que cuenta es el de Dirección.
+    await entrarComo(USUARIO.marta)
+    const { id } = await registrarDocumento({
+      tipo: 'oficio',
+      numero_emisor: 'PR/0901/2026',
+      tipo_emisor: 'externo',
+      emisor: 'Proveedor externo',
+      fecha_documento: '2026-11-20',
+      canal: 'papel',
+      fecha_recepcion: '2026-11-22T10:00:00-06:00',
+      sintesis: 'Documento corregido',
+      confidencial: false,
+      extemporaneo: false,
+      datos_tipo: {},
+    })
+    await turnar(id, [{ id_area: AREA.compras, rol: 'responsable', instruccion: '' }])
+    await entrarComo(USUARIO.ana)
+    const { movimientos } = await turnar(id, [
+      { id_area: AREA.sistemas, rol: 'responsable', instruccion: '' },
+      { id_area: AREA.compras, rol: 'conocimiento', instruccion: '' },
+    ])
+    await entrarComo(USUARIO.marta)
+    await corregirMovimiento(movimientos.find((m) => m.area_destino === 'Compras')?.id ?? '', { rol: 'apoyo', motivo: 'Era apoyo' })
+
+    const usuario = userEvent.setup()
+    await entrarComo(USUARIO.raul)
+    montarApp(`/documentos/${id}`)
+    await abrir(usuario, 'Devolver')
+    const dialogo = await screen.findByRole('dialog', { name: 'Devolver o returnar' })
+    expect(within(dialogo).getByText(/Regresa a Dirección General/)).toBeInTheDocument()
+    expect(within(dialogo).getByRole('button', { name: 'Devolver a Dirección General' })).toBeInTheDocument()
+  })
+})
+
+describe('Anexo y nota (O-28, O-29), diseño propio', () => {
+  it('o28_hojas_invalidas_en_linea_boton_pendiente_y_el_anexo_aparece', async () => {
+    const usuario = userEvent.setup()
+    await entrarComo(USUARIO.marta)
+    montarApp(`/documentos/${idPorFolio('OP-2026-0139')}`)
+    await abrir(usuario, 'Agregar a Anexos')
+    const dialogo = await screen.findByRole('dialog', { name: 'Agregar anexo' })
+    const agregar = within(dialogo).getByRole('button', { name: 'Agregar anexo' })
+    await usuario.type(within(dialogo).getByLabelText('Descripción'), 'Acta de entrega')
+    const hojas = within(dialogo).getByLabelText('Número de hojas')
+    await usuario.type(hojas, '0')
+    await usuario.tab()
+    expect(hojas).toHaveAccessibleDescription('El número de hojas debe ser 1 o más.')
+    await usuario.clear(hojas)
+    await usuario.type(hojas, '3')
+    await usuario.type(within(dialogo).getByLabelText('Ubicación física'), 'Archivo de oficialía, gaveta 4')
+    await usuario.click(agregar)
+    await waitFor(() => expect(agregar).toHaveAttribute('aria-busy', 'true'))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(await screen.findByText('Acta de entrega')).toBeInTheDocument()
+  })
+
+  it('o29_nota_vacia_en_linea_y_la_nota_aparece_con_su_autor', async () => {
+    const usuario = userEvent.setup()
+    await entrarComo(USUARIO.marta)
+    montarApp(`/documentos/${idPorFolio('OP-2026-0139')}`)
+    await abrir(usuario, 'Agregar a Notas')
+    const dialogo = await screen.findByRole('dialog', { name: 'Agregar nota' })
+    const nota = within(dialogo).getByLabelText('Nota')
+    await usuario.click(nota)
+    await usuario.tab()
+    expect(nota).toHaveAccessibleDescription('Escribe la nota.')
+    expect(within(dialogo).getByRole('button', { name: 'Agregar nota' })).toBeDisabled()
+    await usuario.type(nota, 'Se recibió la cotización firmada.')
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Agregar nota' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(await screen.findByText('Se recibió la cotización firmada.')).toBeInTheDocument()
   })
 })
 
@@ -145,7 +225,8 @@ describe('V-10 Relacionar (O-07)', () => {
     // «Sustituye a» no se ofrece con un documento no registrado (D-14).
     expect(within(dialogo).getByRole('radio', { name: /Sustituye a/ })).toBeDisabled()
     await usuario.type(within(dialogo).getByRole('textbox', { name: 'Número del documento' }), 'SIS/0198/2026')
-    await usuario.type(within(dialogo).getByRole('textbox', { name: 'Emisor' }), 'Sistemas')
+    await usuario.click(within(dialogo).getByRole('combobox', { name: /^Emisor/ }))
+    await usuario.click(await screen.findByRole('option', { name: 'Sistemas' }))
     await usuario.click(within(dialogo).getByRole('button', { name: 'Relacionar' }))
     expect(await within(dialogo).findByRole('alert')).toHaveTextContent('Esa relación ya existe.')
     expect(dialogo).toBeInTheDocument()
@@ -187,7 +268,9 @@ describe('V-03 Registrar documento (O-01, D-66)', () => {
 
     await usuario.click(screen.getByRole('combobox', { name: /^Tipo de documento/ }))
     await usuario.click(await screen.findByRole('option', { name: 'Requerimiento de auditoría' }))
-    await usuario.type(screen.getByRole('textbox', { name: 'Actor externo' }), 'Auditoría Superior del Estado')
+    // RI-06: el actor externo se elige del catálogo.
+    await usuario.click(screen.getByRole('combobox', { name: /^Actor externo/ }))
+    await usuario.click(await screen.findByRole('option', { name: 'Auditoría Superior de la Federación' }))
     await usuario.type(screen.getByRole('textbox', { name: 'Síntesis' }), 'Requerimiento sobre el gasto 2025')
     await usuario.click(screen.getByRole('button', { name: 'Registrar y asignar folio' }))
     // Falta el campo obligatorio del tipo: el foco va a él.

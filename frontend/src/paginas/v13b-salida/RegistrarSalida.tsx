@@ -112,13 +112,17 @@ export function RegistrarSalida({ abierto, alCambiar, alRegistrar }: Props) {
           opciones={(areas.data?.elementos ?? []).map((a) => ({ valor: a.id, texto: a.nombre }))}
           alCambiar={setIdArea}
         />
-        <Campo
+        {/* RI-06: el destinatario es un actor externo activo del catálogo (O-35). */}
+        <CampoSelector
           blanco
           etiqueta="Destinatario externo"
           ayuda="¿No está? Regístralo en Actores externos."
-          error={falta(destinatario, 'Escribe el destinatario externo.')}
-          value={destinatario}
-          onChange={(e) => setDestinatario(e.target.value)}
+          error={falta(destinatario, 'Elige el destinatario externo.')}
+          marcador="Elige un actor externo"
+          valor={(catalogos.data?.actores_externos ?? []).find((a) => a.nombre === destinatario)?.id ?? ''}
+          cargando={catalogos.isPending}
+          opciones={(catalogos.data?.actores_externos ?? []).map((a) => ({ valor: a.id, texto: a.nombre }))}
+          alCambiar={(id) => setDestinatario(catalogos.data?.actores_externos.find((a) => a.id === id)?.nombre ?? '')}
         />
       </div>
       <AreaTexto

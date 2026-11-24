@@ -9,8 +9,8 @@ Element.prototype.releasePointerCapture ??= () => {}
 Element.prototype.scrollIntoView ??= () => {}
 
 // Con todas las pruebas en paralelo, montar la aplicación (sesión, marco, esqueleto y datos) puede pasar
-// del segundo que espera findBy por omisión.
-configure({ asyncUtilTimeout: 3000 })
+// del segundo que espera findBy por omisión (5 s desde T-02b, con más vistas probándose a la vez).
+configure({ asyncUtilTimeout: 5000 })
 
 // Ninguna prueba imprime advertencias (React, Radix): una advertencia hace fallar la prueba que la causó.
 beforeEach(() => {

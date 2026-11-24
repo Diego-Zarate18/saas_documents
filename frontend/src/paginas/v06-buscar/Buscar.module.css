@@ -1,0 +1,119 @@
+/* V-06 Buscar documentos (Figma 39:593). */
+.filtros {
+  padding: var(--espacio-20);
+}
+
+.filtros form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px 200px;
+  gap: var(--espacio-14);
+}
+
+.pildoras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-8);
+}
+
+.pie {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espacio-10);
+}
+
+.campoTipo {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espacio-12);
+  min-width: 0;
+}
+
+.campoTipo > div {
+  width: 260px;
+}
+
+/* Chip guinda del filtro por campo propio del tipo (D-46). */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-6) var(--espacio-12);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-marca-suave);
+  color: var(--texto-marca);
+  font: var(--etiqueta-s);
+}
+
+.quitar {
+  display: inline-flex;
+  padding: var(--espacio-2);
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sintesis {
+  overflow: hidden;
+  font: var(--cuerpo-s);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oculta {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-6);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.paginador {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-12) var(--espacio-20);
+  border-top: 1px solid var(--borde-tabla);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.paginador p {
+  flex: 1;
+}
+
+.pagina {
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+  cursor: pointer;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}
+
+.pagina:hover:not(:disabled) {
+  background: var(--fondo-marca-suave);
+}
+
+.pagina[aria-current='page'] {
+  border-color: var(--fondo-marca);
+  background: var(--fondo-marca);
+  color: var(--texto-sobre-marca);
+}
+
+.pagina:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

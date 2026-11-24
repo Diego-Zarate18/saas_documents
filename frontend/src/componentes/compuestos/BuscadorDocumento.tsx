@@ -1,9 +1,12 @@
-import { useId, useState, type KeyboardEvent } from 'react'
+import { useEffect, useId, useState, type KeyboardEvent } from 'react'
 import { useBuscarDocumentos } from '../../api/consultas'
 import type { DocumentoEncontrado, Uuid } from '../../api/tipos'
 import { Icono } from '../../iconos/Icono'
 import { fecha } from '../../paginas/formato'
 import estilos from './BuscadorDocumento.module.css'
+
+/** Espera tras la última tecla antes de consultar O-30. */
+const ESPERA_MS = 250
 
 interface Props {
   etiqueta: string
@@ -13,19 +16,28 @@ interface Props {
   alElegir: (documento: DocumentoEncontrado | null) => void
   /** Documento que no se puede elegir (el propio). */
   excluir?: Uuid
+  /** Solo documentos registrados, sin salidas (asignar a un asunto, O-08). */
+  soloDocumentos?: boolean
 }
 
 /**
  * Combobox para elegir un documento registrado o una salida por folio o asunto (V-09, V-10, V-13b).
  * Patrón ARIA de combobox con lista: flechas, Intro elige y Esc cierra la lista sin cerrar el modal.
  */
-export function BuscadorDocumento({ etiqueta, ayuda, error, elegido, alElegir, excluir }: Props) {
+export function BuscadorDocumento({ etiqueta, ayuda, error, elegido, alElegir, excluir, soloDocumentos }: Props) {
   const id = useId()
   const [texto, setTexto] = useState('')
   const [abierta, setAbierta] = useState(false)
   const [activo, setActivo] = useState(0)
-  const busqueda = useBuscarDocumentos(elegido ? '' : texto)
-  const resultados = (busqueda.data?.elementos ?? []).filter((d) => d.id !== excluir)
+  // Consulta O-30 cuando se deja de teclear, no en cada tecla.
+  const [consulta, setConsulta] = useState('')
+  useEffect(() => {
+    const espera = setTimeout(() => setConsulta(texto), ESPERA_MS)
+    return () => clearTimeout(espera)
+  }, [texto])
+  const busqueda = useBuscarDocumentos(elegido ? '' : consulta)
+  const buscando = busqueda.isFetching || consulta !== texto
+  const resultados = (busqueda.data?.elementos ?? []).filter((d) => d.id !== excluir && !(soloDocumentos && d.salida))
   const mostrar = abierta && !elegido && texto.trim() !== ''
   const nota = error ?? ayuda
 
@@ -41,7 +53,7 @@ export function BuscadorDocumento({ etiqueta, ayuda, error, elegido, alElegir, e
       setAbierta(true)
       const paso = e.key === 'ArrowDown' ? 1 : -1
       setActivo((a) => (resultados.length ? (a + paso + resultados.length) % resultados.length : 0))
-    } else if (e.key === 'Enter' && mostrar && resultados[activo]) {
+    } else if (e.key === 'Enter' && mostrar && !buscando && resultados[activo]) {
       e.preventDefault()
       elegir(resultados[activo])
     } else if (e.key === 'Escape' && mostrar) {
@@ -97,8 +109,8 @@ export function BuscadorDocumento({ etiqueta, ayuda, error, elegido, alElegir, e
       {/* Patrón ARIA de combobox: datalist no puede mostrar el folio en mono junto al asunto. */}
       {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role, jsx-a11y/prefer-tag-over-role */}
       <ul id={`${id}-lista`} role="listbox" aria-label={etiqueta} className={estilos.lista} hidden={!mostrar}>
-        {mostrar && busqueda.isFetching && resultados.length === 0 && <li className={estilos.vacio}>Buscando…</li>}
-        {mostrar && !busqueda.isFetching && resultados.length === 0 && <li className={estilos.vacio}>Sin resultados.</li>}
+        {mostrar && buscando && resultados.length === 0 && <li className={estilos.vacio}>Buscando…</li>}
+        {mostrar && !buscando && resultados.length === 0 && <li className={estilos.vacio}>Sin resultados.</li>}
         {resultados.map((d, i) => (
           <li
             key={d.id}

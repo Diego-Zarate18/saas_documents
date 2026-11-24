@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useQuitarRelacion, useRelacionar } from '../../api/consultas'
+import { useAreas, useCatalogos, useQuitarRelacion, useRelacionar } from '../../api/consultas'
 import type { DocumentoEncontrado, Ficha, TipoRelacion } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
+import { CampoSelector } from '../../componentes/compuestos/Selector'
 import { TEXTO_ESTADO, TEXTO_RELACION } from '../../componentes/base/textos'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { BuscadorDocumento } from '../../componentes/compuestos/BuscadorDocumento'
@@ -38,6 +39,11 @@ export function Relacionar({ ficha, abierto, alCambiar }: Props) {
   const [emisor, setEmisor] = useState('')
   const relacionar = useRelacionar(ficha.registro.id)
   const quitar = useQuitarRelacion(ficha.registro.id)
+  const areas = useAreas()
+  const catalogos = useCatalogos()
+  const emisores = [
+    ...new Set([...(areas.data?.elementos ?? []).map((a) => a.nombre), ...(catalogos.data?.actores_externos ?? []).map((a) => a.nombre)]),
+  ].sort((a, b) => a.localeCompare(b))
   const noRegistrado = destino === 'no_registrado'
   const listo = tipo !== undefined && (noRegistrado ? numero.trim() !== '' && emisor.trim() !== '' : documento !== null)
 
@@ -121,7 +127,16 @@ export function Relacionar({ ficha, abierto, alCambiar }: Props) {
         {noRegistrado ? (
           <div className={estilos.columnas}>
             <Campo blanco etiqueta="Número del documento" value={numero} onChange={(e) => setNumero(e.target.value)} />
-            <Campo blanco etiqueta="Emisor" value={emisor} onChange={(e) => setEmisor(e.target.value)} />
+            {/* El Figma dibuja un selector: áreas internas y actores externos activos del catálogo (RI-06). */}
+            <CampoSelector
+              blanco
+              etiqueta="Emisor"
+              marcador="Elige el emisor"
+              valor={emisor}
+              cargando={areas.isPending || catalogos.isPending}
+              opciones={emisores.map((e) => ({ valor: e, texto: e }))}
+              alCambiar={setEmisor}
+            />
           </div>
         ) : (
           <BuscadorDocumento etiqueta="Documento" elegido={documento} alElegir={setDocumento} excluir={ficha.registro.id} />

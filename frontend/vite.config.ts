@@ -11,5 +11,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/pruebas/preparar.ts'],
+    // Con todas las vistas en paralelo (T-02b), montar la aplicación completa puede pasar de los 5 s por omisión.
+    testTimeout: 15_000,
   },
 })

@@ -1,7 +1,25 @@
 // Hooks de TanStack Query sobre las funciones de la API.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from '.'
-import type { Canal, Conclusion, Correccion, DestinoRelacion, DestinoTurno, Devolucion, FiltrosBandeja, NuevoAnexo, TipoRelacion, Uuid } from './tipos'
+import type {
+  Canal,
+  Conclusion,
+  Correccion,
+  DatosActor,
+  DatosArea,
+  DatosPersona,
+  DecisionDuplicado,
+  DestinoRelacion,
+  DestinoTurno,
+  Devolucion,
+  FiltrosBandeja,
+  FiltrosBusqueda,
+  FiltrosRebotes,
+  NuevoAnexo,
+  NuevoAsunto,
+  TipoRelacion,
+  Uuid,
+} from './tipos'
 
 export const useCatalogos = () => useQuery({ queryKey: ['catalogos'], queryFn: api.obtenerCatalogos })
 
@@ -23,8 +41,8 @@ export const useRecorrido = (id: Uuid | undefined) =>
   })
 
 /** C3 */
-export const useRebotes = (habilitado: boolean) =>
-  useQuery({ queryKey: ['rebotes'], queryFn: api.obtenerRebotes, enabled: habilitado })
+export const useRebotes = (habilitado: boolean, filtros: FiltrosRebotes = {}) =>
+  useQuery({ queryKey: ['rebotes', filtros], queryFn: () => api.obtenerRebotes(filtros), enabled: habilitado })
 
 export const usePosiblesDuplicados = (habilitado: boolean) =>
   useQuery({ queryKey: ['posibles-duplicados'], queryFn: api.obtenerPosiblesDuplicados, enabled: habilitado })
@@ -92,3 +110,46 @@ export const useRegistrarAcuse = () =>
 export const useAgregarAnexo = (id: Uuid) => useEscritura((a: NuevoAnexo) => api.agregarAnexo(id, a))
 /** O-29 */
 export const useAgregarNota = (id: Uuid) => useEscritura((texto: string) => api.agregarNota(id, texto))
+
+// ── T-02b ──────────────────────────────────────────────────────────────────
+
+/** O-30 con filtros y paginación (V-06). */
+export const useBusqueda = (filtros: FiltrosBusqueda) => useQuery({ queryKey: ['busqueda', filtros], queryFn: () => api.buscar(filtros) })
+
+export const useAsuntos = (texto = '') => useQuery({ queryKey: ['asuntos', texto], queryFn: () => api.obtenerAsuntos(texto) })
+/** C2 */
+export const useHiloAsunto = (id: Uuid) => useQuery({ queryKey: ['hilo', id], queryFn: () => api.obtenerHiloAsunto(id) })
+/** C5 */
+export const useAlcanceAsunto = (id: Uuid) => useQuery({ queryKey: ['alcance', id], queryFn: () => api.obtenerAlcanceAsunto(id) })
+/** O-08 */
+export const useAsignarAsunto = (idDocumento: Uuid) => useEscritura((idAsunto: Uuid) => api.asignarAsunto(idDocumento, idAsunto))
+/** O-27; con documento, queda asignado al crearlo. */
+export const useCrearAsunto = (idDocumento: Uuid | null) => useEscritura((a: NuevoAsunto) => api.crearAsunto(a, idDocumento))
+/** O-18, sacar de un asunto */
+export const useSacarDeAsunto = (idAsunto: Uuid) => useEscritura((idDocumento: Uuid) => api.sacarDeAsunto(idDocumento, idAsunto))
+
+/** V-14 */
+export const useComparacionDuplicado = (id: Uuid, habilitado = true) =>
+  useQuery({ queryKey: ['comparacion', id], queryFn: () => api.obtenerComparacionDuplicado(id), enabled: habilitado })
+/** O-26 */
+export const useResolverDuplicado = () =>
+  useEscritura((d: { id_posterior: Uuid; id_otro: Uuid | null; decision: DecisionDuplicado }) =>
+    api.resolverDuplicado(d.id_posterior, d.id_otro, d.decision),
+  )
+
+/** V-13 */
+export const useSalidas = (acuse: 'con' | 'sin' | null) => useQuery({ queryKey: ['salidas', acuse], queryFn: () => api.obtenerSalidas(acuse) })
+
+/** O-32 */
+export const useOrganizacion = () => useQuery({ queryKey: ['organizacion'], queryFn: api.obtenerOrganizacion })
+/** O-33 */
+export const useGuardarArea = () => useEscritura((d: DatosArea & { id: Uuid | null }) => api.guardarArea(d, d.id))
+export const useDesactivarArea = () => useEscritura(api.desactivarArea)
+/** O-34 */
+export const usePersonas = () => useQuery({ queryKey: ['personas'], queryFn: api.obtenerPersonas })
+export const useGuardarPersona = () => useEscritura((d: DatosPersona & { id: Uuid | null }) => api.guardarPersona(d, d.id))
+export const useDarDeBajaPersona = () => useEscritura(api.darDeBajaPersona)
+/** O-35 */
+export const useActores = () => useQuery({ queryKey: ['actores'], queryFn: api.obtenerActores })
+export const useGuardarActor = () => useEscritura((d: DatosActor & { id: Uuid | null }) => api.guardarActor(d, d.id))
+export const useDesactivarActor = () => useEscritura(api.desactivarActor)

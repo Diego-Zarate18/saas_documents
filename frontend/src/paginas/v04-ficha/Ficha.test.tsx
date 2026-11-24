@@ -41,15 +41,17 @@ describe('O-11 Ficha: acciones por rol (D-44, D-62)', () => {
     expect(screen.queryByText('Anexos · 0')).not.toBeInTheDocument()
   })
 
-  it('o11_asignar_a_un_asunto_abre_aviso_en_construccion', async () => {
+  it('o08_asignar_a_un_asunto_abre_v11b_con_los_asuntos_a_los_que_ya_pertenece', async () => {
     await entrarComo(USUARIO.raul)
-    montarApp(`/documentos/${idPorFolio('OP-2026-0152')}`)
+    montarApp(`/documentos/${idPorFolio('OP-2026-0139')}`)
     const { default: userEvent } = await import('@testing-library/user-event')
     const usuario = userEvent.setup()
     await usuario.click(await screen.findByRole('button', { name: 'Más' }))
     await usuario.click(await screen.findByRole('menuitem', { name: /Asignar a un asunto/ }))
     const dialogo = await screen.findByRole('dialog', { name: 'Asignar a un asunto' })
-    expect(dialogo).toHaveTextContent('V-11b · nodo del Figma 48:1407 (T-02b)')
+    expect(await within(dialogo).findByRole('radio', { name: 'Equipamiento de laboratorios 2026' })).toBeDisabled()
+    expect(within(dialogo).getByRole('radio', { name: 'Presupuesto de inversión 2026' })).toBeEnabled()
+    expect(within(dialogo).getByText('Ya pertenece')).toBeInTheDocument()
   })
 
   it('o11_esqueleto_de_la_sesion_y_de_la_ficha', async () => {

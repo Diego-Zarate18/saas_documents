@@ -1,7 +1,8 @@
-import { screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { entrarComo, montarApp, USUARIO } from '../pruebas/utilidades'
+import { MENU, OPCIONES } from './menu'
 
 const opcionesDelMenu = async () => {
   const menu = await screen.findByRole('navigation', { name: 'Menú principal' })
@@ -37,6 +38,28 @@ describe('Menú por rol (D-62)', () => {
     montarApp('/')
     expect(await opcionesDelMenu()).toEqual(esperado)
   })
+})
+
+// Criterio 4 de T-02b: ninguna opción del menú de ningún rol muestra «Vista en construcción».
+describe('Vistas del menú (T-02b)', () => {
+  it.each([
+    ['OF', USUARIO.marta],
+    ['DI', USUARIO.ana],
+    ['TI', USUARIO.raul],
+    ['PE', USUARIO.jorge],
+    ['AD', USUARIO.luis],
+  ] as const)('t02b_ninguna_opcion_del_menu_%s_esta_en_construccion', async (rol, correo) => {
+    await entrarComo(correo)
+    for (const clave of MENU[rol]) {
+      const { ruta } = OPCIONES[clave]
+      montarApp(ruta)
+      const marco = await screen.findByRole('main')
+      // La vista ya cargó cuando su h1 no es el de la pantalla de sesión ni una forma del esqueleto.
+      await waitFor(() => expect(within(marco).getByRole('heading', { level: 1 }).textContent).not.toBe(''))
+      expect(within(marco).queryByText(/en construcción/i)).not.toBeInTheDocument()
+      cleanup()
+    }
+  }, 60_000)
 })
 
 describe('Protección de rutas', () => {
@@ -77,13 +100,6 @@ describe('Protección de rutas', () => {
     expect(await screen.findByRole('heading', { name: 'Sin permiso' })).toBeInTheDocument()
     // El marco sigue ahí: no es una página rota.
     expect(screen.getByRole('navigation', { name: 'Menú principal' })).toBeInTheDocument()
-  })
-
-  it('t02_opcion_en_construccion_muestra_vista_y_nodo', async () => {
-    await entrarComo(USUARIO.ana)
-    montarApp('/asuntos')
-    expect(await screen.findByText('Vista en construcción.')).toBeInTheDocument()
-    expect(screen.getByText('V-11c · nodo del Figma 65:2922')).toBeInTheDocument()
   })
 
   it('o37_cerrar_sesion_vuelve_a_inicio_de_sesion', async () => {

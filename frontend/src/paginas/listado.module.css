@@ -1,0 +1,178 @@
+/* Piezas comunes de las vistas de consulta y administración de T-02b (V-06, V-11 a V-19):
+   página, cuerpo con panel lateral, tarjeta con cabecera, filas elegibles y panel de detalle o edición. */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-24);
+}
+
+/* Lista a la izquierda y panel de 380 px a la derecha (V-13, V-16 a V-19; V-12 usa 360 px). */
+.cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--ancho-panel, 380px);
+  gap: var(--espacio-20);
+  align-items: start;
+}
+
+/* Legibilidad a 1024 px (arquitectura, sección 8): el panel baja bajo la lista. */
+@media (max-width: 1279px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cabecera {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espacio-12);
+  padding: var(--espacio-20) var(--espacio-20) var(--espacio-12);
+}
+
+.titulo {
+  flex: 1;
+  font: var(--titulo-l);
+  letter-spacing: var(--titulo-l-espaciado);
+}
+
+/* Base de la que viene la sección (DESIGN.md: «Cada sección indica en mono la base»). */
+.origen {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+/* Fila elegible: el primer control de la fila la elige. Va antes de .folio para que el folio conserve su tipografía. */
+.elegir {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.elegir:hover {
+  text-decoration: underline;
+}
+
+.folio {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+  text-decoration: none;
+}
+
+a.folio:hover {
+  text-decoration: underline;
+}
+
+.siglas {
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.dato {
+  font: var(--mono-dato);
+}
+
+.texto {
+  font: var(--cuerpo-s);
+}
+
+.secundario {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.pie {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+/* Toda la fila responde al cursor; la elegida queda marcada. */
+.tarjeta tbody tr:hover td {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 35%, transparent);
+}
+
+.tarjeta tbody tr.elegida td {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 60%, transparent);
+}
+
+.tarjeta tbody tr.inactiva td {
+  color: var(--texto-secundario);
+}
+
+/* Panel de detalle o edición a la derecha. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+  padding: var(--espacio-24);
+}
+
+.etiquetaPanel {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.tituloPanel {
+  margin-top: var(--espacio-6);
+  font: var(--titulo-l);
+  letter-spacing: var(--titulo-l-espaciado);
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-10);
+}
+
+.dosColumnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--espacio-12);
+  align-items: start;
+}
+
+/* Píldora neutra de la tabla: tipo de actor, rol de persona y estado activo o inactivo. */
+.pildora {
+  display: inline-flex;
+  padding: var(--espacio-4) var(--espacio-10);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-hundido);
+  font: var(--etiqueta-s);
+  color: var(--texto-secundario);
+  white-space: nowrap;
+}
+
+.activo {
+  background: color-mix(in srgb, var(--estado-concluido) var(--tinte-estado), transparent);
+  color: color-mix(in srgb, var(--estado-concluido) 80%, var(--texto-principal));
+}
+
+.vacante {
+  background: var(--fondo-detalle-suave);
+  color: color-mix(in srgb, var(--estado-posible-duplicado) 80%, var(--texto-principal));
+}
+
+/* Campo con etiqueta y control segmentado (rol en V-18, tipo en V-19). */
+.campoSegmentado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiquetaCampo {
+  font: var(--etiqueta-s);
+}

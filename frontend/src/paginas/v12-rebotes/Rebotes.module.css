@@ -1,0 +1,92 @@
+/* V-12 Rebotes (Figma 49:1577). El color de rebote se usa en cifras, reglas y devoluciones; en texto pequeño
+   lleva un 20 % de tinta para pasar 4.5:1, como el componente Estado. */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-20);
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: var(--espacio-16) var(--espacio-16) var(--espacio-20);
+}
+
+.valor {
+  font: var(--display-l);
+  letter-spacing: var(--display-l-espaciado);
+  color: var(--estado-rebote);
+}
+
+.nota {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.reglas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+}
+
+.regla {
+  display: inline-flex;
+  padding: var(--espacio-3) var(--espacio-10);
+  border-radius: var(--radio-control);
+  background: color-mix(in srgb, var(--estado-rebote) var(--tinte-estado), transparent);
+  font: var(--pie);
+  color: color-mix(in srgb, var(--estado-rebote) 80%, var(--texto-principal));
+}
+
+.pasos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-10);
+  padding: 0;
+  list-style: none;
+}
+
+.pasos li {
+  position: relative;
+  padding-left: var(--espacio-20);
+}
+
+.pasos li::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-marca);
+}
+
+.pasos li.devolucion::before {
+  background: var(--estado-rebote);
+}
+
+.ruta {
+  font: var(--etiqueta-s);
+}
+
+.detalle {
+  margin-top: var(--espacio-2);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.devolucion .detalle {
+  color: color-mix(in srgb, var(--estado-rebote) 80%, var(--texto-principal));
+}
+
+.abrir {
+  align-self: flex-start;
+}
+
+@media (max-width: 1279px) {
+  .indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

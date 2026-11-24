@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { entrarComo, USUARIO } from '../../pruebas/utilidades'
 import type { Conclusion, ErrorDeApi, NuevoDocumento, Uuid } from '../tipos'
-import { AREA, idPorFolio, salidas } from './datos'
+import { AREA, areas, idPorFolio, salidas } from './datos'
 import {
   agregarAnexo,
   agregarNota,
@@ -38,7 +38,7 @@ const nuevo = (cambios: Partial<NuevoDocumento> = {}): NuevoDocumento => ({
   tipo: 'oficio',
   numero_emisor: `PR/${String(++consecutivo).padStart(4, '0')}/2026`,
   tipo_emisor: 'externo',
-  emisor: 'Proveedor de pruebas',
+  emisor: 'Proveedor externo',
   fecha_documento: '2026-11-20',
   canal: 'papel',
   fecha_recepcion: '2026-11-22T10:00:00-06:00',
@@ -105,6 +105,17 @@ describe('O-01 Registrar documento y asignar folio', () => {
     expect(ficha.registro).toMatchObject({ extemporaneo: true, fecha_oficial: '2026-11-10', origen_fecha_oficial: 'sello' })
     expect(ficha.ubicacion_actual).toMatchObject([{ area: 'Oficialía de partes', rol: 'responsable' }])
     expect(await folios()).toContain(id)
+  })
+
+  it('o01_ri06_el_emisor_es_un_area_o_un_actor_activo_del_catalogo', async () => {
+    await entrarComo(USUARIO.marta)
+    expect(await codigoDe(registrarDocumento(nuevo({ emisor: 'Proveedor sin alta' })))).toBe('VALIDACION')
+    expect(await codigoDe(registrarDocumento(nuevo({ emisor: 'Papelería Central' })))).toBe('VALIDACION')
+    expect(await codigoDe(registrarDocumento(nuevo({ tipo_emisor: 'area', emisor: 'Archivo de concentración' })))).toBe('VALIDACION')
+    expect(await codigoDe(registrarDocumento(nuevo({ tipo_emisor: 'otro' as never, emisor: 'Cualquiera' })))).toBe('VALIDACION')
+    expect(await codigoDe(registrarDocumento(nuevo({ tipo_emisor: 'area', emisor: 'Sistemas' })))).toBe('sin error')
+    const salida = { tipo: 'oficio' as const, numero: 'X/1', id_area_emisora: AREA.compras, sintesis: 'Salida', id_responde_a: null }
+    expect(await codigoDe(registrarSalida({ ...salida, destinatario: 'Sistemas' }))).toBe('VALIDACION')
   })
 
   it('o01_d44_solo_oficialia_registra', async () => {
@@ -225,8 +236,8 @@ describe('D-29 Confidencial', () => {
   })
 })
 
-describe('D-42 Regla de pendiente', () => {
-  it('d42_turno_de_oficialia_o_direccion_sobre_un_pendiente_de_otra_area_no_lo_cierra', async () => {
+describe('D-67 Turno de oficialía o dirección (D-42 literal)', () => {
+  it('d67_turno_de_oficialia_o_direccion_sobre_un_pendiente_de_otra_area_no_lo_cierra', async () => {
     const id = await enCompras()
     // Oficialía y Dirección turnan desde su área: Compras sigue teniéndolo pendiente (D-42, literal).
     for (const [usuario, area] of [
@@ -297,6 +308,36 @@ describe('O-23 Atraer', () => {
     // Finanzas lo tiene como apoyo: puede atraerlo. Un titular sin movimiento en el documento, no.
     await entrarComo(USUARIO.elena)
     expect(await codigoDe(atraer(idPorFolio('OP-2026-0152'), 'Sin visibilidad'))).toBe('SIN_PERMISO')
+  })
+})
+
+describe('D-68 Atraer deja una sola área responsable', () => {
+  it('d68_atraer_con_dos_responsables_saca_a_ambas_y_no_toca_apoyo_ni_conocimiento', async () => {
+    const id = idPorFolio('OP-2026-0152')
+    // OP-2026-0152 está en Compras como responsable; oficialía lo turna además a Jurídico (D-67),
+    // con Sistemas de apoyo y Finanzas para conocimiento.
+    await entrarComo(USUARIO.marta)
+    await turnar(id, [
+      { id_area: AREA.juridico, rol: 'responsable', instruccion: '' },
+      { id_area: AREA.sistemas, rol: 'apoyo', instruccion: '' },
+      { id_area: AREA.finanzas, rol: 'conocimiento', instruccion: '' },
+    ])
+    const areasDe = async () => (await obtenerFicha(id)).ubicacion_actual.map((u) => [u.area, u.rol])
+    expect(await areasDe()).toEqual([
+      ['Compras', 'responsable'],
+      ['Sistemas', 'apoyo'],
+      ['Jurídico', 'responsable'],
+    ])
+
+    await entrarComo(USUARIO.elena)
+    const m = await atraer(id, 'Finanzas concentra la cotización.')
+    expect(m).toMatchObject({ tipo: 'atraccion', area_origen: 'Compras y Jurídico', area_destino: 'Finanzas' })
+    expect(await areasDe()).toEqual([
+      ['Finanzas', 'responsable'],
+      ['Sistemas', 'apoyo'],
+    ])
+    await entrarComo(USUARIO.raul)
+    expect(await folios()).not.toContain(id)
   })
 })
 
@@ -401,7 +442,8 @@ describe('O-20 y O-21 Salida externa y acuse (D-58)', () => {
   it('o21_solo_documentos_de_salida', async () => {
     await entrarComo(USUARIO.marta)
     expect(await codigoDe(registrarAcuse(idPorFolio('OP-2026-0139'), '2026-11-22T12:40:00-06:00', 'Alguien'))).toBe('NO_ENCONTRADO')
-    expect(salidas.every((s) => s.folio.startsWith('CO-'))).toBe(true)
+    // D-21: el folio de una salida lleva las siglas de su área emisora (CO-2026-…, UT-2026-…).
+    expect(salidas.every((s) => s.folio.startsWith(`${areas.find((a) => a.id === s.id_area_emisora)?.siglas}-`))).toBe(true)
   })
 })
 

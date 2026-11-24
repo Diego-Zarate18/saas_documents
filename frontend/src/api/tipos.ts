@@ -103,6 +103,71 @@ export interface Area {
   nombre_titular: string | null
 }
 
+export interface PersonaAdscrita {
+  id: Uuid
+  nombre: string
+  rol: Rol | null
+}
+
+/** O-32: cada área con su dependencia, titular y personas adscritas; solo el estado actual (D-08). */
+export interface AreaOrganizacion extends Area {
+  id_padre: Uuid | null
+  activa: boolean
+  personas: PersonaAdscrita[]
+  /** Documentos pendientes en el área (D-42): con pendientes no se desactiva (O-33). */
+  pendientes: number
+  /** Con folios emitidos las siglas no cambian (D-61). */
+  con_folios: boolean
+}
+
+/** O-33 Gestionar áreas. */
+export interface DatosArea {
+  siglas: string
+  nombre: string
+  id_padre: Uuid | null
+  id_titular: Uuid | null
+}
+
+/** O-34: persona con su usuario. */
+export interface Persona {
+  id: Uuid
+  nombre: string
+  correo: string | null
+  id_area: Uuid | null
+  nombre_area: string | null
+  rol: Rol | null
+  /** Baja lógica: conserva sus movimientos. */
+  activa: boolean
+}
+
+export interface DatosPersona {
+  nombre: string
+  correo: string
+  id_area: Uuid
+  rol: Rol
+}
+
+export type TipoActor = 'institucion' | 'municipio' | 'proveedor' | 'ciudadano'
+
+/** O-35: emisor de entradas y destinatario de salidas (RI-06). */
+export interface ActorExterno {
+  id: Uuid
+  nombre: string
+  tipo: TipoActor
+  correo: string | null
+  telefono: string | null
+  activo: boolean
+  /** Entradas que emitió y salidas que recibió. */
+  documentos: number
+}
+
+export interface DatosActor {
+  nombre: string
+  tipo: TipoActor
+  correo: string | null
+  telefono: string | null
+}
+
 // ── Bandeja (O-14) ─────────────────────────────────────────────────────────
 
 export interface FiltrosBandeja {
@@ -149,6 +214,8 @@ export interface Catalogos {
   tipos_documento: TipoDocumento[]
   /** Solo los tipos con campos propios tienen entrada (D-66). */
   campos_tipo: Partial<Record<TipoDocumento, CampoTipo[]>>
+  /** Solo los activos: emisores y destinatarios que se ofrecen al registrar (RI-06, O-35). */
+  actores_externos: Pick<ActorExterno, 'id' | 'nombre' | 'tipo'>[]
 }
 
 /** Documento marcado como posible duplicado que espera revisión (O-26). */
@@ -156,13 +223,56 @@ export interface ResumenDocumento {
   id: Uuid
   folio: string
   asunto: string
+  /** Por qué se marcó (D-27): sin número o sin fecha del documento. */
+  falta: 'numero' | 'fecha'
 }
 
-/** Resumen de C3 (D-32). */
+/** Un lado de la comparación de V-14. */
+export interface DocumentoComparado {
+  id: Uuid
+  folio: string
+  numero_emisor: string | null
+  emisor: string
+  fecha_documento: Fecha | null
+  canal: Canal
+  fecha_recepcion: FechaHora
+  sintesis: string
+  estado: EstadoDocumento
+  /** Área responsable hoy, si la hay. */
+  ubicacion: string | null
+}
+
+export type Coincidencia = 'numero_emisor' | 'emisor' | 'fecha_documento' | 'sintesis'
+
+/** O-26: el marcado y el candidato registrado antes, del mismo emisor. */
+export interface ComparacionDuplicado {
+  posterior: DocumentoComparado
+  candidato: DocumentoComparado | null
+  coincidencias: Coincidencia[]
+}
+
+export type DecisionDuplicado = 'mismo' | 'distintos'
+
+/** Reglas de rebote de D-32; «sin motivo» no ocurre porque O-22 exige motivo. */
+export type ReglaRebote = 'no_competencia_sin_area' | 'tres_devoluciones' | 'tres_areas'
+
+export interface FiltrosRebotes {
+  /** Mes AAAA-MM de los movimientos (D-50); por omisión, el actual. */
+  periodo?: string
+  id_area?: Uuid
+}
+
+/** C3 Rebotes entre áreas (D-32). */
 export interface Rebote {
   id_documento: Uuid
   folio: string
-  motivo: string
+  /** Nulo si el contenido es confidencial y no lo ve (D-29). */
+  asunto: string | null
+  reglas: ReglaRebote[]
+  /** Áreas distintas por las que pasó como responsable, sin contar oficialía. */
+  areas: number
+  /** Área responsable hoy. */
+  ubicacion: string | null
 }
 
 /** Salida con acuse cuyo documento de origen está pendiente en el área como responsable (D-58). */
@@ -358,6 +468,90 @@ export interface DocumentoEncontrado {
   folio: string
   asunto: string
   fecha: FechaHora
+  /** Es una salida externa (O-20), no un documento recibido. */
+  salida: boolean
+}
+
+/** Campos propios con índice parcial (D-46): los únicos por los que se busca. */
+export type CampoBuscable = 'ente_auditor' | 'solicitante'
+
+/** O-30 Buscar documentos. Todos los filtros son opcionales; la paginación es obligatoria. */
+export interface FiltrosBusqueda {
+  texto?: string
+  folio?: string
+  numero?: string
+  emisor?: string
+  tipo?: TipoDocumento
+  estado?: EstadoDocumento
+  /** Fecha de recepción, inclusive. */
+  desde?: Fecha
+  hasta?: Fecha
+  campo_tipo?: { clave: CampoBuscable; valor: string }
+  pagina?: number
+  tamano?: number
+}
+
+export interface ResultadoBusqueda {
+  id: Uuid
+  folio: string
+  /** Nulo fuera de la visibilidad (D-29). */
+  numero_emisor: string | null
+  /** Nula fuera de la visibilidad o si es confidencial y no la ve (D-29). */
+  sintesis: string | null
+  tipo: TipoDocumento
+  estado: EstadoDocumento
+  area_responsable: string | null
+  /** «restringida»: de otra área, solo estado y responsable; «confidencial»: sin contenido. */
+  visibilidad: 'completa' | 'restringida' | 'confidencial'
+}
+
+// ── Asuntos (O-08, O-18, O-27, C2, C5) ─────────────────────────────────────
+
+export interface Asunto {
+  id: Uuid
+  nombre: string
+  descripcion: string
+  creador: string
+  fecha: FechaHora
+  /** Documentos que pertenecen al asunto. */
+  documentos: number
+  /** Áreas responsables hoy de esos documentos. */
+  areas: string[]
+}
+
+export interface NuevoAsunto {
+  nombre: string
+  descripcion: string
+}
+
+/** Un documento del hilo de C2. */
+export interface NodoHilo {
+  /** Para abrir la ficha; nulo en salidas y no registrados. */
+  id_documento: Uuid | null
+  referencia: string
+  /** Asunto del documento, síntesis de la salida o emisor del no registrado; nula sin visibilidad (D-29). */
+  descripcion: string | null
+  estado: EstadoDocumento | null
+  /** Falso en los DocumentoNoRegistrado (D-33). */
+  registrado: boolean
+  /** Pertenece al asunto; los demás llegan por relaciones. */
+  pertenece: boolean
+  /** Relación con el nodo anterior del hilo: «entra» si este apunta al anterior. Nula en los que pertenecen. */
+  relacion: { tipo: TipoRelacion; sentido: 'entra' | 'sale' } | null
+  /** Saltos desde el documento del asunto (D-50: hasta 6). */
+  profundidad: number
+}
+
+/** C2 Hilo de un asunto y C5 Alcance. */
+export interface HiloAsunto {
+  asunto: Asunto
+  nodos: NodoHilo[]
+}
+
+export interface AlcanceAsunto {
+  areas: { area: string; documentos: number }[]
+  /** Solo de los documentos cuyo contenido ve (D-29). */
+  personas: string[]
 }
 
 // ── Salidas externas (O-20, O-21) ──────────────────────────────────────────
@@ -377,6 +571,9 @@ export interface Salida {
   sintesis: string
   destinatario: string
   id_responde_a: Uuid | null
+  folio_responde_a: string | null
+  area_emisora: string
+  fecha_hora: FechaHora
   acuse: { fecha_hora: FechaHora; recibio: string } | null
 }
 

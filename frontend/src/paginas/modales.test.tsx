@@ -2,10 +2,23 @@
 // y los flujos de V-03, V-07, V-09b y V-13b sobre la fuente simulada.
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { corregirMovimiento, registrarDocumento, turnar } from '../api'
 import { AREA, idPorFolio } from '../api/simulado/datos'
+import { conEscrituraRetenida } from '../pruebas/retener'
 import { entrarComo, montarApp, USUARIO } from '../pruebas/utilidades'
+
+// O-22 y O-28 esperan a `escritura.retener` antes de llegar al simulador (ver conEscrituraRetenida).
+const escritura = vi.hoisted(() => ({ retener: Promise.resolve() }))
+vi.mock('../api', async (original) => {
+  const api = await original<typeof import('../api')>()
+  const { retenida } = await import('../pruebas/retener')
+  return {
+    ...api,
+    devolver: retenida(escritura, api.devolver),
+    agregarAnexo: retenida(escritura, api.agregarAnexo),
+  }
+})
 
 type Usuario = ReturnType<typeof userEvent.setup>
 
@@ -61,8 +74,10 @@ describe('V-07 Devolver (O-22)', () => {
     const devolver = within(dialogo).getByRole('button', { name: 'Devolver a Oficialía de partes' })
     expect(devolver).toBeDisabled()
     await usuario.click(within(dialogo).getByRole('radio', { name: /Falta firma/ }))
-    await usuario.click(devolver)
-    await waitFor(() => expect(devolver).toHaveAttribute('aria-busy', 'true'))
+    await conEscrituraRetenida(escritura, async () => {
+      await usuario.click(devolver)
+      await waitFor(() => expect(devolver).toHaveAttribute('aria-busy', 'true'))
+    })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     // Compras ya no lo tiene: la ficha se volvió a leer y el titular ya no ve «Devolver».
     expect(await screen.findByText('Pendiente en Oficialía de partes como responsable · 0 días')).toBeInTheDocument()
@@ -136,8 +151,10 @@ describe('Anexo y nota (O-28, O-29), diseño propio', () => {
     await usuario.clear(hojas)
     await usuario.type(hojas, '3')
     await usuario.type(within(dialogo).getByLabelText('Ubicación física'), 'Archivo de oficialía, gaveta 4')
-    await usuario.click(agregar)
-    await waitFor(() => expect(agregar).toHaveAttribute('aria-busy', 'true'))
+    await conEscrituraRetenida(escritura, async () => {
+      await usuario.click(agregar)
+      await waitFor(() => expect(agregar).toHaveAttribute('aria-busy', 'true'))
+    })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(await screen.findByText('Acta de entrega')).toBeInTheDocument()
   })

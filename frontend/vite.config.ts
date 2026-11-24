@@ -4,6 +4,8 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [react()],
+  // En desarrollo, /api va al backend local (uvicorn): así la cookie de sesión es del mismo origen (arquitectura, 8).
+  server: { proxy: { '/api': 'http://127.0.0.1:8000' } },
   build: {
     // Las dependencias van en su propio fragmento: el navegador las guarda entre versiones de la interfaz.
     rolldownOptions: { output: { codeSplitting: { groups: [{ name: 'dependencias', test: /node_modules/ }] } } },

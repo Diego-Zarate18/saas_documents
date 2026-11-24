@@ -1,0 +1,89 @@
+# SIGEDOC: las tres bases y la API (D-41). Los servicios outbox y web llegan en T-08 y T-17.
+# Todo valor sale de .env (copia de .env.example); aquí no hay credenciales.
+# Los puertos se publican solo en 127.0.0.1 (arquitectura, sección 6).
+# Healthchecks: cada 2 s mientras la base arranca (start_interval) y cada 30 s después.
+
+name: sigedoc
+
+services:
+  postgres:
+    image: postgres:17.12
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?falta POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?falta POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:?falta POSTGRES_PORT en .env}:5432"
+    volumes:
+      - postgres-datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+      start_interval: 2s
+
+  mongo:
+    image: mongo:8.0.38
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:?falta MONGO_USER en .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?falta MONGO_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:${MONGO_PORT:?falta MONGO_PORT en .env}:27017"
+    volumes:
+      - mongo-datos:/data/db
+    healthcheck:
+      # ping no necesita autenticarse.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+      start_interval: 2s
+
+  neo4j:
+    image: neo4j:5.26.34-community
+    environment:
+      # Neo4j exige el usuario neo4j y una contraseña de al menos 8 caracteres.
+      NEO4J_AUTH: ${NEO4J_USER:?falta NEO4J_USER en .env}/${NEO4J_PASSWORD:?falta NEO4J_PASSWORD en .env}
+      # Memoria acotada para una laptop.
+      NEO4J_server_memory_heap_initial__size: ${NEO4J_MEMORIA_HEAP:-512m}
+      NEO4J_server_memory_heap_max__size: ${NEO4J_MEMORIA_HEAP:-512m}
+      NEO4J_server_memory_pagecache_size: ${NEO4J_MEMORIA_PAGECACHE:-256m}
+    ports:
+      - "127.0.0.1:${NEO4J_HTTP_PORT:?falta NEO4J_HTTP_PORT en .env}:7474"
+      - "127.0.0.1:${NEO4J_BOLT_PORT:?falta NEO4J_BOLT_PORT en .env}:7687"
+    volumes:
+      - neo4j-datos:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+      start_interval: 2s
+
+  api:
+    build: ./backend
+    env_file: .env
+    environment:
+      # Dentro de la red de compose las bases se alcanzan por su nombre de servicio y su puerto interno.
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      MONGO_URI: mongodb://mongo:27017
+      NEO4J_URI: bolt://neo4j:7687
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+
+volumes:
+  postgres-datos:
+  mongo-datos:
+  neo4j-datos:

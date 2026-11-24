@@ -3,18 +3,22 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { idPorFolio } from '../api/simulado/datos'
+import { conEscrituraRetenida } from '../pruebas/retener'
 import { entrarComo, montarApp, USUARIO } from '../pruebas/utilidades'
 
-// Cuenta las lecturas de la comparación de V-14 sin cambiar lo que devuelve.
-const lecturas = vi.hoisted(() => ({ comparacion: 0 }))
+// Cuenta las lecturas de la comparación de V-14 sin cambiar lo que devuelve. O-27 espera a `lecturas.retener`
+// antes de llegar al simulador (ver conEscrituraRetenida).
+const lecturas = vi.hoisted(() => ({ comparacion: 0, retener: Promise.resolve() }))
 vi.mock('../api', async (original) => {
   const api = await original<typeof import('../api')>()
+  const { retenida } = await import('../pruebas/retener')
   return {
     ...api,
     obtenerComparacionDuplicado: (id: string) => {
       lecturas.comparacion++
       return api.obtenerComparacionDuplicado(id)
     },
+    crearAsunto: retenida(lecturas, api.crearAsunto),
   }
 })
 
@@ -123,8 +127,10 @@ describe('V-11, V-11b y V-11c Asuntos (C2, C5, O-08, O-18, O-27)', () => {
     expect(within(dialogo).getByLabelText('Nombre del asunto')).toHaveAccessibleDescription('Escribe el nombre del asunto.')
     await usuario.type(within(dialogo).getByLabelText('Nombre del asunto'), 'Papelería 2027')
     await usuario.type(within(dialogo).getByLabelText('Descripción'), 'Compras de papelería del próximo ejercicio.')
-    await usuario.click(crear)
-    await waitFor(() => expect(crear).toHaveAttribute('aria-busy', 'true'))
+    await conEscrituraRetenida(lecturas, async () => {
+      await usuario.click(crear)
+      await waitFor(() => expect(crear).toHaveAttribute('aria-busy', 'true'))
+    })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(await screen.findByText('Papelería 2027')).toBeInTheDocument()
   }, 15_000)

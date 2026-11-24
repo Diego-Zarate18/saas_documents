@@ -8,7 +8,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { API_DISPONIBLE } from './api'
-import { Aviso } from './componentes/compuestos/Aviso'
+import { AvisoApiReal } from './componentes/compuestos/AvisoApiReal'
 import { rutas } from './rutas/rutas'
 
 const cliente = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } } })
@@ -19,16 +19,14 @@ if (!raiz) throw new Error('Falta el elemento #root en index.html')
 
 createRoot(raiz).render(
   <StrictMode>
-    {API_DISPONIBLE ? (
-      <QueryClientProvider client={cliente}>
+    <QueryClientProvider client={cliente}>
+      {API_DISPONIBLE ? (
         <RouterProvider router={router} />
-      </QueryClientProvider>
-    ) : (
-      <main>
-        <Aviso tono="info" rol="alert">
-          La API real aún no está disponible.
-        </Aviso>
-      </main>
-    )}
+      ) : (
+        <main>
+          <AvisoApiReal />
+        </main>
+      )}
+    </QueryClientProvider>
   </StrictMode>,
 )

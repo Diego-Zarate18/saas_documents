@@ -1,0 +1,85 @@
+# Criterio 7 · 2026-11-24T12:42:03Z · node v24.22.3 · npm 11.7.0
+
+$ npm ci
+
+added 182 packages, and audited 183 packages in 6s
+
+27 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+código de salida: 0
+
+$ npm run lint
+
+> sigedoc-frontend@0.0.0 lint
+> oxlint --deny-warnings
+
+código de salida: 0
+
+$ npm run typecheck
+
+> sigedoc-frontend@0.0.0 typecheck
+> tsc -b
+
+código de salida: 0
+
+$ npm test   (corrida 1 de 5; salida completa en npm-test-1.txt)
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+código de salida: 0
+
+$ npm test   (corrida 2 de 5; salida completa en npm-test-2.txt)
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+código de salida: 0
+
+$ npm test   (corrida 3 de 5; salida completa en npm-test-3.txt)
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+código de salida: 0
+
+$ npm test   (corrida 4 de 5; salida completa en npm-test-4.txt)
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+código de salida: 0
+
+$ npm test   (corrida 5 de 5; salida completa en npm-test-5.txt)
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+código de salida: 0
+
+$ npm run build
+
+> sigedoc-frontend@0.0.0 build
+> tsc -b && vite build
+
+[36mvite v8.3.8 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 366 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                   1.19 kB │ gzip:   0.51 kB
+dist/assets/geist-mono-symbols2-wght-normal-CO5SzqOn.woff2        5.81 kB
+dist/assets/geist-mono-cyrillic-ext-wght-normal-X_5orZeX.woff2    6.17 kB
+dist/assets/geist-cyrillic-ext-wght-normal-DjL33-gN.woff2         7.42 kB
+dist/assets/geist-mono-vietnamese-wght-normal-DadHysG0.woff2      7.69 kB
+dist/assets/geist-vietnamese-wght-normal-6IgcOCM7.woff2           8.00 kB
+dist/assets/geist-mono-cyrillic-wght-normal-DiZS0aHC.woff2       12.94 kB
+dist/assets/unbounded-vietnamese-wght-normal-rat7GD3o.woff2      13.88 kB
+dist/assets/geist-mono-latin-ext-wght-normal-Bwz-egvJ.woff2      14.69 kB
+dist/assets/geist-cyrillic-wght-normal-BEAKL7Jp.woff2            15.08 kB
+dist/assets/geist-latin-ext-wght-normal-DC-KSUi6.woff2           16.51 kB
+dist/assets/geist-mono-latin-wght-normal-XN7g48iV.woff2          23.12 kB
+dist/assets/geist-latin-wght-normal-BgDaEnEv.woff2               29.40 kB
+dist/assets/unbounded-cyrillic-wght-normal-C627f1f8.woff2        31.42 kB
+dist/assets/unbounded-latin-wght-normal-D5afBTBx.woff2           50.90 kB
+dist/assets/unbounded-latin-ext-wght-normal-D6H-S6MW.woff2      118.34 kB
+dist/assets/dependencias-Beuno2FA.css                             7.26 kB │ gzip:   2.66 kB
+dist/assets/index-CnxO-zjt.css                                   69.43 kB │ gzip:  11.48 kB
+dist/assets/rolldown-runtime-XKyaHtl9.js                          0.72 kB │ gzip:   0.42 kB
+dist/assets/index-CZlLI-sp.js                                   207.38 kB │ gzip:  57.48 kB
+dist/assets/dependencias-CQY5H8cQ.js                            456.91 kB │ gzip: 143.88 kB
+
+[32m✓ built in 415ms[39m
+código de salida: 0

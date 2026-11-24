@@ -1,0 +1,13 @@
+
+> sigedoc-frontend@0.0.0 test
+> vitest run
+
+
+ RUN  v5.1.1 C:/saas_documents/frontend
+
+
+ Test Files  17 passed (17)
+      Tests  175 passed (175)
+   Start at  06:42:13
+   Duration  27.55s (tests 41%, environment 27%, import 12%, transform 12%, setup 7%)
+

@@ -29,7 +29,24 @@ npm run build       # tsc -b y vite build a frontend/dist/
 npm run preview     # sirve la versión compilada
 ```
 
-Backend y bases: los define T-03.
+Bases, desde la raíz (Docker Desktop; credenciales en `.env`, copia de `.env.example`):
+
+```powershell
+docker compose up -d postgres mongo neo4j   # PostgreSQL 17.12, MongoDB 8.0.38, Neo4j 5.26.34; puertos solo en 127.0.0.1
+docker compose ps                           # las tres en (healthy)
+docker compose up -d --build api            # la API en contenedor, http://127.0.0.1:8000
+```
+
+Backend, desde `backend/` (Python 3.13 con uv):
+
+```powershell
+uv sync                                                        # dependencias exactas de uv.lock
+uv run uvicorn app.main:app --loop asyncio:SelectorEventLoop   # API en http://127.0.0.1:8000; --loop solo en Windows (psycopg)
+uv run ruff check . ../tests                                   # lint (app y pruebas)
+uv run ruff format --check . ../tests                          # formato
+uv run pytest ../tests                                         # unitarias e integración (config en tests/pytest.ini)
+uv run pytest ../tests -m integracion                          # solo integración: requiere las tres bases arriba
+```
 
 ## Recordatorios que no se negocian
 

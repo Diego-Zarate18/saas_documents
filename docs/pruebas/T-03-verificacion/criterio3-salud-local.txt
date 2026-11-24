@@ -1,0 +1,18 @@
+# Criterio 3 · 2026-11-24T12:41:24Z
+
+$ uv run uvicorn app.main:app --loop asyncio:SelectorEventLoop   (desde backend/; --loop solo en Windows)
+
+Registro de arranque (registro de conexión):
+
+INFO:     Started server process [17300]
+INFO:     Waiting for application startup.
+INFO:     sigedoc: postgres: conectada (92 ms)
+INFO:     sigedoc: mongo: conectada (91 ms)
+INFO:     sigedoc: neo4j: conectada (60 ms)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+$ curl -s -w "HTTP %{http_code}" http://127.0.0.1:8000/api/salud
+{"estado":"ok","bases":{"postgres":{"ok":true,"ms":4,"error":null},"mongo":{"ok":true,"ms":2,"error":null},"neo4j":{"ok":true,"ms":2,"error":null}}}
+HTTP 200
+

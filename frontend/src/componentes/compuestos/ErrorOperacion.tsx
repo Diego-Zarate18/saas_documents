@@ -1,4 +1,4 @@
-import { ErrorDeApi } from '../../api/tipos'
+import { mensajeDeError } from '../../api/tipos'
 import { Aviso } from './Aviso'
 
 interface Props {
@@ -12,7 +12,7 @@ export function ErrorOperacion({ error, que }: Props) {
   if (!error) return null
   return (
     <Aviso tono="error" rol="alert">
-      {error instanceof ErrorDeApi ? error.problema.title : `No se pudo ${que}.`}
+      {mensajeDeError(error, `No se pudo ${que}.`)}
     </Aviso>
   )
 }

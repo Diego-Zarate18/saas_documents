@@ -4,7 +4,7 @@ import type { DocumentoEncontrado, Ficha, TipoRelacion } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
 import { CampoSelector } from '../../componentes/compuestos/Selector'
-import { TEXTO_ESTADO, TEXTO_RELACION } from '../../componentes/base/textos'
+import { DESCRIPCION_RELACION, TEXTO_ESTADO, TEXTO_RELACION } from '../../componentes/base/textos'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { BuscadorDocumento } from '../../componentes/compuestos/BuscadorDocumento'
 import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
@@ -13,14 +13,6 @@ import { Modal } from '../../componentes/compuestos/Modal'
 import { OpcionRadio } from '../../componentes/compuestos/OpcionRadio'
 import { Segmentado } from '../../componentes/compuestos/Segmentado'
 import estilos from './Relacionar.module.css'
-
-/** Las cuatro relaciones de D-05 con las descripciones de V-10. */
-const TIPOS: { valor: TipoRelacion; descripcion: string }[] = [
-  { valor: 'responde_a', descripcion: 'Este documento contesta al otro' },
-  { valor: 'da_seguimiento_a', descripcion: 'Continúa un trámite anterior' },
-  { valor: 'en_alcance_a', descripcion: 'Complementa o amplía al otro' },
-  { valor: 'sustituye_a', descripcion: 'Solo entre registrados: el otro queda sin efecto' },
-]
 
 type Destino = 'registrado' | 'no_registrado'
 
@@ -97,16 +89,16 @@ export function Relacionar({ ficha, abierto, alCambiar }: Props) {
       }
     >
       <GrupoOpciones leyenda="Tipo de relación" columnas={2}>
-        {TIPOS.map((t) => (
+        {(catalogos.data?.tipos_relacion ?? []).map((t) => (
           <OpcionRadio
-            key={t.valor}
+            key={t}
             name="tipo-relacion"
-            texto={TEXTO_RELACION[t.valor]}
-            codigo={t.valor.toUpperCase()}
-            descripcion={t.descripcion}
-            checked={tipo === t.valor}
-            disabled={t.valor === 'sustituye_a' && noRegistrado}
-            onChange={() => setTipo(t.valor)}
+            texto={TEXTO_RELACION[t]}
+            codigo={t.toUpperCase()}
+            descripcion={DESCRIPCION_RELACION[t]}
+            checked={tipo === t}
+            disabled={t === 'sustituye_a' && noRegistrado}
+            onChange={() => setTipo(t)}
           />
         ))}
       </GrupoOpciones>
@@ -187,6 +179,7 @@ export function Relacionar({ ficha, abierto, alCambiar }: Props) {
           </ul>
         </div>
       )}
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={relacionar.error ?? quitar.error} que="guardar la relación" />
     </Modal>
   )

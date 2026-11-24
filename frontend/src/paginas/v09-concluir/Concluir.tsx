@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { useConcluir } from '../../api/consultas'
+import { useCatalogos, useConcluir } from '../../api/consultas'
 import { validarConclusion } from '../../api/reglas'
 import type { DocumentoEncontrado, Ficha, FormaConclusion } from '../../api/tipos'
 import { AreaTexto } from '../../componentes/base/Campo'
 import { Boton } from '../../componentes/base/Boton'
-import { TEXTO_FORMA } from '../../componentes/base/textos'
+import { DESCRIPCION_FORMA, TEXTO_FORMA } from '../../componentes/base/textos'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { BuscadorDocumento } from '../../componentes/compuestos/BuscadorDocumento'
 import { Chip } from '../../componentes/compuestos/Chip'
@@ -13,15 +13,6 @@ import { GrupoOpciones } from '../../componentes/compuestos/GrupoOpciones'
 import { Modal } from '../../componentes/compuestos/Modal'
 import { OpcionRadio } from '../../componentes/compuestos/OpcionRadio'
 import { Efectos, Resumen } from '../../componentes/compuestos/Resumen'
-
-/** Catálogo cerrado de D-59 con las descripciones de V-09. */
-const FORMAS: { valor: FormaConclusion; descripcion: string }[] = [
-  { valor: 'con_respuesta', descripcion: 'Se emitió un oficio o una salida que atiende este documento' },
-  { valor: 'atencion_sin_oficio', descripcion: 'Se atendió sin emitir documento; exige nota de evidencia' },
-  { valor: 'enterado', descripcion: 'Documento informativo; no requiere respuesta ni nota' },
-  { valor: 'no_procede', descripcion: 'No corresponde atenderlo; exige nota con el motivo' },
-  { valor: 'duplicado', descripcion: 'Ya existe el original; exige referencia a él' },
-]
 
 /** Etiqueta de la nota según la forma; con_respuesta y enterado no la piden (D-59). */
 const NOTA: Partial<Record<FormaConclusion, string>> = {
@@ -44,6 +35,8 @@ export function Concluir({ ficha, areaPropia, abierto, alCambiar }: Props) {
   const [nota, setNota] = useState('')
   const [tocado, setTocado] = useState(false)
   const concluir = useConcluir(ficha.registro.id)
+  const catalogos = useCatalogos()
+  const formas = catalogos.data?.formas_conclusion ?? []
   const conclusion = {
     forma,
     id_respuesta: forma === 'con_respuesta' ? (documento?.id ?? null) : null,
@@ -104,15 +97,15 @@ export function Concluir({ ficha, areaPropia, abierto, alCambiar }: Props) {
     >
       <Aviso tono="exito">{areaPropia} es la responsable y tiene el documento pendiente: puedes concluirlo.</Aviso>
       <GrupoOpciones leyenda="Forma de conclusión" marca={<Chip>Catálogo cerrado · D-59</Chip>}>
-        {FORMAS.map((f) => (
+        {formas.map((f) => (
           <OpcionRadio
-            key={f.valor}
+            key={f}
             name="forma"
-            texto={TEXTO_FORMA[f.valor]}
-            codigo={f.valor}
-            descripcion={f.descripcion}
-            checked={forma === f.valor}
-            onChange={() => elegirForma(f.valor)}
+            texto={TEXTO_FORMA[f]}
+            codigo={f}
+            descripcion={DESCRIPCION_FORMA[f]}
+            checked={forma === f}
+            onChange={() => elegirForma(f)}
           />
         ))}
       </GrupoOpciones>
@@ -161,6 +154,7 @@ export function Concluir({ ficha, areaPropia, abierto, alCambiar }: Props) {
           <li>Sale de la bandeja de todas las áreas y del conteo de pendientes</li>
         </Efectos>
       </Resumen>
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={concluir.error} que="concluir el documento" />
     </Modal>
   )

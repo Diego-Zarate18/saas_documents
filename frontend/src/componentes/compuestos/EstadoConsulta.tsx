@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { ErrorDeApi } from '../../api/tipos'
+import { mensajeDeError } from '../../api/tipos'
 import { Boton } from '../base/Boton'
 import estilos from './EstadoConsulta.module.css'
 
@@ -30,11 +30,11 @@ interface Props<T> {
 export function EstadoConsulta<T>({ consulta, que, esqueleto, cargando, vacio, children }: Props<T>) {
   if (consulta.isPending || cargando) return esqueleto
   if (consulta.error || consulta.data === undefined) {
-    const detalle = consulta.error instanceof ErrorDeApi ? ` ${consulta.error.problema.title}` : ''
+    const detalle = mensajeDeError(consulta.error, '')
     return (
       <div className={`${estilos.estado} ${estilos.error}`} role="alert">
         <p>
-          No se pudo cargar {que}.{detalle}
+          No se pudo cargar {que}.{detalle && ` ${detalle}`}
         </p>
         <Boton variante="secundario" onClick={() => consulta.refetch()}>
           Reintentar

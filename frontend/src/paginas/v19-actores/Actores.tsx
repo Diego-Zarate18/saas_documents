@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useActores, useDesactivarActor, useGuardarActor } from '../../api/consultas'
+import { useActores, useCatalogos, useDesactivarActor, useGuardarActor } from '../../api/consultas'
 import type { ActorExterno, TipoActor } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
@@ -16,7 +16,6 @@ import { Tarjeta } from '../../componentes/compuestos/Tarjeta'
 import listado from '../listado.module.css'
 
 const NUEVO = 'nuevo'
-const TIPOS: TipoActor[] = ['institucion', 'municipio', 'proveedor', 'ciudadano']
 
 const COLUMNAS = [
   { titulo: 'Nombre' },
@@ -109,6 +108,8 @@ function Formulario({ actor, alGuardar, alCancelar }: PropsFormulario) {
   const [tocado, setTocado] = useState(false)
   const guardar = useGuardarActor()
   const desactivar = useDesactivarActor()
+  const catalogos = useCatalogos()
+  const tipos = catalogos.data?.tipos_actor ?? []
 
   function enviar() {
     guardar.mutate({ id: actor?.id ?? null, nombre, tipo, correo, telefono }, { onSuccess: (a) => alGuardar(a.id) })
@@ -134,7 +135,7 @@ function Formulario({ actor, alGuardar, alCancelar }: PropsFormulario) {
         <span className={listado.etiquetaCampo} aria-hidden="true">
           Tipo
         </span>
-        <Segmentado etiqueta="Tipo" valor={tipo} alCambiar={setTipo} opciones={TIPOS.map((t) => ({ valor: t, texto: TEXTO_TIPO_ACTOR[t] }))} />
+        <Segmentado etiqueta="Tipo" valor={tipo} alCambiar={setTipo} opciones={tipos.map((t) => ({ valor: t, texto: TEXTO_TIPO_ACTOR[t] }))} />
       </div>
       <Campo blanco type="email" etiqueta="Correo de contacto" value={correo} onChange={(e) => setCorreo(e.target.value)} />
       <Campo blanco type="tel" etiqueta="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
@@ -146,6 +147,7 @@ function Formulario({ actor, alGuardar, alCancelar }: PropsFormulario) {
       )}
       {actor && !actor.activo && <Aviso tono="info">Inactivo: ya no se ofrece como emisor ni como destinatario.</Aviso>}
       <ErrorOperacion error={guardar.error} que="guardar el actor" />
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={desactivar.error} que="desactivar el actor" />
       <div className={listado.acciones}>
         {actor ? (

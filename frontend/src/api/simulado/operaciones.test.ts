@@ -1,7 +1,7 @@
 // Operaciones de T-02a sobre la fuente simulada. Los ids son los del catálogo (docs/operaciones/catalogo.json).
 import { describe, expect, it } from 'vitest'
 import { entrarComo, USUARIO } from '../../pruebas/utilidades'
-import type { Conclusion, ErrorDeApi, NuevoDocumento, Uuid } from '../tipos'
+import type { Conclusion, ErrorApi, NuevoDocumento, Uuid } from '../tipos'
 import { AREA, areas, idPorFolio, salidas } from './datos'
 import {
   agregarAnexo,
@@ -29,7 +29,7 @@ import {
 const errorDe = (promesa: Promise<unknown>) =>
   promesa.then(
     () => undefined,
-    (e: ErrorDeApi) => e.problema,
+    (e: ErrorApi) => e,
   )
 const codigoDe = async (promesa: Promise<unknown>) => (await errorDe(promesa))?.codigo ?? 'sin error'
 
@@ -82,7 +82,7 @@ describe('O-01 Registrar documento y asignar folio', () => {
     const original = await registrarDocumento(datos)
     const previsto = await obtenerFolioSiguiente()
     const problema = await errorDe(registrarDocumento({ ...datos, canal: 'papel', fecha_documento: '2026-01-05' }))
-    expect(problema).toMatchObject({ codigo: 'DUPLICADO', status: 409, existente: { id: original.id, folio: original.folio, canal: 'correo' } })
+    expect(problema).toMatchObject({ codigo: 'DUPLICADO', estado_http: 409, existente: { id: original.id, folio: original.folio, canal: 'correo' } })
     expect(await obtenerFolioSiguiente()).toBe(previsto)
     // Mismo número y emisor pero otro año del documento: no es duplicado.
     expect(await codigoDe(registrarDocumento({ ...datos, fecha_documento: '2025-12-30' }))).toBe('sin error')
@@ -154,7 +154,7 @@ describe('D-65 y D-66 Tipos y campos propios', () => {
     await entrarComo(USUARIO.marta)
     expect(await errorDe(registrarDocumento(nuevo({ tipo: 'requerimiento_auditoria' })))).toMatchObject({
       codigo: 'VALIDACION',
-      title: 'Escribe el campo «Ente auditor».',
+      titulo: 'Escribe el campo «Ente auditor».',
     })
     expect(await codigoDe(registrarDocumento(nuevo({ tipo: 'solicitud_transparencia', datos_tipo: { solicitante: '  ' } })))).toBe(
       'VALIDACION',
@@ -527,7 +527,7 @@ describe('O-25 Corregir un movimiento', () => {
     expect(await codigoDe(corregirMovimiento(finanzas.id, { rol: 'apoyo', motivo: ' ' }))).toBe('VALIDACION')
     // RI-10: el grupo ya tiene un responsable, y no puede quedarse sin él.
     expect(await errorDe(corregirMovimiento(finanzas.id, { rol: 'responsable', motivo: 'x' }))).toMatchObject({
-      title: 'Solo puede haber un responsable en el grupo.',
+      titulo: 'Solo puede haber un responsable en el grupo.',
     })
     expect(await codigoDe(corregirMovimiento(compras.id, { rol: 'apoyo', motivo: 'x' }))).toBe('VALIDACION')
 

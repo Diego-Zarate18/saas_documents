@@ -4,7 +4,7 @@ import estilos from './EncabezadoPagina.module.css'
 interface Props {
   /** Texto del h1; la ficha pasa formas mientras carga. */
   titulo: ReactNode
-  /** Migas de pan sobre el título (V-04: «BANDEJA / OP-2026-0139»). */
+  /** Migas de pan sobre el título (V-04: «BANDEJA / <folio>»). */
   migas?: ReactNode
   /** Línea bajo el título: texto o metadatos. */
   descripcion?: ReactNode

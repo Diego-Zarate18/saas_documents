@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAreas, useDarDeBajaPersona, useGuardarPersona, useOrganizacion, usePersonas } from '../../api/consultas'
-import { ErrorDeApi, type Persona, type Rol } from '../../api/tipos'
+import { useAreas, useCatalogos, useDarDeBajaPersona, useGuardarPersona, useOrganizacion, usePersonas } from '../../api/consultas'
+import { ErrorApi, mensajeDeError, type Persona, type Rol } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
 import { DESCRIPCION_ROL, TEXTO_ROL_USUARIO } from '../../componentes/base/textos'
@@ -19,7 +19,6 @@ import listado from '../listado.module.css'
 import estilos from './Personas.module.css'
 
 const NUEVA = 'nueva'
-const ROLES: Rol[] = ['OF', 'DI', 'TI', 'PE', 'AD']
 
 const COLUMNAS = [
   { titulo: 'Nombre', ancho: 130 },
@@ -107,6 +106,8 @@ function Formulario({ persona, alGuardar, alCancelar }: PropsFormulario) {
   const sesion = useSesion().data
   const areas = useAreas()
   const organizacion = useOrganizacion()
+  const catalogos = useCatalogos()
+  const roles = catalogos.data?.roles ?? []
   const [nombre, setNombre] = useState(persona?.nombre ?? '')
   const [correo, setCorreo] = useState(persona?.correo ?? '')
   const [idArea, setIdArea] = useState(persona?.id_area ?? '')
@@ -117,7 +118,7 @@ function Formulario({ persona, alGuardar, alCancelar }: PropsFormulario) {
   const valido = nombre.trim() !== '' && correo.trim() !== '' && idArea !== ''
   const soloLectura = persona !== undefined && !persona.activa
   // El correo repetido se marca en el campo (estado Error del componente Campo, notas de V-18).
-  const correoRepetido = guardar.error instanceof ErrorDeApi && guardar.error.problema.codigo === 'CONFLICTO'
+  const correoRepetido = guardar.error instanceof ErrorApi && guardar.error.codigo === 'CONFLICTO'
   const titularDe = organizacion.data?.elementos.find((a) => persona && a.id_titular === persona.id)
 
   function enviar() {
@@ -154,7 +155,7 @@ function Formulario({ persona, alGuardar, alCancelar }: PropsFormulario) {
         etiqueta="Correo"
         value={correo}
         disabled={soloLectura}
-        error={correoRepetido ? guardar.error?.message : tocado.correo && !correo.trim() ? 'Escribe el correo.' : undefined}
+        error={correoRepetido ? mensajeDeError(guardar.error, '') : tocado.correo && !correo.trim() ? 'Escribe el correo.' : undefined}
         onChange={(e) => {
           setCorreo(e.target.value)
           if (correoRepetido) guardar.reset()
@@ -180,7 +181,7 @@ function Formulario({ persona, alGuardar, alCancelar }: PropsFormulario) {
           etiqueta="Rol"
           valor={rol}
           alCambiar={setRol}
-          opciones={ROLES.map((r) => ({ valor: r, texto: r, deshabilitado: soloLectura }))}
+          opciones={roles.map((r) => ({ valor: r, texto: r, deshabilitado: soloLectura }))}
         />
         <p className={listado.pie}>{DESCRIPCION_ROL[rol]}</p>
       </div>
@@ -194,6 +195,7 @@ function Formulario({ persona, alGuardar, alCancelar }: PropsFormulario) {
         <Aviso tono="info">Es titular de {titularDe.nombre}: si la das de baja, el área queda vacante.</Aviso>
       )}
       {!correoRepetido && <ErrorOperacion error={guardar.error} que="guardar la persona" />}
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={baja.error} que="dar de baja a la persona" />
       {!soloLectura && (
         <div className={listado.acciones}>

@@ -18,8 +18,10 @@ import type {
   Relacion,
   Rol,
   RolTurno,
+  TipoActor,
   TipoDocumento,
   TipoMovimiento,
+  TipoRelacion,
   Uuid,
 } from '../tipos'
 
@@ -778,6 +780,16 @@ export const tiposDocumento: TipoDocumento[] = [
   'informe',
 ]
 
+/** Catálogos cerrados que la interfaz ofrece como opciones (O-31), en el orden en que se muestran. */
+export const motivosDevolucion: MotivoDevolucion[] = ['falta_informacion', 'falta_firma', 'falta_anexo', 'corregir_dato', 'no_competencia'] // D-32
+export const formasConclusion: FormaConclusion[] = ['con_respuesta', 'atencion_sin_oficio', 'enterado', 'no_procede', 'duplicado'] // D-59
+export const canales: Canal[] = ['correo', 'papel']
+export const roles: Rol[] = ['OF', 'DI', 'TI', 'PE', 'AD'] // D-44
+export const rolesTurno: RolTurno[] = ['responsable', 'apoyo', 'conocimiento']
+export const estadosDocumento: EstadoDocumento[] = ['en_tramite', 'concluido', 'cancelado', 'sin_efecto']
+export const tiposRelacion: TipoRelacion[] = ['responde_a', 'da_seguimiento_a', 'en_alcance_a', 'sustituye_a'] // D-05
+export const tiposActor: TipoActor[] = ['institucion', 'municipio', 'proveedor', 'ciudadano']
+
 /** D-66: campos propios por tipo; los otros cuatro tipos no tienen. T-05 la reemplaza por el esquema de MongoDB (D-55). */
 export const camposTipo: Partial<Record<TipoDocumento, CampoTipo[]>> = {
   requerimiento_auditoria: [
@@ -787,6 +799,9 @@ export const camposTipo: Partial<Record<TipoDocumento, CampoTipo[]>> = {
   solicitud_transparencia: [{ clave: 'solicitante', etiqueta: 'Solicitante', forma: 'texto', obligatorio: true }],
   solicitud_material_pago: [{ clave: 'concepto', etiqueta: 'Concepto', forma: 'texto', obligatorio: false }],
 }
+
+/** Usuarios de prueba del Figma que V-01 sugiere, uno o más por rol; entran con cualquier contraseña. */
+export const usuariosDePrueba = ['mflores', 'alopez', 'rperez', 'ediaz', 'jruiz', 'lgomez'].map((u) => `${u}@institucion.gob.mx`)
 
 /** Para las pruebas: id de un documento por su folio. */
 export const idPorFolio = (folio: string): Uuid => {

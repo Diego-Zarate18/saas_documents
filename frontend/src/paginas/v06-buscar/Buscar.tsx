@@ -36,7 +36,6 @@ const CAMPO_DEL_TIPO: Partial<Record<TipoDocumento, { clave: CampoBuscable; etiq
   solicitud_transparencia: { clave: 'solicitante', etiqueta: 'Solicitante' },
 }
 
-const ESTADOS: EstadoDocumento[] = ['en_tramite', 'concluido', 'cancelado', 'sin_efecto']
 
 // Diseño propio: el Figma dibuja «Recibido: 01/01/2026 – 21/11/2026» sin selector; se ofrecen periodos fijos.
 const hoy = aHoraLocal(new Date().toISOString()).slice(0, 10)
@@ -115,7 +114,7 @@ export function Buscar() {
         <form onSubmit={enviar} aria-label="Filtros de búsqueda">
           <div className={estilos.campos}>
             <Campo etiqueta="Texto en la síntesis" value={borrador.texto} onChange={(e) => cambiar({ texto: e.target.value })} />
-            <Campo etiqueta="Folio" placeholder="OP-2026-…" value={borrador.folio} onChange={(e) => cambiar({ folio: e.target.value })} />
+            <Campo etiqueta="Folio" placeholder="Siglas-año-número" value={borrador.folio} onChange={(e) => cambiar({ folio: e.target.value })} />
             <Campo
               etiqueta="Número del emisor"
               placeholder="—"
@@ -146,7 +145,7 @@ export function Buscar() {
               variante="pildora"
               prefijo="Estado:"
               valor={borrador.estado}
-              opciones={[{ valor: TODOS, texto: 'Todos' }, ...ESTADOS.map((e) => ({ valor: e, texto: TEXTO_ESTADO[e] }))]}
+              opciones={[{ valor: TODOS, texto: 'Todos' }, ...(catalogos.data?.estados_documento ?? []).map((e) => ({ valor: e, texto: TEXTO_ESTADO[e] }))]}
               alCambiar={(estado) => cambiar({ estado })}
             />
             <Selector

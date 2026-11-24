@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAreas, useCatalogos, useFolioSiguiente, useRegistrarDocumento } from '../../api/consultas'
 import { validarDatosTipo } from '../../api/reglas'
-import { ErrorDeApi, type Canal, type DatosTipo, type TipoDocumento } from '../../api/tipos'
+import { ErrorApi, type Canal, type DatosTipo, type TipoDocumento } from '../../api/tipos'
 import { Boton, BotonEnlace } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
 import { Interruptor } from '../../componentes/base/Interruptor'
@@ -52,7 +52,7 @@ export function Registrar() {
   }, [intentos])
 
   const campos = tipo ? (catalogos.data?.campos_tipo[tipo] ?? []) : []
-  const existente = registrar.error instanceof ErrorDeApi ? registrar.error.problema.existente : undefined
+  const existente = registrar.error instanceof ErrorApi ? registrar.error.existente : undefined
 
   function validar(): Errores {
     const e: Errores = {}
@@ -204,7 +204,7 @@ export function Registrar() {
                 etiqueta="Canal de recepción"
                 valor={canal}
                 alCambiar={setCanal}
-                opciones={(['correo', 'papel'] as const).map((c) => ({ valor: c, texto: TEXTO_CANAL[c] }))}
+                opciones={(catalogos.data?.canales ?? []).map((c) => ({ valor: c, texto: TEXTO_CANAL[c] }))}
               />
             </div>
             <Campo

@@ -1,19 +1,15 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation } from 'react-router'
-import { ErrorDeApi } from '../../api/tipos'
+import { usuariosDePrueba } from '../../api'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
-import { Aviso } from '../../componentes/compuestos/Aviso'
+import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
 import { Icono } from '../../iconos/Icono'
 import { Isotipo } from '../../iconos/Isotipo'
 import { inicioDe } from '../../rutas/menu'
 import { useIniciarSesion, useSesion } from '../../sesion/sesion'
 import estilos from './InicioSesion.module.css'
 
-// Sugerencias del navegador con los usuarios de prueba del Figma (modo simulado, D-63).
-const USUARIOS_DE_PRUEBA = ['mflores', 'alopez', 'rperez', 'ediaz', 'jruiz', 'lgomez'].map(
-  (u) => `${u}@institucion.gob.mx`,
-)
 
 /** V-01 Inicio de sesión (O-36). */
 export function InicioSesion() {
@@ -57,7 +53,7 @@ export function InicioSesion() {
           required
         />
         <datalist id="usuarios-de-prueba">
-          {USUARIOS_DE_PRUEBA.map((u) => (
+          {usuariosDePrueba.map((u) => (
             <option key={u} value={u}>{u}</option>
           ))}
         </datalist>
@@ -69,11 +65,7 @@ export function InicioSesion() {
           onChange={(e) => setContrasena(e.target.value)}
           required
         />
-        {iniciar.error && (
-          <Aviso tono="error" rol="alert">
-            {iniciar.error instanceof ErrorDeApi ? iniciar.error.problema.title : 'No se pudo iniciar sesión.'}
-          </Aviso>
-        )}
+        <ErrorOperacion error={iniciar.error} que="iniciar sesión" />
         <Boton type="submit" ancho pendiente={iniciar.isPending}>
           Entrar
         </Boton>

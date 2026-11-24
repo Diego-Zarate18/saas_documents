@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFicha, useSegundaRecepcion } from '../../api/consultas'
+import { useCatalogos, useFicha, useSegundaRecepcion } from '../../api/consultas'
 import type { Canal, Uuid } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
@@ -25,6 +25,9 @@ export function SegundaRecepcion({ idDocumento, abierto, alCambiar, alRegistrar 
   const ficha = useFicha(idDocumento).data
   const recepcion = useSegundaRecepcion(idDocumento)
   const r = ficha?.registro
+  const catalogos = useCatalogos()
+  const canales = catalogos.data?.canales ?? []
+  // D-28: la segunda recepción llega por el canal que aún no se registró.
   const otro: Canal = r?.canal === 'papel' ? 'correo' : 'papel'
   const [canal, setCanal] = useState<Canal>()
   const [hora, setHora] = useState('')
@@ -94,7 +97,7 @@ export function SegundaRecepcion({ idDocumento, abierto, alCambiar, alRegistrar 
             etiqueta="Canal de esta recepción"
             valor={elegido}
             alCambiar={setCanal}
-            opciones={(['correo', 'papel'] as const).map((c) => ({
+            opciones={canales.map((c) => ({
               valor: c,
               texto: c === r?.canal ? `${TEXTO_CANAL[c]} · ya registrado` : TEXTO_CANAL[c],
               deshabilitado: c === r?.canal,
@@ -114,6 +117,7 @@ export function SegundaRecepcion({ idDocumento, abierto, alCambiar, alRegistrar 
           </Aviso>
         </>
       )}
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={recepcion.error} que="registrar la recepción" />
     </Modal>
   )

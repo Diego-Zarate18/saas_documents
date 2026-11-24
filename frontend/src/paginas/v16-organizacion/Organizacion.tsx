@@ -84,11 +84,13 @@ export function Organizacion() {
                       type="button"
                       className={estilos.fila}
                       aria-pressed={area === actual}
-                      style={{ paddingLeft: `calc(var(--espacio-12) + ${buscado ? 0 : nivel} * var(--espacio-24))` }}
                       onClick={() => setElegida(area.id)}
                     >
                       <span className={listado.siglas}>{area.siglas}</span>
-                      <span className={estilos.nombre}>{area.nombre}</span>
+                      {/* Las siglas quedan en una columna fija; solo el nombre se sangra por nivel. */}
+                      <span className={estilos.nombre} style={{ paddingLeft: `calc(${buscado ? 0 : nivel} * var(--espacio-24))` }}>
+                        {area.nombre}
+                      </span>
                       <span className={estilos.titular}>
                         {area.nombre_titular ?? <span className={`${listado.pildora} ${listado.vacante}`}>Vacante</span>}
                       </span>

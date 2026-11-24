@@ -1,7 +1,7 @@
 // Operaciones y consultas de T-02b sobre la fuente simulada. Los ids son los del catálogo (docs/operaciones/catalogo.json).
 import { describe, expect, it } from 'vitest'
 import { entrarComo, USUARIO } from '../../pruebas/utilidades'
-import type { ErrorDeApi, NuevoDocumento, Uuid } from '../tipos'
+import type { ErrorApi, NuevoDocumento, Uuid } from '../tipos'
 import { AREA, ASUNTO, idPorFolio, PERSONA } from './datos'
 import {
   asignarAsunto,
@@ -38,7 +38,7 @@ import {
 const codigoDe = (promesa: Promise<unknown>) =>
   promesa.then(
     () => 'sin error',
-    (e: ErrorDeApi) => e.problema.codigo,
+    (e: ErrorApi) => e.codigo,
   )
 
 let consecutivo = 0

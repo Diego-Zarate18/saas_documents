@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useAreas, useTurnar } from '../../api/consultas'
+import { useAreas, useCatalogos, useTurnar } from '../../api/consultas'
 import { validarGrupoTurno } from '../../api/reglas'
 import type { RolTurno, Uuid } from '../../api/tipos'
 import { Boton } from '../../componentes/base/Boton'
+import { TEXTO_ROL } from '../../componentes/base/textos'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
 import { Modal } from '../../componentes/compuestos/Modal'
@@ -19,12 +20,6 @@ interface Fila {
   instruccion: string
 }
 
-const ROLES = [
-  { valor: 'responsable' as const, texto: 'Responsable', marca: true },
-  { valor: 'apoyo' as const, texto: 'Apoyo' },
-  { valor: 'conocimiento' as const, texto: 'Conocimiento' },
-]
-
 let siguienteClave = 0
 const filaNueva = (): Fila => ({ clave: siguienteClave++, id_area: '', rol: 'responsable', instruccion: '' })
 
@@ -39,6 +34,8 @@ interface Props {
 export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
   const [filas, setFilas] = useState<Fila[]>(() => [filaNueva()])
   const consultaAreas = useAreas()
+  const catalogos = useCatalogos()
+  const roles = (catalogos.data?.roles_turno ?? []).map((r) => ({ valor: r, texto: TEXTO_ROL[r], marca: r === 'responsable' }))
   const areas = consultaAreas.data?.elementos ?? []
   const idPropia = useSesion().data?.id_area
   const turnar = useTurnar(idDocumento)
@@ -105,7 +102,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
               />
               <Segmentado
                 etiqueta={`Rol de ${nombre}`}
-                opciones={ROLES}
+                opciones={roles}
                 valor={f.rol}
                 alCambiar={(rol) => cambiar(f.clave, { rol })}
               />
@@ -152,6 +149,7 @@ export function Turnar({ idDocumento, folio, abierto, alCambiar }: Props) {
           .
         </Aviso>
       )}
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={turnar.error} que="turnar el documento" />
     </Modal>
   )

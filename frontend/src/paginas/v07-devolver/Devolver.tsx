@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useAreas, useDevolver } from '../../api/consultas'
+import { useAreas, useCatalogos, useDevolver } from '../../api/consultas'
 import type { Ficha, MotivoDevolucion, Uuid } from '../../api/tipos'
 import { AreaTexto } from '../../componentes/base/Campo'
+import { OPCION_MOTIVO } from '../../componentes/base/textos'
 import { Boton } from '../../componentes/base/Boton'
 import { Aviso } from '../../componentes/compuestos/Aviso'
 import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
@@ -10,15 +11,6 @@ import { Modal } from '../../componentes/compuestos/Modal'
 import { OpcionRadio } from '../../componentes/compuestos/OpcionRadio'
 import { Segmentado } from '../../componentes/compuestos/Segmentado'
 import { CampoSelector } from '../../componentes/compuestos/Selector'
-
-/** Catálogo cerrado de D-32, con los textos de V-07. */
-const MOTIVOS: { valor: MotivoDevolucion; texto: string; descripcion: string }[] = [
-  { valor: 'falta_informacion', texto: 'Falta información', descripcion: 'Faltan datos para atenderlo' },
-  { valor: 'falta_firma', texto: 'Falta firma', descripcion: 'El documento o un anexo no está firmado' },
-  { valor: 'falta_anexo', texto: 'Falta anexo', descripcion: 'No llegó un anexo que el oficio menciona' },
-  { valor: 'corregir_dato', texto: 'Corregir dato', descripcion: 'Hay un dato equivocado que debe corregirse' },
-  { valor: 'no_competencia', texto: 'No es de nuestra competencia', descripcion: 'Indica qué área debería atenderlo' },
-]
 
 type Modo = 'devolver' | 'returnar'
 
@@ -39,6 +31,8 @@ export function Devolver({ ficha, areaPropia, origen, abierto, alCambiar }: Prop
   const [idArea, setIdArea] = useState('')
   const [nota, setNota] = useState('')
   const devolver = useDevolver(ficha.registro.id)
+  const catalogos = useCatalogos()
+  const motivos = catalogos.data?.motivos_devolucion ?? []
   const areas = useAreas()
   const opciones = (areas.data?.elementos ?? []).filter((a) => a.nombre !== areaPropia)
   const sugerida = opciones.find((a) => a.id === idArea)
@@ -98,15 +92,15 @@ export function Devolver({ ficha, areaPropia, origen, abierto, alCambiar }: Prop
         </Aviso>
       )}
       <GrupoOpciones leyenda="Motivo del catálogo">
-        {MOTIVOS.map((m) => (
+        {motivos.map((m) => (
           <OpcionRadio
-            key={m.valor}
+            key={m}
             name="motivo"
-            texto={m.texto}
-            codigo={m.valor}
-            descripcion={m.descripcion}
-            checked={motivo === m.valor}
-            onChange={() => setMotivo(m.valor)}
+            texto={OPCION_MOTIVO[m].texto}
+            codigo={m}
+            descripcion={OPCION_MOTIVO[m].descripcion}
+            checked={motivo === m}
+            onChange={() => setMotivo(m)}
           />
         ))}
       </GrupoOpciones>
@@ -138,6 +132,7 @@ export function Devolver({ ficha, areaPropia, origen, abierto, alCambiar }: Prop
         </>
       )}
       <AreaTexto blanco etiqueta="Nota para quien lo recibe" value={nota} onChange={(e) => setNota(e.target.value)} />
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={devolver.error} que="devolver el documento" />
     </Modal>
   )

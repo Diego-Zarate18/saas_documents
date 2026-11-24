@@ -24,6 +24,28 @@ describe('V-16 Organización (O-32)', () => {
     expect(screen.getByRole('button', { name: /Unidad de Transparencia/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^CO/ })).not.toBeInTheDocument()
   }, 15_000)
+
+  it('t02c_v16_siglas_de_todos_los_niveles_en_una_columna_fija', async () => {
+    await entrarComo(USUARIO.jorge)
+    montarApp('/organizacion')
+    const arbol = await screen.findByRole('list', { name: 'Áreas por dependencia' })
+    // jsdom no calcula posiciones: la columna es fija si nada antes de las siglas se sangra.
+    const filas = within(arbol).getAllByRole('button')
+    const sangrias = filas.map((fila) => {
+      const [siglas, nombre] = [...fila.children] as HTMLElement[]
+      expect(fila.getAttribute('style')).toBeNull()
+      expect(siglas?.getAttribute('style')).toBeNull()
+      return { siglas: siglas?.textContent, sangria: nombre?.style.paddingLeft }
+    })
+    // Los tres niveles del Figma: la raíz, Jurídico y Unidad de Transparencia (bajo Jurídico).
+    expect(sangrias).toEqual(
+      expect.arrayContaining([
+        { siglas: 'DG', sangria: 'calc(0 * var(--espacio-24))' },
+        { siglas: 'JU', sangria: 'calc(1 * var(--espacio-24))' },
+        { siglas: 'UT', sangria: 'calc(2 * var(--espacio-24))' },
+      ]),
+    )
+  })
 })
 
 describe('V-17 Áreas (O-33)', () => {

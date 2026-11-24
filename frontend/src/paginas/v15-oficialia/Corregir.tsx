@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCorregirMovimiento } from '../../api/consultas'
+import { useCatalogos, useCorregirMovimiento } from '../../api/consultas'
 import type { Ficha, Movimiento, RolTurno as Rol } from '../../api/tipos'
 import { AreaTexto } from '../../componentes/base/Campo'
 import { Boton } from '../../componentes/base/Boton'
@@ -13,8 +13,6 @@ import { Segmentado } from '../../componentes/compuestos/Segmentado'
 import { CampoSelector } from '../../componentes/compuestos/Selector'
 import { diaMes, fechaHora } from '../formato'
 import estilos from './Corregir.module.css'
-
-const ROLES: Rol[] = ['responsable', 'apoyo', 'conocimiento']
 
 interface Props {
   ficha: Ficha
@@ -36,13 +34,15 @@ export function Corregir({ ficha, abierto, alCambiar }: Props) {
   const [motivo, setMotivo] = useState('')
   const [tocado, setTocado] = useState(false)
   const corregir = useCorregirMovimiento()
+  const catalogos = useCatalogos()
+  const roles = catalogos.data?.roles_turno ?? []
   // Por omisión, el último turno: lo más probable es que la captura equivocada sea la más reciente.
   const elegido = turnos.find((m) => m.id === idMovimiento) ?? turnos.at(-1)
   const grupo = turnos.filter((m) => m.id_grupo_turno === elegido?.id_grupo_turno)
   const otroResponsable = grupo.find((m) => m.id !== elegido?.id && m.rol === 'responsable')
   // RI-10: un solo responsable y nunca ninguno. Los roles que lo romperían no se ofrecen.
   const permitido = (r: Rol) => (r === 'responsable' ? !otroResponsable : elegido?.rol !== 'responsable')
-  const nuevo = rol ?? ROLES.find((r) => r !== elegido?.rol && permitido(r))
+  const nuevo = rol ?? roles.find((r) => r !== elegido?.rol && permitido(r))
   const valido = elegido && nuevo && nuevo !== elegido.rol && permitido(nuevo) && motivo.trim()
   const fechas = new Set(turnos.map((m) => m.id_grupo_turno)).size > 1
 
@@ -124,7 +124,7 @@ export function Corregir({ ficha, abierto, alCambiar }: Props) {
               etiqueta="Valor corregido"
               valor={nuevo ?? elegido.rol}
               alCambiar={setRol}
-              opciones={ROLES.map((r) => ({ valor: r, texto: TEXTO_ROL[r], deshabilitado: r === elegido.rol || !permitido(r) }))}
+              opciones={roles.map((r) => ({ valor: r, texto: TEXTO_ROL[r], deshabilitado: r === elegido.rol || !permitido(r) }))}
             />
             {otroResponsable && (
               <p className={estilos.ayuda}>
@@ -153,6 +153,7 @@ export function Corregir({ ficha, abierto, alCambiar }: Props) {
           )}
         </>
       )}
+      <ErrorOperacion error={catalogos.error} que="cargar las opciones del catálogo" />
       <ErrorOperacion error={corregir.error} que="guardar la corrección" />
     </Modal>
   )

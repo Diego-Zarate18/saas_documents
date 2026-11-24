@@ -4,7 +4,7 @@
 import { borrarSesion, guardarSesion, leerSesionGuardada } from '../../sesion/almacen'
 import { validarConclusion, validarDatosTipo, validarGrupoTurno } from '../reglas'
 import {
-  ErrorDeApi,
+  ErrorApi,
   type Acuse,
   type ActorExterno,
   type AlcanceAsunto,
@@ -61,14 +61,16 @@ import {
 } from '../tipos'
 import * as db from './datos'
 
+export { usuariosDePrueba } from './datos'
+
 // Latencia simulada para que los esqueletos se vean en desarrollo (VITE_API_LATENCIA_MS, 450 ms por
 // omisión). En las pruebas es 0; un valor que no sea un número de milisegundos ≥ 0 cuenta como 0.
 const latencia = Number(import.meta.env.VITE_API_LATENCIA_MS ?? 450)
 const LATENCIA_MS = import.meta.env.MODE === 'test' || !(latencia >= 0) ? 0 : latencia
 const esperar = () => new Promise((listo) => setTimeout(listo, LATENCIA_MS))
 
-function falla(codigo: CodigoError, status: number, title: string): never {
-  throw new ErrorDeApi({ codigo, status, title })
+function falla(codigo: CodigoError, estado_http: number, titulo: string): never {
+  throw new ErrorApi({ codigo, estado_http, titulo })
 }
 
 /** Texto obligatorio ya recortado; si falta, VALIDACION con el mensaje dado. */
@@ -312,6 +314,14 @@ export async function obtenerCatalogos(): Promise<Catalogos> {
     tipos_documento: db.tiposDocumento,
     campos_tipo: db.camposTipo,
     actores_externos: db.actores.filter((a) => a.activo).map(({ id, nombre, tipo }) => ({ id, nombre, tipo })),
+    motivos_devolucion: db.motivosDevolucion,
+    formas_conclusion: db.formasConclusion,
+    canales: db.canales,
+    roles: db.roles,
+    roles_turno: db.rolesTurno,
+    estados_documento: db.estadosDocumento,
+    tipos_relacion: db.tiposRelacion,
+    tipos_actor: db.tiposActor,
   })
 }
 
@@ -530,10 +540,10 @@ export async function registrarDocumento(d: NuevoDocumento): Promise<DocumentoRe
       ? db.documentos.find((x) => x.numero_emisor === numero && x.emisor === emisor && x.fecha_documento?.slice(0, 4) === anio)
       : undefined
   if (existente)
-    throw new ErrorDeApi({
+    throw new ErrorApi({
       codigo: 'DUPLICADO',
-      status: 409,
-      title: 'Ya existe este documento: mismo número, mismo emisor y mismo año del documento.',
+      estado_http: 409,
+      titulo: 'Ya existe este documento: mismo número, mismo emisor y mismo año del documento.',
       existente: {
         id: existente.id,
         folio: existente.folio,
@@ -1413,8 +1423,6 @@ export async function obtenerPersonas(): Promise<Listado<Persona>> {
   return listado(db.personas.map(aPersona))
 }
 
-const ROLES: Rol[] = ['OF', 'DI', 'TI', 'PE', 'AD']
-
 /** Un titular que ya no está adscrito a su área (cambio o baja) deja el área vacante (O-34). */
 function vaciarTitularidades(persona: db.PersonaSemilla) {
   for (const a of db.areas) if (a.id_titular === persona.id && (!persona.activa || persona.id_area !== a.id)) a.id_titular = null
@@ -1432,7 +1440,7 @@ export async function guardarPersona(d: DatosPersona, id: Uuid | null = null): P
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) falla('VALIDACION', 422, 'Escribe un correo válido.')
   if (db.personas.some((p) => p.id !== id && p.correo === correo)) falla('CONFLICTO', 409, 'Ya existe un usuario con este correo.')
   if (!areaDe(d.id_area)?.activa) falla('VALIDACION', 422, 'Elige el área de adscripción.')
-  if (!ROLES.includes(d.rol)) falla('VALIDACION', 422, 'Elige el rol.')
+  if (!db.roles.includes(d.rol)) falla('VALIDACION', 422, 'Elige el rol.')
   // shortcut: la contraseña inicial y su hash no se simulan; el servicio real la guarda con hash (O-34, D-49).
   const persona: db.PersonaSemilla = actual ?? { id: crypto.randomUUID(), nombre, correo, rol: d.rol, id_area: d.id_area, activa: true }
   Object.assign(persona, { nombre, correo, rol: d.rol, id_area: d.id_area })
@@ -1453,8 +1461,6 @@ export async function darDeBajaPersona(id: Uuid): Promise<void> {
   vaciarTitularidades(persona)
 }
 
-const TIPOS_ACTOR: db.TipoActorSemilla[] = ['institucion', 'municipio', 'proveedor', 'ciudadano']
-
 const documentosDeActor = (nombre: string) =>
   db.documentos.filter((d) => d.tipo_emisor === 'externo' && d.emisor === nombre).length +
   db.salidas.filter((s) => s.destinatario === nombre).length
@@ -1473,7 +1479,7 @@ export async function guardarActor(d: DatosActor, id: Uuid | null = null): Promi
   const actual = id ? db.actores.find((a) => a.id === id) : undefined
   if (id && !actual) falla('NO_ENCONTRADO', 404, 'El actor no existe.')
   const nombre = exigirTexto(d.nombre, 'Escribe el nombre del actor.')
-  if (!TIPOS_ACTOR.includes(d.tipo)) falla('VALIDACION', 422, 'Elige el tipo de actor.')
+  if (!db.tiposActor.includes(d.tipo)) falla('VALIDACION', 422, 'Elige el tipo de actor.')
   if (db.actores.some((a) => a.id !== id && a.nombre.toLowerCase() === nombre.toLowerCase()))
     falla('CONFLICTO', 409, 'Ya existe un actor con ese nombre.')
   const actor: db.ActorSemilla = actual ?? { id: crypto.randomUUID(), nombre, tipo: d.tipo, correo: null, telefono: null, activo: true }

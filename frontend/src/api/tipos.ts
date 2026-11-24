@@ -45,16 +45,6 @@ export type CodigoError =
   | 'CONFLICTO'
   | 'BASE_NO_DISPONIBLE'
 
-/** Problem details (RFC 9457) con `codigo` estable. */
-export interface Problema {
-  title: string
-  status: number
-  detail?: string
-  codigo: CodigoError
-  /** Con DUPLICADO (O-01, D-27): el documento que ya existe. */
-  existente?: DocumentoExistente
-}
-
 export interface DocumentoExistente {
   id: Uuid
   folio: string
@@ -64,14 +54,31 @@ export interface DocumentoExistente {
   fecha_recepcion: FechaHora
 }
 
-export class ErrorDeApi extends Error {
-  readonly problema: Problema
-  constructor(problema: Problema) {
-    super(problema.detail ?? problema.title)
-    this.name = 'ErrorDeApi'
-    this.problema = problema
+/**
+ * Único error que reciben las páginas (contrato, sección 4). El cliente real lo arma desde el *problem
+ * details* (RFC 9457) de la respuesta: `title` → `titulo`, `detail` → `detalle`, `status` → `estado_http`.
+ * Las páginas no leen sus textos: los muestran ErrorOperacion y EstadoConsulta con `mensajeDeError`.
+ */
+export class ErrorApi extends Error {
+  readonly codigo: CodigoError
+  readonly titulo: string
+  readonly detalle: string | null
+  readonly estado_http: number
+  /** Con DUPLICADO (O-01, D-27): el documento que ya existe. */
+  readonly existente?: DocumentoExistente
+  constructor(e: { codigo: CodigoError; titulo: string; detalle?: string | null; estado_http: number; existente?: DocumentoExistente }) {
+    super(e.detalle ?? e.titulo)
+    this.name = 'ErrorApi'
+    this.codigo = e.codigo
+    this.titulo = e.titulo
+    this.detalle = e.detalle ?? null
+    this.estado_http = e.estado_http
+    if (e.existente) this.existente = e.existente
   }
 }
+
+/** Texto que ve el usuario: el del servidor si es un ErrorApi; si no (red, fallo inesperado), el de respaldo. */
+export const mensajeDeError = (error: unknown, respaldo: string) => (error instanceof ErrorApi ? error.titulo : respaldo)
 
 export interface Listado<T> {
   elementos: T[]
@@ -216,6 +223,15 @@ export interface Catalogos {
   campos_tipo: Partial<Record<TipoDocumento, CampoTipo[]>>
   /** Solo los activos: emisores y destinatarios que se ofrecen al registrar (RI-06, O-35). */
   actores_externos: Pick<ActorExterno, 'id' | 'nombre' | 'tipo'>[]
+  /** Listas cerradas que la interfaz ofrece como opciones, en orden (T-02c: ninguna vive en las páginas). */
+  motivos_devolucion: MotivoDevolucion[]
+  formas_conclusion: FormaConclusion[]
+  canales: Canal[]
+  roles: Rol[]
+  roles_turno: RolTurno[]
+  estados_documento: EstadoDocumento[]
+  tipos_relacion: TipoRelacion[]
+  tipos_actor: TipoActor[]
 }
 
 /** Documento marcado como posible duplicado que espera revisión (O-26). */

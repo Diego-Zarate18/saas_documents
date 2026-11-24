@@ -248,7 +248,7 @@ Lienzo de 1440 × 960 px: barra lateral de 248 px y área principal con márgene
 Profundidad por material, no por capas de sombra genéricas. Cada superficie tiene un papel fijo.
 
 ### Shadow Vocabulary
-- **Vidrio** (`backdrop-filter: blur(28px)`, `inset 0 1px 0 #FFFFFFB2`, `0 12px 32px -8px #17141F14`): lo que flota — recorrido, barra superior, modales, menús. Requiere color detrás.
+- **Vidrio** (`backdrop-filter: blur(28px)`, `inset 0 1px 0 #FFFFFFB2`, `0 12px 32px -8px #17141F14`): lo que flota — recorrido, barra superior, modales, menús. Requiere color detrás. Los modales, menús y listas desplegables usan `--vidrio-fondo-modal: rgba(255, 255, 255, 0.94)` (T-02c; antes 0.9): con 0.9 el texto secundario quedaba en 4.4:1 medido por píxeles sobre el velo; con 0.94 pasa de 4.5:1 (mínimo 5.13:1 con el fondo medido).
 - **Vidrio oscuro** (`backdrop-filter: blur(32px)`, `inset 0 1px 0 #FFFFFF24`): elementos sobre la barra lateral guinda.
 - **Relieve** (`-6px -6px 16px #FFFFFFE5`, `6px 6px 18px #17141F1A`): tarjetas indicadoras y resúmenes.
 - **Hundida** (`inset 2px 2px 6px #17141F17`, `inset -2px -2px 6px #FFFFFFE5`): campos y buscador.

@@ -9,6 +9,23 @@ export const TEXTO_MOTIVO: Record<MotivoDevolucion, string> = {
   no_competencia: 'no es de su competencia',
 }
 
+/** Motivos de devolución como opciones de V-07: texto y descripción. La lista sale de O-31. */
+export const OPCION_MOTIVO: Record<MotivoDevolucion, { texto: string; descripcion: string }> = {
+  falta_informacion: { texto: 'Falta información', descripcion: 'Faltan datos para atenderlo' },
+  falta_firma: { texto: 'Falta firma', descripcion: 'El documento o un anexo no está firmado' },
+  falta_anexo: { texto: 'Falta anexo', descripcion: 'No llegó un anexo que el oficio menciona' },
+  corregir_dato: { texto: 'Corregir dato', descripcion: 'Hay un dato equivocado que debe corregirse' },
+  no_competencia: { texto: 'No es de nuestra competencia', descripcion: 'Indica qué área debería atenderlo' },
+}
+
+/** Descripciones de las relaciones en V-10. La lista sale de O-31. */
+export const DESCRIPCION_RELACION: Record<TipoRelacion, string> = {
+  responde_a: 'Este documento contesta al otro',
+  da_seguimiento_a: 'Continúa un trámite anterior',
+  en_alcance_a: 'Complementa o amplía al otro',
+  sustituye_a: 'Solo entre registrados: el otro queda sin efecto',
+}
+
 /** Relaciones entre documentos (D-05). */
 export const TEXTO_RELACION: Record<TipoRelacion, string> = {
   responde_a: 'Responde a',
@@ -65,6 +82,15 @@ export const TEXTO_FORMA: Record<FormaConclusion, string> = {
   enterado: 'Enterado',
   no_procede: 'No procede',
   duplicado: 'Duplicado',
+}
+
+/** Descripciones de las formas de conclusión en V-09. La lista sale de O-31. */
+export const DESCRIPCION_FORMA: Record<FormaConclusion, string> = {
+  con_respuesta: 'Se emitió un oficio o una salida que atiende este documento',
+  atencion_sin_oficio: 'Se atendió sin emitir documento; exige nota de evidencia',
+  enterado: 'Documento informativo; no requiere respuesta ni nota',
+  no_procede: 'No corresponde atenderlo; exige nota con el motivo',
+  duplicado: 'Ya existe el original; exige referencia a él',
 }
 
 /** Qué fue un movimiento, en una línea: «Turno como responsable», «Devolución · falta firma». */

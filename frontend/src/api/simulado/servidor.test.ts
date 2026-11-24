@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { entrarComo, USUARIO } from '../../pruebas/utilidades'
 import { validarGrupoTurno } from '../reglas'
-import type { ErrorDeApi } from '../tipos'
+import type { ErrorApi } from '../tipos'
 import { AREA, idPorFolio } from './datos'
 import { obtenerAcuses, obtenerBandeja, obtenerFicha, turnar } from './servidor'
 
 const codigoDe = (promesa: Promise<unknown>) =>
   promesa.then(
     () => 'sin error',
-    (e: ErrorDeApi) => e.problema.codigo,
+    (e: ErrorApi) => e.codigo,
   )
 
 const folios = async (idArea?: string) => (await obtenerBandeja({ id_area: idArea })).elementos.map((p) => p.folio)

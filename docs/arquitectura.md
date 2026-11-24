@@ -251,8 +251,10 @@ Una tarea a la vez; cada una deja pruebas en verde, evidencia y un commit. El de
 | Tarea | Contenido | Depende de |
 | --- | --- | --- |
 | T-01 | Interfaz base (D-63): proyecto React, arquitectura del frontend, sistema visual desde el Figma, marco por rol y vistas núcleo (V-01, V-02, V-02b, V-02c, V-04, V-04b, V-05) con datos simulados | maquetado aprobado |
-| T-02 | Interfaz: el resto de las vistas y variantes del maquetado con datos simulados | T-01 |
-| T-03 | Esqueleto: docker-compose con las tres bases, backend con configuración, pools y `/salud`, proxy del frontend a la API, herramientas de calidad, prueba de conectividad | — |
+| T-02a | Interfaz: flujo del documento (registrar y los modales de devolver, atraer, concluir, relacionar, cancelar, corregir, segunda recepción y salida) con datos simulados | T-01 |
+| T-02b | Interfaz: consulta, asuntos y administración (V-06, V-11 a V-14, V-16 a V-19) con datos simulados | T-02a |
+| T-02c | Interfaz: corrección de V-16, simulador aislado, frontera `ApiSigedoc` e inventario del contrato para el backend | T-02b |
+| T-03 | Esqueleto: docker-compose con las tres bases, backend con configuración, pools y `/salud`, proxy del frontend a la API, herramientas de calidad, prueba de conectividad (guía: `docs/guia-implementacion-backend.md`) | T-02c |
 | T-04 | PostgreSQL (E-4): esquema, ejecutor de esquemas, datos de prueba, consultas representativas y pruebas de integridad y transacciones | T-03, E-2 en `docs/modelos/` |
 | T-05 | MongoDB (E-4): validadores `$jsonSchema` por tipo, índices, carga, consultas y pruebas de documentos válidos e inválidos | T-04 |
 | T-06 | Neo4j (E-4): restricciones, índices, carga, consultas y pruebas de humo, integridad y cardinalidad | T-04 |

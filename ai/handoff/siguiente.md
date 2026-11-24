@@ -1,36 +1,33 @@
-# T-05: Sesión, registro con outbox, turnos y bandeja
+# T-07: Referencias, asuntos, consultas, búsqueda, administración y salidas
 
 - Asignada: 2026-11-24
-- Depende de: T-04 (`e3a0fdd`)
-- Entrega: miércoles 25. Prioriza que funcione; pruebas y documentos solo los que se piden aquí.
+- Depende de: T-06 (`8246571`)
+- Entrega: miércoles 25. Solo las pruebas que se piden aquí. Con esta tarea el backend queda completo.
 
 ## Fuentes
 
-- `docs/guia-implementacion-backend.md`, Apéndice A: ruta, cuerpo, salida, errores y reglas de cada función. **Las rutas son las del Apéndice A, incluidos los marcados «ajuste» y «nuevo»** (D-106).
-- `docs/arquitectura.md`, secciones 3 (capas y flujos), 4 (errores RFC 9457 con `codigo`, paginación `{elementos,total}`) y 6 (variables).
-- `docs/modelos/02-relacional.md` y `04-grafo.md` (réplica y regla de SIGUIENTE).
-- Catálogo: O-01, O-03, O-14, O-22, O-23, O-31, O-32, O-36 a O-39; decisiones D-21, D-27, D-29, D-31, D-42, D-44, D-49, D-67, D-68, D-106, D-107.
+- `docs/guia-implementacion-backend.md`, Apéndice A, para cada función de abajo (D-106).
+- `docs/modelos/` y el catálogo: O-07, O-08, O-18, O-20, O-21, O-27, O-30 a O-35; consultas C2, C3, C5; patrones AG-02 a AG-05, AG-07 a AG-09, AD-07; decisiones D-14, D-29, D-30, D-32, D-33, D-46, D-47, D-50, D-58, D-61, D-101.
 
 ## Alcance
 
-1. **Capas** según la arquitectura: `app/dominio/` (enums y modelos Pydantic), `app/seguridad/` (sesión y visibilidad), `app/repositorios/{relacional,documental,grafo}/`, `app/servicios/`, `app/api/` (un router por recurso, prefijo `/api`), manejador de errores con `codigo`.
-2. **Sesión** (O-36, O-37, O-38): `POST /sesiones`, `GET /sesiones/actual`, `DELETE /sesiones/actual`. Cookie httpOnly, huella SHA-256 en `sesion`, caducidad por inactividad, bloqueo de 15 minutos tras 5 intentos fallidos (D-107); las contraseñas se comprueban con el mismo scrypt de la semilla. Dependencia `ContextoUsuario` con rol, área y áreas visibles (D-29) para todos los endpoints.
-3. **Catálogos y áreas** (O-31, O-32 de lectura): `GET /catalogos`, `GET /areas?activas=true`, `GET /organizacion`.
-4. **Registro** (O-01): `POST /documentos` y `GET /documentos/folio-siguiente`. Una transacción: folio con contador bloqueado (D-21), duplicado por índice parcial (D-27, error `DUPLICADO` con el existente), movimiento `registro` y eventos de outbox para MongoDB (expediente) y Neo4j (nodo y movimiento).
-5. **Outbox** (O-39): `backend/outbox/`, `python -m outbox`. Un proceso, orden por id, `SKIP LOCKED`, reintentos con espera creciente hasta `OUTBOX_MAX_INTENTOS`, upsert en MongoDB y `MERGE` en Neo4j con la regla de SIGUIENTE. Servicio `outbox` en `docker-compose.yml`.
-6. **Recorrido** (O-03, O-22, O-23): `POST /documentos/{id}/turnos`, `/devoluciones`, `/atracciones`, con las reglas y permisos del Apéndice A, RI-10 y D-67, D-68 (atracción con `movimiento_origen`). Cada movimiento encola su réplica. Diferencias con el simulador: área sugerida solo con `no_competencia` y la nota de la devolución en `instruccion` (`05-diccionario-y-reglas.md`).
-7. **Bandeja** (O-14): `GET /bandeja` con la regla de D-42 calculada en PostgreSQL (AR-06), paginada.
-8. **Semilla**: agrega a OP-2026-0087 su movimiento `conclusion` (por el área que lo tenía como responsable, con la forma de D-59 que corresponda a su contenido; anota cuál en el reporte) para que cumpla RI-14. El outbox usa la misma consulta de SIGUIENTE que `herramientas/esquemas.py` (con `<`).
+1. **Ajustes a la ficha** (respuesta a las dudas de T-06):
+   - Con acceso restringido, el registro trae solo folio, tipo, estado y ubicación actual; número, emisor, fechas y canal van en `null` (D-29, igual que O-30).
+   - Las relaciones incluyen las que llegan al documento, no solo las que salen (AG-05), con su sentido.
+2. **Referencias** (O-07, O-18): crear y quitar las cuatro relaciones, con DocumentoNoRegistrado por número y emisor (D-33). SUSTITUYE_A solo entre registrados: escribe en Neo4j y deja al otro `sin_efecto` con `estado_previo` en PostgreSQL; quitarla lo devuelve (D-14).
+3. **Asuntos** (O-27, O-08, O-18): crear (con `id_documento` opcional), listar (`GET /asuntos`), asignar y sacar documentos.
+4. **Consultas de grafo**: C2 hilo (`/asuntos/{id}/hilo`, hasta 6 saltos), C5 alcance y C3 rebotes, con la regla de D-32 y anclas de D-50.
+5. **Búsqueda** (O-30): `GET /documentos` con todos los filtros, paginada; el filtro por campo del tipo consulta MongoDB y filtra la visibilidad en PostgreSQL (D-46). `GET /consultas/selector-documentos`.
+6. **Administración** (O-32 a O-35): áreas (sin ciclos con consulta recursiva, D-47; siglas inmutables con folios, D-61; no desactivar con pendientes), personas y usuarios (baja lógica; si era titular, el área queda vacante) y actores externos. Cada cambio de área o persona encola su réplica a Neo4j.
+7. **Salidas y acuses** (O-20, O-21): `POST /salidas`, `GET /salidas`, `POST /salidas/{id}/acuses`, `GET /consultas/acuses` (D-58, D-101).
 
 ## Fuera de alcance
 
-Una base de pruebas aparte: las pruebas de integración siguen contra la base de desarrollo y deshacen lo que escriben o recargan la semilla.
-
-Ficha, expediente, conclusión y demás operaciones (T-06 y T-07). Conectar el frontend (T-08).
+Conectar el frontend, reconciliación, respaldo y evidencia (T-08).
 
 ## Criterios de aceptación
 
 1. `uv run pytest ../tests` y `uv run ruff check . ../tests` en verde.
-2. Pruebas nuevas, solo estas: `test_o36_credenciales_incorrectas_y_bloqueo`, `test_o01_folios_concurrentes_sin_huecos` (20 registros simultáneos en la misma área), `test_o01_duplicado`, `test_ri10_un_responsable_por_grupo`, `test_o23_atraccion_deja_un_responsable`, `test_o39_replica_documento_y_movimientos` (registrar, turnar a dos áreas, correr el outbox y comprobar el nodo, SIGUIENTE y el expediente) y `test_o14_bandeja_refleja_el_turno`.
-3. Con `docker compose up -d`, una secuencia con `curl` o `httpie` en el reporte: iniciar sesión como oficialía, registrar, turnar y ver la bandeja del área destino.
-4. Un solo commit `T-05: …` sin coautoría.
+2. Pruebas nuevas, solo estas: `test_o07_no_registrado_y_sustitucion_reversible`, `test_c2_hilo_de_un_asunto`, `test_c3_rebotes`, `test_o30_busqueda_por_campo_del_tipo_con_visibilidad`, `test_o33_area_sin_ciclos` y `test_o21_acuse_aparece_al_area_responsable`.
+3. Toda función del Apéndice A, salvo `usuariosPrueba`, tiene su endpoint. Anota en el reporte cualquier función que no tenga endpoint y por qué.
+4. Un solo commit `T-07: …` sin coautoría.

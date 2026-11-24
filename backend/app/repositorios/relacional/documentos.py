@@ -120,7 +120,8 @@ async def ubicacion(con: AsyncConnection, id_documento: UUID) -> list[dict]:
         """SELECT a.nombre AS area, p.rol, p.fecha_hora AS desde,
                   (now() AT TIME ZONE 'America/Mexico_City')::date
                     - (p.fecha_hora AT TIME ZONE 'America/Mexico_City')::date AS antiguedad_dias,
-                  m.tipo AS tipo_movimiento, mo.nombre AS motivo, ao.nombre AS area_origen, d.canal_inicial
+                  m.tipo AS tipo_movimiento, mo.nombre AS motivo, ao.nombre AS area_origen, a.nombre AS area_destino,
+                  d.canal_inicial
            FROM pendiente p
            JOIN area a ON a.id_area = p.id_area
            JOIN movimiento m ON m.id_movimiento = p.id_movimiento

@@ -1,16 +1,7 @@
-// Punto único de acceso a la API (D-63). Las páginas solo importan de aquí o de consultas.ts.
-// VITE_API_MODO elige la fuente: «simulado» por omisión; T-15 agrega «real» con el cliente del OpenAPI.
-import type { ApiSigedoc } from './contrato'
-import * as simulado from './simulado/servidor'
-
-/** Con otro modo, main.tsx muestra «La API real aún no está disponible» en lugar de la aplicación. */
-export const API_DISPONIBLE = (import.meta.env.VITE_API_MODO ?? 'simulado') === 'simulado'
-
-// shortcut: el simulador se importa también en modo «real», que aún no monta la aplicación; T-15 elige aquí el cliente real.
-const api: ApiSigedoc = simulado
+// Punto único de acceso a la API (D-63, D-108). Las páginas solo importan de aquí o de consultas.ts.
+import { api } from './real'
 
 export const {
-  usuariosDePrueba,
   iniciarSesion,
   obtenerSesionActual,
   cerrarSesion,

@@ -181,7 +181,7 @@ export function TablaPendientes({
                             title="Ver su recorrido"
                             onClick={() => alSeleccionar(p)}
                           >
-                            {p.asunto}
+                            {p.asunto ?? 'Contenido confidencial'}
                           </button>
                           {p.posible_duplicado && <Estado estado="posible_duplicado" />}
                           {p.confidencial && <Estado estado="confidencial" />}

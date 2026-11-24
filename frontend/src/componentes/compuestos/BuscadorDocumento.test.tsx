@@ -46,7 +46,7 @@ describe('Buscador de documento', () => {
     )
     const buscador = screen.getByRole('combobox', { name: 'Documento' })
     fireEvent.change(buscador, { target: { value: 'OP' } })
-    // 250 ms de espera; después, la respuesta simulada y la notificación de TanStack Query (setTimeout 0).
+    // 250 ms de espera; después, la respuesta del mock y la notificación de TanStack Query (setTimeout 0).
     await act(() => vi.advanceTimersByTimeAsync(250))
     await act(() => vi.advanceTimersByTimeAsync(50))
     expect(screen.getByRole('option', { name: /OP-2026-0001/ })).toBeInTheDocument()

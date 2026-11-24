@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup, configure } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
-import { borrarSesion } from '../sesion/almacen'
 
 // jsdom no implementa la captura de puntero ni scrollIntoView, que usa el selector de Radix.
 Element.prototype.hasPointerCapture ??= () => false
@@ -20,7 +19,6 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
-  borrarSesion()
   const avisos = [vi.mocked(console.error), vi.mocked(console.warn)].flatMap((espia) => espia.mock.calls)
   vi.restoreAllMocks()
   if (avisos.length > 0) throw new Error(`La prueba imprimió advertencias: ${avisos.map((a) => a.join(' ')).join(' | ')}`)

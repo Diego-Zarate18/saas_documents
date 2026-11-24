@@ -189,7 +189,8 @@ export interface FiltrosBandeja {
 export interface PendienteBandeja {
   id_documento: Uuid
   folio: string
-  asunto: string
+  /** Nulo si es confidencial y quien consulta no ve su contenido (D-29). */
+  asunto: string | null
   tipo: TipoDocumento
   emisor: string
   rol: Exclude<RolTurno, 'conocimiento'>
@@ -331,6 +332,7 @@ export interface UbicacionActual {
   llegada: string
 }
 
+/** Con acceso restringido solo traen valor folio, tipo, estado y las marcas (D-29, T-07). */
 export interface RegistroDocumento {
   id: Uuid
   folio: string
@@ -342,17 +344,17 @@ export interface RegistroDocumento {
   posible_duplicado: boolean
   extemporaneo: boolean
   numero_emisor: string | null
-  emisor: string
-  tipo_emisor: 'area' | 'externo'
+  emisor: string | null
+  tipo_emisor: 'area' | 'externo' | null
   /** Nula si el documento no trae fecha (queda como posible duplicado). */
   fecha_documento: Fecha | null
   /** Primera recepción; el folio se asigna con ella (D-28). */
-  canal: Canal
-  fecha_recepcion: FechaHora
+  canal: Canal | null
+  fecha_recepcion: FechaHora | null
   /** Segunda recepción por el otro canal (O-19). */
   segunda_recepcion: { canal: Canal; fecha_recepcion: FechaHora } | null
-  fecha_oficial: Fecha
-  origen_fecha_oficial: string
+  fecha_oficial: Fecha | null
+  origen_fecha_oficial: string | null
   /** Nula si el contenido está oculto por D-29. */
   sintesis: string | null
 }
@@ -383,6 +385,8 @@ export interface Expediente {
 
 export interface Relacion {
   tipo: TipoRelacion
+  /** «entra»: el otro documento apunta a este (AG-05). */
+  sentido: 'sale' | 'entra'
   /** Nulo si el destino no está registrado (D-33). */
   id_documento: Uuid | null
   referencia: string

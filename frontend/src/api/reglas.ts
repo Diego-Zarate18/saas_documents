@@ -1,10 +1,10 @@
-// Reglas que comparten la fuente simulada (como lo hará el servicio) y los formularios, para que el
+// Reglas que comparten los formularios con las del servicio (backend/app/servicios), para que el
 // error en línea y el rechazo del servidor digan lo mismo.
 import type { CampoTipo, Conclusion, DatosTipo, DestinoTurno } from './tipos'
 
 /**
  * O-03 / RI-10: valida un grupo de turno. Devuelve el mensaje de error o null si es válido.
- * La usa la fuente simulada (como lo hará el servicio) y V-05 para deshabilitar «Turnar».
+ * V-05 la usa para deshabilitar «Turnar»; la API aplica la misma regla (servicios/recorrido.py).
  */
 export function validarGrupoTurno(destinos: Pick<DestinoTurno, 'id_area' | 'rol'>[]): string | null {
   if (destinos.length === 0) return 'Agrega al menos un área.'

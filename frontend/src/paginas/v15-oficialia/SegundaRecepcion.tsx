@@ -32,7 +32,7 @@ export function SegundaRecepcion({ idDocumento, abierto, alCambiar, alRegistrar 
   const [canal, setCanal] = useState<Canal>()
   const [hora, setHora] = useState('')
   const elegido = canal ?? otro
-  const fechaOficial = elegido === 'papel' && hora ? fecha(hora.slice(0, 10)) : r ? fecha(r.fecha_oficial) : ''
+  const fechaOficial = elegido === 'papel' && hora ? fecha(hora.slice(0, 10)) : r?.fecha_oficial ? fecha(r.fecha_oficial) : ''
 
   function cerrar(abrir: boolean) {
     if (!abrir) {
@@ -77,7 +77,7 @@ export function SegundaRecepcion({ idDocumento, abierto, alCambiar, alRegistrar 
         </>
       }
     >
-      {r && (
+      {r?.canal && r.fecha_recepcion && r.fecha_oficial && (
         <Resumen titulo="Primera recepción" borde>
           <p>
             {TEXTO_CANAL[r.canal]} · {fechaHora(r.fecha_recepcion)}

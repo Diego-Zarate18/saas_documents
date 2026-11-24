@@ -1,67 +1,54 @@
-# Reporte T-07: Referencias, asuntos, consultas, búsqueda, administración y salidas
+# Reporte T-08: Interfaz conectada a la API real y retiro del simulador
 
 - Estado: completa
 
 ## Qué hice
 
-1. **Calidad.** `uv run pytest ../tests` da 41 pruebas pasadas (con `api` y `outbox` de compose reconstruidos y corriendo, sin fallos en el outbox). `uv run ruff check . ../tests` no marca nada.
-2. **Las seis pruebas pedidas**, en `tests/integration/test_consultas.py`, pasan:
-   - `test_o07_no_registrado_y_sustitucion_reversible`:
-     - Un no registrado con espacios de más se reutiliza: hay un solo nodo para el mismo número y emisor, y repetir la relación da 409.
-     - `sustituye_a` con un no registrado o consigo mismo da 422.
-     - SUSTITUYE_A deja OP-2026-0137 en `sin_efecto` con `estado_previo = en_tramite`; su ficha la muestra con sentido `entra`, y quitarla lo devuelve a `en_tramite`.
-     - Quitar dos veces el no registrado da 404.
-   - `test_c2_hilo_de_un_asunto`:
-     - El asunto «Laboratorios» da sus dos documentos (profundidad 0, por folio), la salida CO-2026-0048 (`responde_a`/`entra`, sin `id_documento`) y el no registrado SIS/0198/2026 (`en_alcance_a`/`sale`).
-     - Servicios Generales ve los estados, pero no las descripciones.
-     - Un asunto nuevo con documento aparece en `GET /asuntos` y en su hilo.
-   - `test_c3_rebotes`:
-     - Noviembre 2026 da 0131 `tres_devoluciones`, 0118 y 0129 `no_competencia_sin_area` (0129, confidencial, sin asunto para dirección) y 0097 `tres_areas` con 4 áreas.
-     - Con `id_area` de Recursos Humanos queda solo 0131; con un periodo inválido, 422; personal, 403.
-   - `test_o30_busqueda_por_campo_del_tipo_con_visibilidad`:
-     - «interno de control» encuentra 0143, 0133 y 0108 para oficialía, pero no el requerimiento confidencial que registró Carmen (ella sí lo encuentra). El personal de Compras solo encuentra 0133.
-     - Por folio, un documento de otra área sale `restringida` sin número ni síntesis.
-     - El filtro de texto no coincide con un confidencial ajeno.
-   - `test_o33_area_sin_ciclos`:
-     - Tres ciclos rechazados: la raíz bajo una de sus hijas, Jurídico bajo Transparencia y Compras bajo su propia hija nueva.
-     - Las siglas de un área con folios no cambian (409).
-     - No se desactiva un área con pendientes ni con hijas activas; sí una vacía. Oficialía no administra áreas.
-   - `test_o21_acuse_aparece_al_area_responsable`:
-     - La salida de Compras recibe CO-2026-0050, en la misma secuencia que sus documentos.
-     - Con el acuse, OP-2026-0121 aparece en `GET /consultas/acuses` del titular y del personal de Compras, y no en el de Finanzas.
-     - Un segundo acuse da 409; el acuse de un documento recibido da 404.
-3. **Endpoints.** Las 46 funciones del Apéndice A, salvo `usuariosDePrueba` (es una constante del modo simulado y la API real exporta `[]`), tienen su endpoint, con la ruta del Apéndice. Lo comprobé contra el OpenAPI generado.
-4. **Commit.** Un solo commit `T-07: …` sin coautoría.
+1. **Calidad.** `npm run lint`, `npm run typecheck`, `npm test` (10 pruebas en 4 archivos) y `npm run build` terminan sin errores ni avisos. `uv run pytest ../tests` da 41 pasadas y `uv run ruff check . ../tests` no marca nada.
+2. **Sin simulador.** `grep -ri "simulad" frontend/src` no devuelve nada.
+3. **Recorrido de las pantallas.** Lo hice con la API real, la semilla recargada y un usuario por rol (contraseña `sigedoc-dev`), en Chrome sin interfaz dirigido por CDP con scripts fuera del repositorio.
+   - El inicio de sesión se hizo por el formulario real.
+   - Cada pantalla se abrió y se revisó su contenido, las respuestas 4xx/5xx de `/api` y los errores de consola.
+   - Las escrituras se ejecutaron con el mismo cliente (`src/api`) desde la página, con la sesión de cada rol, y después se revisaron las pantallas que las muestran. Una escritura (agregar nota) se hizo además llenando el formulario: el modal se cierra y la ficha se actualiza.
+   - El único 401 que aparece es el de `GET /sesiones/actual` antes de iniciar sesión, que es lo esperado.
+4. **Commit.** Un solo commit `T-08: …` sin coautoría.
 
-Lo que se implementó:
-- Ajustes a la ficha: la restringida trae solo folio, tipo, estado y ubicación; las relaciones van en ambos sentidos, con `sentido`.
-- Referencias: `POST /documentos/{id}/referencias` y `DELETE …/referencias/{tipo}?referencia=&emisor=`.
-- Asuntos: `/asuntos` (listar, crear, asignar, sacar, hilo, alcance).
-- Consultas: `/consultas/rebotes`, `/consultas/selector-documentos` y `/consultas/acuses`.
-- Búsqueda: `GET /documentos`.
-- Administración: `/areas` (POST, PATCH, desactivación), `/personas` (GET, POST, PATCH, baja) y `/actores-externos` (GET, POST, PATCH, desactivación).
-- Salidas: `/salidas` (GET, POST y acuses).
-- Réplica de áreas y personas por el outbox.
+| Pantalla | Resultado |
+| --- | --- |
+| Iniciar sesión (V-01), 5 roles | Funciona. Cada rol entra a su inicio: OF, DI, TI y PE a `/bandeja`; AD a `/organizacion`. |
+| Bandeja (V-02) | Funciona: oficialía, 24 pendientes (18 como responsable), como en la semilla. Se corrigieron en el backend dos diferencias con el contrato: «Atraído por …» nombraba el área de origen en lugar de la que atrae, y «Ya no está adscrito» se marcaba a cualquier titular de otra área (ahora solo cuando el titular quedó sin área, como el simulador). La síntesis nula de un confidencial ajeno se muestra como «Contenido confidencial». |
+| Registrar (V-03, O-01) | Funciona: OP-2026-0153 con datos del tipo. |
+| Turnar (O-03) | Funciona: grupo Compras (responsable) y Finanzas (apoyo). |
+| Devolver (O-22) | Funciona: OP-2026-0152 regresa a oficialía «Devuelto por Compras · falta firma». |
+| Atraer (O-23) | Funciona: Finanzas atrae OP-2026-0153; la bandeja dice «Atraído por Finanzas» (después de la corrección). |
+| Concluir (O-05) | Funciona: `con_respuesta` con la salida nueva (titular) y `enterado` (personal). |
+| Ficha (V-04, O-11) | Funciona: registro, expediente de MongoDB (datos del tipo, anexo y nota), recorrido de Neo4j (turno, corrección, atracción), relaciones y ubicación. Con acceso restringido, el registro ya admite los campos nulos (se muestra «—»). |
+| Expediente, segunda recepción, corrección, cancelación (O-28, O-29, O-19, O-25, O-24) | Funcionan. La nota también desde el formulario. |
+| Relacionar y quitar (O-07, O-18) | Funcionan, con un documento registrado y uno no registrado; la ficha muestra la relación. |
+| Asuntos e hilo (V-11, C2, C5, O-27, O-08) | Funcionan: el hilo de «Laboratorios» trae la salida que responde y el no registrado. Crear un asunto con documento, asignar y sacar también funcionan. |
+| Búsqueda (V-06, O-30) y selector | Funcionan: 37 resultados sin filtros. |
+| Rebotes (V-12, C3) | Funciona: 4 documentos con sus reglas. |
+| Posibles duplicados (V-14, O-26) | Funciona: comparación, «distintos» y «mismo»; la lista queda vacía. |
+| Salidas y acuse (V-13, O-20, O-21, D-58) | Funcionan: CO-2026-0050 responde a OP-2026-0121 y aparece con acuse; los acuses del área llegan a Compras. |
+| Administración (O-32 a O-35) | Funciona: crear área, persona (cuenta nueva), titular, baja, desactivar área, crear y desactivar actor. Organización, Áreas, Personas y Actores cargan. |
 
 ## Desviaciones y decisiones
 
-- **Windows y Neo4j.** El driver de Neo4j se cae (access violation) al serializar un `datetime` con zona `ZoneInfo`. Los límites del periodo de C3 se mandan en UTC.
-- **Campo del tipo (O-30).** Se busca con «contiene» y sin distinguir mayúsculas (`$regex` con `i`, escapado), como pide el Apéndice A. Ese tipo de consulta no aprovecha el índice parcial con colación (D-46), que sirve para igualdad; los acentos deben coincidir. La visibilidad se filtra después en PostgreSQL.
-- **Rebotes (C3).** Se anclan en el índice de fecha de los movimientos (D-50). Las correcciones no se cuentan como movimientos y tampoco cambian el rol de los turnos que corrigen. «Oficialía» son las áreas de las personas con rol OF.
-- **Hilo (C2).**
-  - Cada nodo queda con su camino más corto, y la relación es la última de ese camino.
-  - El orden es: los del asunto por folio y luego por profundidad y referencia (anchura, en lugar del preorden exacto).
-  - Una salida trae `id_documento` nulo, como pide el contrato.
-- **SUSTITUYE_A.** Si el documento sustituido ya no está vigente (cancelado o sin efecto), responde 422 «El documento sustituido ya no está vigente.». Es nuevo: el Apéndice A lo marcaba «Dudoso».
-- **Grafo atrasado.** Una referencia o asunto sobre un documento que el outbox aún no replica responde 503 `BASE_NO_DISPONIBLE`.
-- **Salidas.**
-  - Un tipo con campos obligatorios (requerimiento de auditoría, solicitud de transparencia) da 422 «Ese tipo de documento no se usa en una salida.», porque el expediente de una salida no lleva campos del tipo y el validador de MongoDB los exige.
-  - El RESPONDE_A de una salida viaja por el outbox detrás del nodo de la salida.
-- **Personas.**
-  - Una cuenta nueva recibe la contraseña inicial de desarrollo (`sigedoc-dev`, con hash): el contrato no trae contraseña y no hay flujo de cambio.
-  - La baja revoca sus sesiones.
-- **Paginación.** `GET /asuntos`, `/salidas` y `/consultas/posibles-duplicados` aceptan `pagina` y `tamano` (D-106).
+- **Cliente real.** `src/api/real.ts` usa `fetch` sobre `/api` con `credentials: 'include'` y convierte los problem details a `ErrorApi` (`title` → `titulo`, `detail` → `detalle`, `status` → `estado_http`, `existente`). Un fallo de red o un 5xx sin cuerpo llega como `Error`, y la vista muestra su texto de respaldo. Las escrituras que devuelven un `Movimiento` lo reciben con ids, no con nombres; ninguna página lo lee (vuelven a consultar).
+- **Tipos actualizados a la API** (T-06 y T-07):
+  - `PendienteBandeja.asunto` puede ser nulo.
+  - `RegistroDocumento` admite nulos con acceso restringido.
+  - `Relacion` trae `sentido`.
+  - La ficha, la segunda recepción y la bandeja muestran «—» o «Contenido confidencial» donde llega `null`.
+- **Pruebas del frontend.**
+  - Se borraron las que montaban la aplicación o leían la semilla del simulador.
+  - Los casos de `validarGrupoTurno`, que estaban en `simulado/servidor.test.ts`, pasaron a `api/reglas.test.ts` (son reglas puras, no pruebas nuevas).
+  - `api/contrato.test.ts` se borró: leía `ai/handoff/borradores/contrato-api.md`, que ya no existe.
+  - Quedan Boton, BuscadorDocumento (con la API mockeada), el paginador y las reglas.
+- **Indicador de salud y sesión.** El indicador de T-03 (`AvisoApiReal`, `api/salud.ts`) se borró: solo existía para el modo real sin vistas. `sesion/almacen.ts` (la sesión en `sessionStorage` del simulador) también se borró: la sesión es la cookie httpOnly.
+- **Semilla y variables.** Se borraron `database/semilla.mjs` y `frontend/.env.example`. Este último solo tenía `VITE_API_MODO` y `VITE_API_LATENCIA_MS`.
+- **Neo4j.** El driver de la API no emite notificaciones informativas (`notifications_min_severity='OFF'`). Llenaban el registro con avisos de propiedades opcionales que aún no existen en ningún nodo, como `id_area_sugerida`.
 
 ## Dudas
 
-1. ¿Se agrega un flujo de cambio de contraseña para las cuentas que crea el administrador, o basta con la inicial de desarrollo para la entrega?
+Ninguna.

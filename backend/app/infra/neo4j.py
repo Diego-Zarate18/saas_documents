@@ -11,6 +11,8 @@ def crear_driver(ajustes: Ajustes) -> AsyncDriver:
         ajustes.neo4j_uri,
         auth=(ajustes.neo4j_user, ajustes.neo4j_password.get_secret_value()),
         connection_timeout=2.0,
+        # Sin avisos informativos (propiedades opcionales que aún no existen en ningún nodo, D-69).
+        notifications_min_severity='OFF',
     )
 
 

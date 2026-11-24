@@ -21,7 +21,7 @@ Interfaz, desde `frontend/` (Node 24 LTS, npm):
 
 ```powershell
 npm ci              # instala las dependencias exactas de package-lock.json
-npm run dev         # servidor de desarrollo en http://localhost:5173 (modo simulado)
+npm run dev         # http://localhost:5173 contra la API (proxy /api → 127.0.0.1:8000); usuarios de la semilla, contraseña sigedoc-dev
 npm run lint        # oxlint con reglas de React, hooks y jsx-a11y; falla ante cualquier aviso
 npm run typecheck   # tsc -b, TypeScript estricto
 npm test            # Vitest y Testing Library (vitest run)

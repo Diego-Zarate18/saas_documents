@@ -25,9 +25,9 @@ async def listar(
                     (now() AT TIME ZONE 'America/Mexico_City')::date
                       - (p.fecha_hora AT TIME ZONE 'America/Mexico_City')::date AS antiguedad_dias,
                     t.nombre AS titular_al_turnar,
-                    (t.id_persona IS NOT NULL AND (NOT t.activa OR t.id_area IS DISTINCT FROM p.id_area))
-                      AS titular_ya_no_adscrito,
-                    m.tipo AS tipo_movimiento, mo.nombre AS motivo, ao.nombre AS area_origen, d.canal_inicial,
+                    (t.id_persona IS NOT NULL AND t.id_area IS NULL) AS titular_ya_no_adscrito,
+                    m.tipo AS tipo_movimiento, mo.nombre AS motivo, ao.nombre AS area_origen, ad.nombre AS area_destino,
+                    d.canal_inicial,
                     d.posible_duplicado, d.confidencial,
                     EXISTS (SELECT 1 FROM movimiento x WHERE x.id_documento = p.id_documento
                               AND (x.id_persona = %(persona)s OR x.id_titular_al_turnar = %(persona)s))
@@ -45,6 +45,7 @@ async def listar(
              LEFT JOIN actor_externo ax ON ax.id_actor = d.id_actor_emisor
              LEFT JOIN persona t ON t.id_persona = m.id_titular_al_turnar
              LEFT JOIN area ao ON ao.id_area = m.id_area_origen
+             JOIN area ad ON ad.id_area = m.id_area_destino
              LEFT JOIN motivo_devolucion mo ON mo.clave = m.motivo
              WHERE p.id_area = %(area)s AND (%(tipo)s::text IS NULL OR d.tipo = %(tipo)s)
            ) filas

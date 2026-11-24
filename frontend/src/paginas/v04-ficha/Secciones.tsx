@@ -42,11 +42,11 @@ export function Registro({ ficha }: { ficha: Ficha }) {
           {r.numero_emisor ?? '—'}
         </Dato>
         <Dato etiqueta="Emisor">
-          {r.emisor} · {r.tipo_emisor === 'area' ? 'área interna' : 'externo'}
+          {r.emisor ? `${r.emisor} · ${r.tipo_emisor === 'area' ? 'área interna' : 'externo'}` : '—'}
         </Dato>
         <Dato etiqueta="Fecha del documento">{r.fecha_documento ? fecha(r.fecha_documento) : '—'}</Dato>
         <Dato etiqueta="Recepción">
-          {TEXTO_CANAL[r.canal]} · {fechaHora(r.fecha_recepcion)}
+          {r.canal && r.fecha_recepcion ? `${TEXTO_CANAL[r.canal]} · ${fechaHora(r.fecha_recepcion)}` : '—'}
           {r.segunda_recepcion && (
             <>
               <br />
@@ -55,7 +55,7 @@ export function Registro({ ficha }: { ficha: Ficha }) {
           )}
         </Dato>
         <Dato etiqueta="Fecha oficial">
-          {fecha(r.fecha_oficial)} ({r.origen_fecha_oficial})
+          {r.fecha_oficial ? `${fecha(r.fecha_oficial)} (${r.origen_fecha_oficial})` : '—'}
         </Dato>
         {ficha.acceso === 'completo' && (
           <Dato etiqueta="Síntesis" ancho>

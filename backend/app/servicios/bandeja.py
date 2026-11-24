@@ -19,7 +19,7 @@ def describir(fila: dict) -> str:
             motivo = fila['motivo'] or ''
             return f'Devuelto por {fila["area_origen"]} · {motivo[:1].lower()}{motivo[1:]}'
         case 'atraccion':
-            return f'Atraído por {fila["area_origen"]}'
+            return f'Atraído por {fila["area_destino"]}'  # el área que lo atrajo
         case _:
             return f'Turnado por {fila["area_origen"]}'
 

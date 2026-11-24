@@ -1,4 +1,4 @@
-// Sesión y rol del usuario (O-36, O-37, O-38). Simulados hasta T-15 (D-63).
+// Sesión y rol del usuario (O-36, O-37, O-38): la sesión es la cookie httpOnly de la API (D-49).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cerrarSesion, iniciarSesion, obtenerSesionActual } from '../api'
 

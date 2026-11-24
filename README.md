@@ -47,12 +47,12 @@ Con las bases arriba, desde `backend/`:
 
 ```powershell
 uv run python -m herramientas.esquemas           # aplica lo que falte de los esquemas de las tres bases
-uv run python -m herramientas.esquemas --datos   # además carga la semilla (la misma que usa el modo simulado)
+uv run python -m herramientas.esquemas --datos   # además carga la semilla (database/*/data)
 ```
 
 - Los scripts están en `database/relational/schema/`, `database/document/validators/` y `database/graph/schema/`. Cada uno se aplica una sola vez y queda registrado en la tabla `esquema_version` de PostgreSQL. Un script aplicado no se edita: los cambios van en uno nuevo.
 - La semilla (`database/*/data/`) se escribe en las tres bases a la vez; correrla otra vez no duplica nada. Todos los usuarios de la semilla entran con la contraseña de desarrollo `sigedoc-dev`.
-- La semilla se genera de `frontend/src/api/simulado/datos.ts` con `node database/semilla.mjs`, desde la raíz.
+- La semilla son los JSON de `database/relational/data/`, `database/document/data/` y `database/graph/data/`.
 - Para empezar de cero: `docker compose down -v` (borra los volúmenes) y `docker compose up -d postgres mongo neo4j`.
 - `database/*/queries/` tiene consultas de ejemplo para cada base; cada archivo dice cómo correrlo.
 
@@ -88,9 +88,9 @@ uv run pytest ../tests -m "not integracion"   # solo unitarias (no necesitan las
 uv run pytest ../tests -m integracion   # solo integración: necesitan las tres bases levantadas y el .env
 ```
 
-## Interfaz (modo simulado)
+## Interfaz
 
-La interfaz vive en [`frontend/`](frontend/) (React, Vite y TypeScript). Hasta T-15 no se conecta a la API: lee datos simulados de `frontend/src/api/simulado/` que siguen el contrato de la API (D-63). Los datos viven en la memoria de la pestaña; al recargar la página vuelven a su estado inicial.
+La interfaz vive en [`frontend/`](frontend/) (React, Vite y TypeScript) y solo habla con la API (D-36): en desarrollo, Vite reenvía `/api` a `http://127.0.0.1:8000`, así que antes deben estar arriba las bases (con la semilla cargada) y el backend.
 
 ### Requisitos
 
@@ -105,7 +105,7 @@ npm ci
 npm run dev
 ```
 
-Abre <http://localhost:5173> y entra con cualquiera de los usuarios de prueba. En modo simulado cualquier contraseña no vacía es válida; el campo de correo los sugiere al escribir.
+Abre <http://localhost:5173> y entra con cualquiera de los usuarios de la semilla; todos tienen la contraseña de desarrollo `sigedoc-dev`. Tras cinco intentos fallidos la cuenta se bloquea 15 minutos (D-107).
 
 | Rol | Usuario | Correo | Área |
 | --- | --- | --- | --- |
@@ -126,10 +126,3 @@ Abre <http://localhost:5173> y entra con cualquiera de los usuarios de prueba. E
 | `npm run build` | Compila a `frontend/dist/` |
 | `npm run preview` | Sirve la versión compilada en <http://localhost:4173> |
 
-`VITE_API_MODO` elige la fuente de datos (ver `frontend/.env.example`). `simulado` es el valor por omisión. Con `real` las vistas aún no se muestran (llegan en T-15): la página dice «La API real aún no está disponible» y, debajo, el estado de cada base según `GET /api/salud`. En desarrollo, Vite reenvía `/api` a `http://127.0.0.1:8000`, así que el backend debe estar levantado:
-
-```powershell
-$env:VITE_API_MODO = 'real'; npm run dev; Remove-Item Env:VITE_API_MODO
-```
-
-`VITE_API_LATENCIA_MS` fija la latencia de la fuente simulada en milisegundos (450 por omisión) para que se vean los esqueletos de carga; en las pruebas siempre es 0. Para cambiarla, crea `frontend/.env.local` con, por ejemplo, `VITE_API_LATENCIA_MS=1500` y reinicia `npm run dev`.

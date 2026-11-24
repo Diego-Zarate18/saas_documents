@@ -1,6 +1,5 @@
-// Frontera de la API (T-02c, D-63): lo único que las páginas pueden pedir al servidor. El simulador la
-// implementa hoy; en T-15 el cliente generado del OpenAPI la implementa sin tocar las páginas.
-// El detalle de cada función (ruta, reglas, errores y pruebas) está en ai/handoff/borradores/contrato-api.md.
+// Frontera de la API (D-63, D-108): lo único que las páginas pueden pedir al servidor. La implementa el cliente
+// real (real.ts). El detalle de cada función está en el Apéndice A de docs/guia-implementacion-backend.md.
 import type {
   Acuse,
   ActorExterno,
@@ -48,9 +47,6 @@ import type {
 
 /** Toda función rechaza con `ErrorApi` (tipos.ts); los listados responden `{ elementos, total }`. */
 export interface ApiSigedoc {
-  /** Correos que V-01 sugiere. Solo el simulador tiene; la API real devuelve una lista vacía. */
-  usuariosDePrueba: readonly string[]
-
   // Sesión
   iniciarSesion(credenciales: Credenciales): Promise<Sesion>
   obtenerSesionActual(): Promise<Sesion>

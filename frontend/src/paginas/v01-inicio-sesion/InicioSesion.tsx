@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation } from 'react-router'
-import { usuariosDePrueba } from '../../api'
 import { Boton } from '../../componentes/base/Boton'
 import { Campo } from '../../componentes/base/Campo'
 import { ErrorOperacion } from '../../componentes/compuestos/ErrorOperacion'
@@ -47,16 +46,10 @@ export function InicioSesion() {
           etiqueta="Correo"
           type="email"
           autoComplete="username"
-          list="usuarios-de-prueba"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
           required
         />
-        <datalist id="usuarios-de-prueba">
-          {usuariosDePrueba.map((u) => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </datalist>
         <Campo
           etiqueta="Contraseña"
           type="password"

@@ -1,0 +1,52 @@
+/* Encabezado de página (V-02 y V-04): título Display/L, descripción y acciones alineadas abajo. */
+.encabezado {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espacio-12);
+}
+
+.textos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  min-width: 0;
+}
+
+.migas {
+  display: flex;
+  gap: var(--espacio-12);
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.migas a {
+  text-decoration: none;
+}
+
+.migas a:hover {
+  color: var(--texto-principal);
+  text-decoration: underline;
+}
+
+.titulo {
+  overflow: hidden;
+  font: var(--display-l);
+  letter-spacing: var(--display-l-espaciado);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.descripcion {
+  font: var(--cuerpo-m);
+  color: var(--texto-secundario);
+}
+
+.acciones {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--espacio-10);
+}

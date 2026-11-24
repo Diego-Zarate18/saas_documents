@@ -1,0 +1,104 @@
+/* V-01 Inicio de sesión (Figma 34:115). */
+.pagina {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-96);
+  min-height: 100vh;
+  padding: var(--espacio-32);
+  overflow: hidden;
+}
+
+.brillo {
+  position: absolute;
+  z-index: -1;
+  border-radius: var(--radio-pildora);
+  filter: var(--brillo-desenfoque);
+  pointer-events: none;
+}
+
+.brillo:nth-child(1) {
+  top: 420px;
+  left: 80px;
+  width: 620px;
+  height: 620px;
+  background: var(--brillo-acceso-marca);
+}
+
+.brillo:nth-child(2) {
+  top: -120px;
+  left: 640px;
+  width: 520px;
+  height: 520px;
+  background: var(--brillo-acceso-detalle);
+}
+
+.brillo:nth-child(3) {
+  top: 560px;
+  left: 1000px;
+  width: 480px;
+  height: 480px;
+  background: var(--brillo-acceso-marca-tenue);
+}
+
+.presentacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-24);
+}
+
+.logotipo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-16);
+  font: 600 40px / normal var(--fuente-display);
+  letter-spacing: -0.02em;
+}
+
+.lema {
+  width: 460px;
+  font: var(--titulo-l);
+  letter-spacing: var(--titulo-l-espaciado);
+}
+
+.bajada {
+  width: 420px;
+  font: var(--cuerpo-m);
+  color: var(--texto-secundario);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+  width: 440px;
+  padding: var(--espacio-40);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-modal);
+  background: var(--vidrio-fondo);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+}
+
+.titulo {
+  font: var(--titulo-l);
+  letter-spacing: var(--titulo-l-espaciado);
+}
+
+.instruccion {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.bloqueo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.bloqueo svg {
+  flex: none;
+}

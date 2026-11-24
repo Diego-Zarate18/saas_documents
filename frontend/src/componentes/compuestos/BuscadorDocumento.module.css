@@ -1,0 +1,135 @@
+/* Buscador de documento (V-09 «Documento de respuesta», V-13b «Responde a»): caja blanca con lupa y,
+   elegido, el folio en mono guinda seguido del asunto. La lista desplegada usa el vidrio de los menús. */
+.campo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiqueta {
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.caja {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+}
+
+.caja:focus-within {
+  border-color: var(--borde-marca);
+  box-shadow: 0 0 0 0.5px var(--borde-marca);
+}
+
+.caja[data-invalido] {
+  border-color: var(--estado-error);
+}
+
+.caja input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--espacio-10) var(--espacio-12);
+  border: 0;
+  border-radius: var(--radio-control);
+  background: transparent;
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  outline: none;
+}
+
+.caja input::placeholder {
+  color: var(--texto-secundario);
+}
+
+/* Elegido: el input sigue enfocable y anuncia el documento, pero lo que se ve es la línea con el folio. */
+.caja input.oculto {
+  color: transparent;
+  caret-color: transparent;
+}
+
+.elegido {
+  position: absolute;
+  inset: 0 var(--espacio-40) 0 var(--espacio-12);
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  overflow: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.lupa {
+  flex: none;
+  margin-right: var(--espacio-12);
+  color: var(--texto-secundario);
+}
+
+.folio {
+  flex: none;
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+  color: var(--texto-marca);
+}
+
+.asunto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--cuerpo-s);
+}
+
+.lista {
+  position: absolute;
+  top: calc(100% - var(--espacio-4));
+  right: 0;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: var(--espacio-4);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-aviso);
+  background: var(--vidrio-fondo-modal);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
+}
+
+.lista[hidden] {
+  display: none;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-8) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.opcion[aria-selected='true'],
+.opcion:hover {
+  background: var(--fondo-marca-suave);
+}
+
+.vacio {
+  padding: var(--espacio-8) var(--espacio-10);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.ayuda {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.error {
+  font: var(--pie);
+  color: var(--estado-error);
+}

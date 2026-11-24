@@ -1,0 +1,66 @@
+/* Interruptor de V-03 (Figma 36:301): pista de 38 × 22 con perilla de 16 px. Encendido: guinda (diseño propio). */
+.interruptor {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-12);
+  cursor: pointer;
+}
+
+.pista {
+  position: relative;
+  flex: none;
+  appearance: none;
+  width: 38px;
+  height: 22px;
+  margin: 0;
+  border-radius: var(--radio-pildora);
+  /* El Figma la pinta con borde sutil; el gris cálido da 3:1 contra el blanco (WCAG 1.4.11). */
+  background: var(--borde-campo);
+  cursor: pointer;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}
+
+.pista::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-superficie);
+}
+
+.pista:checked {
+  background: var(--fondo-marca);
+}
+
+.pista:checked::before {
+  left: 19px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pista::before {
+    transition: left var(--mov-corto) var(--curva-estandar);
+  }
+}
+
+.pista:focus-visible {
+  outline: none;
+  box-shadow: var(--foco-anillo);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.texto {
+  font: var(--etiqueta-s);
+}
+
+.descripcion {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}

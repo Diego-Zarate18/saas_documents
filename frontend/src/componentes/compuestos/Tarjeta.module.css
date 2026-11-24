@@ -1,0 +1,28 @@
+/* Superficies del Figma (22:15 a 22:24): vidrio para lo que flota, relieve para resúmenes,
+   hundida para campos y sólida para tablas y formularios. */
+.tarjeta {
+  border-radius: var(--radio-tarjeta);
+}
+
+.vidrio {
+  border: 1px solid var(--vidrio-borde);
+  background: var(--vidrio-fondo);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+}
+
+.relieve {
+  background: var(--fondo-relieve);
+  box-shadow: var(--relieve-sombra);
+}
+
+.hundida {
+  background: var(--fondo-hundido);
+  box-shadow: var(--hundida-sombra);
+}
+
+.solida {
+  border: 1px solid var(--borde-tarjeta);
+  background: var(--fondo-superficie);
+  box-shadow: var(--solida-sombra);
+}

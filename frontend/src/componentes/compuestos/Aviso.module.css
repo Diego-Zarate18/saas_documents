@@ -1,0 +1,50 @@
+/* Avisos del Figma: posibles duplicados (V-02), grupo válido e información de titulares (V-05).
+   El tono de error lo pide la nota de V-05 («mensaje en rojo en lugar del verde»). */
+.aviso {
+  --color: var(--texto-secundario);
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  padding: var(--espacio-10) var(--espacio-14);
+  border-radius: var(--radio-aviso);
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
+}
+
+.icono {
+  flex: none;
+  color: var(--color);
+}
+
+.texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.duplicado {
+  --color: var(--estado-posible-duplicado);
+  gap: var(--espacio-12);
+  padding: var(--espacio-10) var(--espacio-16);
+  border: 1px solid color-mix(in srgb, var(--color) var(--tinte-borde-aviso), transparent);
+  border-radius: var(--radio-fila);
+  background: color-mix(in srgb, var(--color) var(--tinte-aviso), transparent);
+}
+
+.exito {
+  --color: var(--estado-concluido);
+  background: color-mix(in srgb, var(--color) var(--tinte-aviso), transparent);
+}
+
+.error {
+  --color: var(--estado-error);
+  background: color-mix(in srgb, var(--color) var(--tinte-aviso), transparent);
+}
+
+.info {
+  align-items: flex-start;
+  /* Opaco: al 80 % sobre el vidrio del modal el texto quedaba en 4.4:1 (T-02a); opaco da 5.06:1. */
+  background: var(--fondo-base);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}

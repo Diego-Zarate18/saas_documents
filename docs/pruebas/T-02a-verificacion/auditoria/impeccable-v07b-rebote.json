@@ -1,0 +1,24 @@
+[
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://localhost:5174/documentos/00000000-0000-4000-8000-000000001027",
+    "line": 0,
+    "snippet": "Card inside card",
+    "selector": "aside > div:nth-of-type(3)"
+  },
+  {
+    "antipattern": "cream-palette",
+    "name": "Cream / beige palette",
+    "description": "A warm cream or beige page background has become the default \"tasteful\" AI surface, reached for by reflex. Choose a background that comes from a deliberate palette, not the safe warm off-white.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://localhost:5174/documentos/00000000-0000-4000-8000-000000001027",
+    "line": 0,
+    "snippet": "cream/beige page background rgb(242, 239, 234)",
+    "selector": "body"
+  }
+]

@@ -1,0 +1,51 @@
+/* V-08 (Figma 47:1131): «Ahora» en marfil y «Después» en guinda suave, con una flecha entre ambos. */
+.cambio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-12);
+}
+
+.lado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: var(--espacio-14);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-base);
+}
+
+.despues {
+  border-color: var(--borde-marca);
+  background: var(--fondo-marca-suave);
+}
+
+.cuando {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.area {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  font: var(--titulo-s);
+  letter-spacing: var(--titulo-s-espaciado);
+}
+
+.persona {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.desde {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.flecha {
+  color: var(--texto-marca);
+}

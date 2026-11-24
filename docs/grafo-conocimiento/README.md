@@ -2,7 +2,7 @@
 
 Actualizado: 2026-11-22
 
-Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta el escenario hipotético de requerimientos, la guía del proyecto o la retroalimentación del profesor.
+Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta las entrevistas, la guía del proyecto o la retroalimentación del profesor.
 
 ## Archivos
 
@@ -16,14 +16,14 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 275 nodos y 932 relaciones
+## Contenido: 278 nodos y 957 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
 | Proyecto | 1 | El sistema SIGEDOC |
-| Contexto | 6 | Organización, guía, alcance de evaluación, escenario hipotético de requerimientos y retroalimentación del profesor |
+| Contexto | 6 | Organización, guía, alcance de evaluación, entrevistas y retroalimentación del profesor |
 | Problema | 1 | El problema central |
-| Hallazgo | 16 | Problemas concretos del escenario hipotético (supuestos) |
+| Hallazgo | 16 | Problemas concretos detectados en las entrevistas |
 | Requerimiento | 16 | Requerimientos funcionales (activos y retirados) |
 | Rol | 5 | Roles de usuario y qué operaciones ejecutan |
 | Consulta | 5 | Consultas principales C1 a C5 |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 65 | Decisiones de diseño tomadas |
+| Decision | 68 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -60,7 +60,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | HU-C4 | Plazos en días hábiles | D-06 | Fuera de alcance. |
 | HU-E2 | Referencias capturadas a mano | AL-01 | No hay extracción automática; referencias_citadas es solo informativo. |
 | HU-G1 | El sistema refleja registros, no la realidad | AL-01 | Limitación declarada: movimientos no capturados no existen para el sistema. |
-| HU-VIS | Reglas de visibilidad sin validar por dirección y Jurídico | AL-01 | Se toma lo descrito en el escenario hipotético como supuesto declarado. |
+| HU-VIS | Reglas de visibilidad sin validar por dirección y Jurídico | AL-01 | Se toma lo descrito por la entrevistada como supuesto declarado. |
 
 ## Deudas técnicas
 
@@ -206,7 +206,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-14 | Consulta de reconciliación para sustituciones | — | SUSTITUYE_A se escribe en Neo4j y luego el estado en PostgreSQL; la reconciliación detecta fallas a medias. |
 | D-15 | Un mismo UUID en las tres bases | — | Generado por el backend; _id en MongoDB e id en Neo4j. |
 | D-16 | Expediente con _id = id_documento | — | Relación 1:1 sin tabla de equivalencias; tipo copiado como dato inmutable. |
-| D-17 | Catálogo de 7 tipos de documento | — | Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. |
+| D-17 | Catálogo de 7 tipos de documento | — | Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. Los siete nombres están en D-65. |
 | D-18 | id_grupo_turno para RI-10 | — | Agrupa turnos simultáneos en lugar de comparar fecha_hora. |
 | D-19 | Evidencia como nota del expediente | — | Nota evidencia_atencion ligada al id_movimiento de la conclusión. |
 | D-20 | Documentos y movimientos no se borran | — | Se cancelan o corrigen; solo se eliminan anexos, notas, referencias y pertenencias a asuntos capturados por error. |
@@ -247,14 +247,17 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-55 | Esquemas versionados y versiones fijas | CTX-02 | El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes. |
 | D-56 | Pruebas por tipo de la guía con evidencia de ejecución | CTX-02 | Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12). |
 | D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. |
-| D-58 | Oficialía registra el acuse; el área responsable concluye | — | O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Salida con acuse». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo». |
+| D-58 | Oficialía registra el acuse; el área responsable concluye | — | O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Acuses». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo». |
 | D-59 | Catálogo cerrado de formas de conclusión | — | Cinco formas: con_respuesta (exige un documento de salida o respuesta registrado y enlazado), atencion_sin_oficio (nota evidencia_atencion, D-19), enterado (documento informativo, sin más requisitos), no_procede (nota con el motivo) y duplicado (referencia al documento original, D-27). Toda forma salvo con_respuesta y enterado lleva nota obligatoria; ninguna se borra (D-20). Enumeración versionada en PostgreSQL (D-55). Propuesta por confirmar contra E-2. |
 | D-60 | Núcleo en PostgreSQL y campos por tipo en MongoDB | — | PostgreSQL guarda solo el núcleo oficial: folio, tipo, asunto, remitente, fecha y fecha límite. Los campos propios de cada tipo de documento van en el expediente de MongoDB con un esquema JSON versionado por tipo (D-55), máximo tres campos específicos por tipo, opcionales salvo la fecha límite en los tipos que exigen respuesta. El detalle por tipo queda por definir en E-2. |
 | D-61 | Siglas de área inmutables con folios emitidos | — | Las siglas forman parte del folio (D-21), así que no se pueden modificar mientras el área tenga folios emitidos. Administración puede editarlas solo si el área no tiene documentos; los folios ya emitidos conservan las suyas. |
 | D-62 | Vistas por rol: bandeja diferenciada y asuntos para Dirección | — | Bandeja con dos variantes propias, titular y personal del área, ambas con la tarjeta de acuses (D-58) porque el personal también concluye si su área es responsable (D-44); la diferencia está en la ficha, donde el personal no ve Devolver, Turnar ni Atraer. La búsqueda se reutiliza para todos los roles, porque la visibilidad la filtra el servicio (D-29). Dirección añade «Asuntos» a su menú, solo de consulta: sin asignar documentos ni crear asuntos. |
 | D-63 | Interfaz primero con datos simulados | — | Con el maquetado aprobado, la interfaz se construye antes que el backend (T-01 y T-02) con datos simulados que siguen el contrato de la API; las páginas leen por funciones de src/api envueltas en TanStack Query y en T-15 se cambian al cliente generado del OpenAPI sin tocar las páginas. La sesión y el rol se simulan hasta entonces. La interfaz sigue sin conectarse a ninguna base (D-36). |
 | D-64 | Sistema visual del frontend desde el Figma | — | Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado. |
-| D-65 | La entrevista se trata como escenario hipotético | — | La entrevista de requerimientos fue simulada. Sus respuestas se presentan como supuestos explícitos de un escenario verosímil, no como hallazgos de una organización real, y así se declaran en los entregables. |
+| D-65 | Los siete tipos de documento: nombres y alcance * | — | Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2. |
+| D-66 | Campos propios por tipo de documento * | — | Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene. |
+| D-67 | El turno de oficialía o dirección no cierra el pendiente de otras áreas * | — | Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos. |
+| D-68 | Atraer deja una sola área responsable * | — | Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67. |
 
 ## Tipos de relación
 
@@ -262,12 +265,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 126 |
+| AFECTA | 139 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 22 |
+| DERIVA_DE | 31 |
 | DESCRIBE | 2 |
 | DESDE_HACIA | 1 |
 | DOCUMENTA | 116 |
@@ -304,7 +307,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 65 |
+| TOMA | 68 |
 | UNE | 2 |
 | USA | 64 |
 

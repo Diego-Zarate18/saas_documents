@@ -1,0 +1,75 @@
+/* Segmentado del rol en V-05: canal hundido con el segmento elegido en relieve. */
+.grupo {
+  display: inline-flex;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3);
+  margin: 0;
+  border: 0;
+  border-radius: var(--radio-control);
+  background: var(--fondo-hundido);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
+}
+
+.segmento {
+  position: relative;
+  padding: var(--espacio-6) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  font: var(--pie);
+  color: var(--texto-secundario);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.segmento:hover {
+  color: var(--texto-principal);
+}
+
+.segmento:has(input:checked) {
+  background: var(--fondo-superficie);
+  box-shadow: var(--segmento-sombra);
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.segmento.marca:has(input:checked) {
+  background: var(--fondo-marca);
+  color: var(--texto-sobre-marca);
+}
+
+.segmento:has(input:focus-visible) {
+  box-shadow: var(--foco-anillo);
+}
+
+.segmento input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A todo lo ancho (V-07, V-15b, V-15c, V-03): segmentos iguales, centrados, con Etiqueta/S. */
+.ancho {
+  display: flex;
+  width: 100%;
+}
+
+.ancho .segmento {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-14);
+  font: var(--etiqueta-s);
+}
+
+.segmento:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segmento:has(input:disabled):hover {
+  color: var(--texto-secundario);
+}

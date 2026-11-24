@@ -1,0 +1,4 @@
+Sin filtro (primera de la lista)                           fila resaltada OP-2026-0143 · recorrido OP-2026-0143 · coinciden
+Elige «Requisición de material de cómputo»                 fila resaltada OP-2026-0139 · recorrido OP-2026-0139 · coinciden
+Tipo: Solicitud de material o pago (la elegida sigue)      fila resaltada OP-2026-0139 · recorrido OP-2026-0139 · coinciden
+Tipo: Solicitud de transparencia (la elegida sale)         fila resaltada OP-2026-0141 · recorrido OP-2026-0141 · coinciden

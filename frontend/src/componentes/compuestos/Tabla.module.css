@@ -1,0 +1,39 @@
+/* Tabla de la bandeja (V-02 «Pendientes»): encabezado mono sobre marfil y filas separadas por borde sutil. */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tabla th,
+.tabla td {
+  padding-inline: 7px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--borde-tabla);
+}
+
+.tabla th:first-child,
+.tabla td:first-child {
+  padding-left: var(--espacio-20);
+}
+
+.tabla th:last-child,
+.tabla td:last-child {
+  padding-right: var(--espacio-20);
+}
+
+.tabla th {
+  padding-block: var(--espacio-9);
+  background: var(--fondo-encabezado-tabla);
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--texto-secundario);
+}
+
+.tabla td {
+  padding-block: var(--espacio-12);
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}

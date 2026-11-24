@@ -1,0 +1,73 @@
+/* Navegación/Elemento (Figma 31:187): 40 px de alto; el indicador arena marca la vista activa. */
+.elemento {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-12);
+  width: 100%;
+  height: 40px;
+  padding: var(--espacio-10);
+  border: 0;
+  border-radius: var(--radio-control);
+  background: transparent;
+  color: var(--texto-sobre-marca);
+  font: var(--cuerpo-m);
+  text-align: left;
+  text-decoration: none;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}
+
+/* Indicador arena: siempre presente, aparece en la vista activa creciendo desde el centro. */
+.elemento::before {
+  content: '';
+  flex: none;
+  width: 3px;
+  height: 18px;
+  border-radius: var(--radio-indicador);
+  background: var(--fondo-detalle);
+  transform: scaleY(0);
+  transition: transform var(--mov-corto) var(--curva-salida);
+}
+
+.icono {
+  flex: none;
+  opacity: 0.75;
+  transition: transform var(--mov-corto) var(--curva-estandar);
+}
+
+.texto {
+  flex: 1;
+  min-width: 0;
+  opacity: 0.8;
+}
+
+.elemento:not(:disabled):hover {
+  background: var(--sobre-marca-tarjeta);
+}
+
+.elemento[aria-busy='true'] {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .elemento:not(:disabled):hover .icono {
+    transform: translateX(2px);
+  }
+}
+
+.elemento:focus-visible {
+  box-shadow: var(--foco-anillo-sobre-marca);
+}
+
+.elemento[aria-current='page'] {
+  background: var(--sobre-marca-activo);
+  font: var(--etiqueta-m);
+}
+
+.elemento[aria-current='page']::before {
+  transform: scaleY(1);
+}
+
+.elemento[aria-current='page'] .icono,
+.elemento[aria-current='page'] .texto {
+  opacity: 1;
+}

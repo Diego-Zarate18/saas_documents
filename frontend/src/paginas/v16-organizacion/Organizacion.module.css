@@ -1,0 +1,97 @@
+/* V-16 Organización (Figma 52:2118): árbol de dependencia y detalle del área elegida. */
+.arbol {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--espacio-8) var(--espacio-12);
+  list-style: none;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 170px 90px;
+  align-items: center;
+  gap: var(--espacio-12);
+  width: 100%;
+  padding: var(--espacio-12);
+  border: 0;
+  border-radius: var(--radio-control);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}
+
+.fila:hover {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 35%, transparent);
+}
+
+.elegida .fila {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 60%, transparent);
+}
+
+.nombre {
+  overflow: hidden;
+  font: var(--cuerpo-m);
+  color: var(--texto-principal);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titular {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+}
+
+.datos dt {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.datos dd {
+  margin-top: var(--espacio-4);
+  font: var(--cuerpo-m);
+}
+
+.personas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  padding: 0;
+  list-style: none;
+}
+
+.personas li {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  padding: var(--espacio-10) var(--espacio-12);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+  color: var(--texto-secundario);
+}
+
+.personas .nombre {
+  flex: 1;
+}
+
+.nota {
+  display: flex;
+  gap: var(--espacio-10);
+  padding: var(--espacio-14) var(--espacio-16);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-relieve);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.nota svg {
+  flex: none;
+  margin-top: var(--espacio-2);
+}

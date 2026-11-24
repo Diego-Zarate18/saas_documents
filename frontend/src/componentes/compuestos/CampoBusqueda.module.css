@@ -1,0 +1,41 @@
+/* Buscador en píldora de V-16 a V-19 (Figma 52:2118): vidrio, lupa a la izquierda. */
+.campo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  width: 260px;
+  padding: var(--espacio-10) var(--espacio-14);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-pildora);
+  background: var(--vidrio-fondo);
+  box-shadow: var(--vidrio-sombra);
+}
+
+.campo:focus-within {
+  border-color: var(--borde-marca);
+  box-shadow: var(--foco-anillo);
+}
+
+.lupa {
+  flex: none;
+  color: var(--texto-secundario);
+}
+
+.campo input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  outline: none;
+}
+
+.campo input:focus-visible {
+  box-shadow: none;
+}
+
+.campo input::placeholder {
+  color: var(--texto-secundario);
+}

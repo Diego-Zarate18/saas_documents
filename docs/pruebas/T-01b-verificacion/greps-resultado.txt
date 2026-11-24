@@ -1,0 +1,46 @@
+== Declaraciones transition/animation en src/**/*.css (fuera de tokens.css) ==
+frontend/src/componentes/base/Boton.module.css:15:  transition:
+frontend/src/componentes/base/Boton.module.css:84:  transition: transform var(--mov-corto) var(--curva-estandar);
+frontend/src/componentes/base/ElementoNavegacion.module.css:16:  transition: background-color var(--mov-corto) var(--curva-estandar);
+frontend/src/componentes/base/ElementoNavegacion.module.css:28:  transition: transform var(--mov-corto) var(--curva-salida);
+frontend/src/componentes/base/ElementoNavegacion.module.css:34:  transition: transform var(--mov-corto) var(--curva-estandar);
+frontend/src/componentes/compuestos/Aviso.module.css:12:  animation: aparecer var(--mov-corto) var(--curva-salida);
+frontend/src/componentes/compuestos/Esqueleto.module.css:39:  animation: brillo var(--mov-brillo) var(--curva-lineal) infinite;
+frontend/src/componentes/compuestos/Esqueleto.module.css:51:    animation: none;
+frontend/src/componentes/compuestos/EstadoConsulta.module.css:14:  animation: aparecer var(--mov-corto) var(--curva-salida);
+frontend/src/componentes/compuestos/EstadoConsulta.module.css:25:  animation: aparecer var(--mov-corto) var(--curva-salida);
+frontend/src/componentes/compuestos/Modal.module.css:14:  animation: aparecer var(--mov-medio) var(--curva-salida);
+frontend/src/componentes/compuestos/Modal.module.css:19:  animation: desaparecer var(--mov-corto) var(--curva-salida) forwards;
+frontend/src/componentes/compuestos/Modal.module.css:24:    animation-name: subir;
+frontend/src/componentes/compuestos/Modal.module.css:28:    animation-name: bajar;
+frontend/src/componentes/compuestos/Selector.module.css:85:  transition: transform var(--mov-corto) var(--curva-estandar);
+frontend/src/componentes/compuestos/Selector.module.css:104:  animation: desplegar var(--mov-corto) var(--curva-salida);
+frontend/src/componentes/compuestos/Selector.module.css:115:    animation-name: desplegar-bajando;
+frontend/src/componentes/compuestos/Tabla.module.css:38:  transition: background-color var(--mov-corto) var(--curva-estandar);
+frontend/src/estilos/base.css:154:    transition-duration: var(--mov-nulo) !important;
+frontend/src/estilos/base.css:155:    animation-duration: var(--mov-nulo) !important;
+frontend/src/estilos/base.css:156:    animation-iteration-count: 1 !important;
+frontend/src/iconos/Giro.module.css:4:  animation: girar var(--mov-giro) var(--curva-lineal) infinite;
+frontend/src/iconos/Giro.module.css:21:    animation-duration: var(--mov-giro-reducido) !important;
+frontend/src/iconos/Giro.module.css:22:    animation-iteration-count: infinite !important;
+
+== Literales de tiempo (ms, s) o curvas (cubic-bezier, ease, linear) fuera de tokens.css ==
+(ninguno)
+
+== Duraciones de los tokens de movimiento ==
+152:  --mov-nulo: 0.01ms;
+153:  --mov-instantaneo: 100ms;
+154:  --mov-corto: 150ms;
+155:  --mov-medio: 220ms;
+156:  --mov-giro: 800ms;
+157:  --mov-giro-reducido: 1600ms;
+158:  --mov-brillo: 1400ms;
+159:  --curva-salida: cubic-bezier(0.2, 0, 0, 1);
+160:  --curva-estandar: cubic-bezier(0.4, 0, 0.2, 1);
+161:  --curva-lineal: linear;
+
+== Colores escritos fuera de tokens.css (mismo grep de la T-01) ==
+(ninguno)
+
+== Dependencias de package.json frente a develop ==
+(sin cambios)

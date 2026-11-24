@@ -1,0 +1,64 @@
+/* V-13b (Figma 51:1700) y V-13 (Figma 50:1425). */
+.fila {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-12);
+  align-items: start;
+}
+
+.secundario {
+  margin-top: var(--espacio-4);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.guardar {
+  align-self: flex-end;
+}
+
+/* V-13 Salidas externas y acuses (Figma 50:1425). */
+.meses {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-20);
+  min-width: 0;
+}
+
+.responde {
+  margin-top: var(--espacio-2);
+  font: var(--pie);
+  color: var(--texto-marca);
+}
+
+.acuse {
+  display: inline-flex;
+  padding: var(--espacio-3) var(--espacio-10);
+  border-radius: var(--radio-control);
+  font: var(--pie);
+  white-space: nowrap;
+}
+
+.sinAcuse {
+  background: var(--fondo-detalle-suave);
+  color: color-mix(in srgb, var(--estado-posible-duplicado) 80%, var(--texto-principal));
+}
+
+.conAcuse {
+  background: color-mix(in srgb, var(--estado-concluido) var(--tinte-estado), transparent);
+  color: color-mix(in srgb, var(--estado-concluido) 80%, var(--texto-principal));
+}
+
+.acuseRegistrado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+}
+
+.acuseRegistrado dt {
+  font: var(--etiqueta-s);
+}
+
+.acuseRegistrado dd {
+  margin-top: var(--espacio-4);
+  font: var(--cuerpo-m);
+}

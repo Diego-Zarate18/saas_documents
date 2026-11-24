@@ -1,0 +1,65 @@
+/* Menú «Más acciones» (V-04d, Figma 51:2015): vidrio, opciones con ícono y operación en mono; Cancelar en rojo. */
+.lista {
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 298px;
+  padding: var(--espacio-6);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-aviso);
+  background: var(--vidrio-fondo-modal);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
+}
+
+.bloque {
+  display: contents;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  padding: var(--espacio-10) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--mov-corto) var(--curva-estandar);
+}
+
+.opcion svg {
+  flex: none;
+  color: var(--texto-secundario);
+}
+
+.opcion[data-highlighted] {
+  background: var(--fondo-marca-suave);
+}
+
+.opcion[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.texto {
+  flex: 1;
+}
+
+.operacion {
+  font: var(--mono-dato);
+  color: var(--texto-secundario);
+}
+
+.peligro,
+.peligro svg {
+  color: var(--estado-error);
+}
+
+.separador {
+  height: 1px;
+  margin: var(--espacio-4) var(--espacio-6);
+  background: var(--borde-sutil);
+}

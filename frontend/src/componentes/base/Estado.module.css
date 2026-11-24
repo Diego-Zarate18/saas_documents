@@ -1,0 +1,49 @@
+/* Estado (Figma 31:144): punto de 6 px y texto del color del estado sobre su tinte al 12 %. */
+.estado {
+  --color: var(--estado-en-tramite);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-6);
+  padding: var(--espacio-4) var(--espacio-10);
+  border-radius: var(--radio-pildora);
+  background: color-mix(in srgb, var(--color) var(--tinte-estado), transparent);
+  /* WCAG 2.2 AA: el texto lleva un 20 % de tinta para pasar 4.5:1 sobre marfil y relieve
+     (aprobado por Diego en T-01). El punto conserva el color exacto del Figma. */
+  color: color-mix(in srgb, var(--color) 80%, var(--texto-principal));
+  font: var(--etiqueta-s);
+  white-space: nowrap;
+}
+
+.estado::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--color);
+}
+
+.en_tramite {
+  --color: var(--estado-en-tramite);
+}
+.concluido {
+  --color: var(--estado-concluido);
+}
+.cancelado {
+  --color: var(--estado-cancelado);
+}
+.sin_efecto {
+  --color: var(--estado-sin-efecto);
+}
+.posible_duplicado {
+  --color: var(--estado-posible-duplicado);
+}
+.rebote {
+  --color: var(--estado-rebote);
+}
+.confidencial {
+  --color: var(--estado-confidencial);
+}
+.extemporaneo {
+  --color: var(--texto-secundario);
+}

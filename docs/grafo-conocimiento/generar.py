@@ -22,9 +22,9 @@ ORDEN = ["Proyecto", "Contexto", "Problema", "Hallazgo", "Requerimiento", "Rol",
          "Base", "Concepto", "Regla", "Decision", "Hueco", "DeudaTecnica", "Alcance", "Entregable"]
 QUE = {
     "Proyecto": "El sistema SIGEDOC",
-    "Contexto": "Organización, guía, alcance de evaluación, escenario hipotético de requerimientos y retroalimentación del profesor",
+    "Contexto": "Organización, guía, alcance de evaluación, entrevistas y retroalimentación del profesor",
     "Problema": "El problema central",
-    "Hallazgo": "Problemas concretos del escenario hipotético (supuestos)",
+    "Hallazgo": "Problemas concretos detectados en las entrevistas",
     "Requerimiento": "Requerimientos funcionales (activos y retirados)",
     "Consulta": "Consultas principales C1 a C5",
     "Operacion": "Catálogo de operaciones de la API",
@@ -47,7 +47,7 @@ L = []
 w = L.append
 w("# Grafo de conocimiento del proyecto SIGEDOC\n")
 w(f"Actualizado: {g['actualizado']}\n")
-w("Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta el escenario hipotético de requerimientos, la guía del proyecto o la retroalimentación del profesor.\n")
+w("Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta las entrevistas, la guía del proyecto o la retroalimentación del profesor.\n")
 w("## Archivos\n")
 w("| Archivo | Para qué sirve |\n| --- | --- |")
 w("| `grafo.json` | Fuente única: nodos y relaciones. Edítalo aquí y regenera lo demás. |")
@@ -150,11 +150,11 @@ C += ["", "// ---------- Consultas de ejemplo ----------", "",
       "MATCH (h:Hueco) WHERE h.estado IN ['abierto', 'parcial']",
       "OPTIONAL MATCH (h)-[:AFECTA|BLOQUEA]->(e:Entregable)",
       "RETURN h.id, h.nombre, h.estado, collect(e.id) AS entregables;", "",
-      "// Rastrear una decisión hasta el escenario hipotético: hallazgo que la justifica o que origina lo que afecta",
+      "// Rastrear una decisión hasta la entrevista: hallazgo que la justifica o que origina lo que afecta",
       "MATCH (d:Decision {id: 'D-29'})",
       "OPTIONAL MATCH (h:Hallazgo)-[:JUSTIFICA]->(d)",
       "OPTIONAL MATCH (d)-[:AFECTA]->(:Requerimiento)<-[:ORIGINA]-(h2:Hallazgo)",
-      "RETURN d.nombre, collect(DISTINCT h.referencia_escenario) + collect(DISTINCT h2.referencia_escenario) AS referencias;", "",
+      "RETURN d.nombre, collect(DISTINCT h.referencia_entrevista) + collect(DISTINCT h2.referencia_entrevista) AS referencias;", "",
       "// Deudas con la decisión que las genera y la que las mitiga",
       "MATCH (g:Decision)-[:GENERA]->(t:DeudaTecnica)",
       "OPTIONAL MATCH (m:Decision)-[:MITIGA]->(t)",

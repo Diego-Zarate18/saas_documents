@@ -1,0 +1,22 @@
+bandeja-OF  CLS 0.0041 · esqueleto: aria-busy 5, status ["Cargando…"], formas 59
+   línea de tiempo: fuentes 29 ms · esqueleto 979 ms · contenido 1981 ms
+   layout-shift 0.00367 a los 1050 ms ← _bento_m6843_35, _indicadores_m6843_29, ?, ?, _descripcion_k6jmf_42
+   layout-shift 0.0001 a los 1156 ms ← ?, ?, ?, ?, ?
+   layout-shift 0.0003 a los 1501 ms ← _acciones_k6jmf_47
+bandeja-TI  CLS 0.0034 · esqueleto: aria-busy 4, status ["Cargando…"], formas 56
+   línea de tiempo: fuentes 134 ms · esqueleto 1113 ms · contenido 2120 ms
+   layout-shift 0.00333 a los 1154 ms ← _bento_m6843_35, _indicadores_m6843_29, ?, _acciones_k6jmf_47, _descripcion_k6jmf_42
+   layout-shift 0.00008 a los 1240 ms ← ?, ?, ?, ?, ?
+bandeja-PE  CLS 0.0034 · esqueleto: aria-busy 4, status ["Cargando…"], formas 56
+   línea de tiempo: fuentes 124 ms · esqueleto 1025 ms · contenido 2024 ms
+   layout-shift 0.00333 a los 1068 ms ← _bento_m6843_35, _indicadores_m6843_29, ?, _acciones_k6jmf_47, _descripcion_k6jmf_42
+   layout-shift 0.00008 a los 1128 ms ← ?, ?, ?, ?, ?
+ficha-OF    CLS 0.0030 · esqueleto: aria-busy 1, status ["Cargando…"], formas 38
+   línea de tiempo: fuentes 145 ms · esqueleto 1050 ms · contenido 1531 ms
+   layout-shift 0.00151 a los 1083 ms ← ?, ?, ?, ?
+   layout-shift 0.00001 a los 1145 ms ← ?, ?, ?, ?, ?
+   layout-shift 0.00152 a los 1556 ms ← SPAN, SPAN
+ficha-TI    CLS 0.0015 · esqueleto: aria-busy 1, status ["Cargando…"], formas 38
+   línea de tiempo: fuentes 120 ms · esqueleto 974 ms · contenido 1462 ms
+   layout-shift 0.00151 a los 1007 ms ← ?, ?, ?, ?
+   layout-shift 0.00001 a los 1050 ms ← ?, ?, ?, ?, ?

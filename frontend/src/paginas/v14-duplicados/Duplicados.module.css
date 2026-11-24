@@ -1,0 +1,136 @@
+/* V-14 Posibles duplicados (Figma 50:1648). */
+.cuerpo {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: var(--espacio-20);
+  align-items: start;
+}
+
+@media (max-width: 1279px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-12);
+  padding: var(--espacio-20);
+}
+
+.marcados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-10);
+  padding: 0;
+  list-style: none;
+}
+
+.marcado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-6);
+  width: 100%;
+  padding: var(--espacio-14);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-superficie);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--mov-corto) var(--curva-estandar),
+    border-color var(--mov-corto) var(--curva-estandar);
+}
+
+.marcado:hover {
+  background: color-mix(in srgb, var(--fondo-marca-suave) 35%, var(--fondo-superficie));
+}
+
+.marcado[aria-pressed='true'] {
+  border-color: var(--borde-marca);
+  background: var(--fondo-marca-suave);
+}
+
+.asunto {
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+}
+
+.comparar {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--espacio-20);
+}
+
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-16);
+  padding: 0 var(--espacio-20);
+}
+
+.lados {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-14);
+}
+
+.lado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-10);
+  padding: var(--espacio-16);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-fila);
+  background: var(--fondo-superficie);
+}
+
+.lado dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.marcadoLado {
+  border-color: var(--borde-marca);
+  background: color-mix(in srgb, var(--fondo-marca-suave) 70%, var(--fondo-superficie));
+}
+
+.etiquetaMarca {
+  color: var(--texto-marca);
+}
+
+.sinCandidato {
+  justify-content: flex-start;
+}
+
+.dato {
+  padding: var(--espacio-8);
+  border-radius: var(--radio-control);
+}
+
+.dato dt {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-6);
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.dato dd {
+  margin-top: var(--espacio-4);
+  font: var(--cuerpo-s);
+}
+
+/* Fondo verde: los campos que sostienen la sospecha (notas de V-14). */
+.coincide {
+  background: color-mix(in srgb, var(--estado-concluido) var(--tinte-estado), transparent);
+}
+
+/* Sobre el verde, el gris de la etiqueta queda en 4.46:1 (impeccable): se usa la tinta. */
+.coincide dt {
+  color: var(--texto-principal);
+}

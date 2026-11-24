@@ -1,0 +1,26 @@
+/* Estados que el Figma no dibuja (vacío y error de la fuente): diseño propio y sobrio. */
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-10);
+  padding: var(--espacio-20);
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.error {
+  color: var(--estado-error);
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
+}
+
+/* El contenido que sustituye al esqueleto aparece con un fundido. El envoltorio no crea caja,
+   así que el contenido sigue en la disposición de su tarjeta. */
+.contenido {
+  display: contents;
+}
+
+.contenido > *,
+.aparecer {
+  animation: global(aparecer) var(--mov-corto) var(--curva-salida);
+}

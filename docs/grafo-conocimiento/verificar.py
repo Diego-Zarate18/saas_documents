@@ -72,7 +72,7 @@ for id, n in N.items():
             errs.append(f"{id} retirado sin RETIRA")
     if t == "Hallazgo":
         if not inn(id, "REVELA"):
-            errs.append(f"{id} sin escenario que lo revele")
+            errs.append(f"{id} sin entrevista que lo revele")
         if not outs(id, "CONTRIBUYE_A"):
             errs.append(f"{id} no contribuye al problema")
         if not outs(id, "ORIGINA"):

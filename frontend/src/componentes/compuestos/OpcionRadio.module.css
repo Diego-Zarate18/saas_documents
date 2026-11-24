@@ -1,0 +1,65 @@
+/* Opción de radio. No aparece en las vistas de T-01: se dibuja con los tokens del Campo. */
+.opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-10);
+  padding: var(--espacio-10) var(--espacio-12);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-superficie);
+  cursor: pointer;
+}
+
+.opcion:has(input:checked) {
+  border-color: var(--borde-marca);
+  background: var(--fondo-marca-suave);
+}
+
+.opcion:has(input:focus-visible) {
+  box-shadow: var(--foco-anillo);
+}
+
+.opcion:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.circulo {
+  flex: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  border: 1.5px solid var(--borde-campo);
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-superficie);
+}
+
+.circulo:checked {
+  border: 5px solid var(--borde-marca);
+}
+
+.circulo:focus-visible {
+  box-shadow: none;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.texto {
+  font: var(--etiqueta-m);
+}
+
+.descripcion {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.codigo {
+  margin-left: var(--espacio-8);
+  font: var(--mono-dato);
+  color: var(--texto-secundario);
+}

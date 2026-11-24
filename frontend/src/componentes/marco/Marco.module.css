@@ -1,0 +1,138 @@
+/* Marco con barra lateral (V-02, V-04): barra de 248 px en vidrio oscuro y contenido con márgenes de 32 px. */
+.marco {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  height: 100vh;
+  padding: var(--espacio-24) var(--espacio-16);
+  background: var(--vidrio-oscuro-fondo);
+  backdrop-filter: var(--vidrio-oscuro-desenfoque);
+  box-shadow: var(--vidrio-oscuro-sombra);
+  color: var(--texto-sobre-marca);
+  overflow-y: auto;
+}
+
+.marca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-4) 0 var(--espacio-24) var(--espacio-8);
+}
+
+.logotipo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-10);
+  font: var(--titulo-m);
+  letter-spacing: var(--titulo-m-espaciado);
+}
+
+.rolUsuario {
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--sobre-marca-tenue);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.espacio {
+  flex: 1;
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-12);
+  padding: var(--espacio-10);
+  border: 1px solid var(--sobre-marca-borde);
+  border-radius: var(--radio-aviso);
+  background: var(--sobre-marca-tarjeta);
+  font: var(--pie);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-detalle);
+  color: var(--texto-sobre-detalle);
+  font: var(--mono-folio);
+  letter-spacing: var(--mono-folio-espaciado);
+}
+
+.datosUsuario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+.nombre {
+  font-weight: 500;
+}
+
+.adscripcion {
+  color: var(--sobre-marca-secundario);
+}
+
+.contenido {
+  position: relative;
+  min-width: 0;
+  padding: var(--espacio-32);
+}
+
+/* Brillos difusos del fondo, en las posiciones del Figma a 1440 px. */
+.brillos {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.brillos span {
+  position: absolute;
+  border-radius: var(--radio-pildora);
+  filter: var(--brillo-desenfoque);
+}
+
+.brillos span:nth-child(1) {
+  top: 520px;
+  left: -120px;
+  width: 520px;
+  height: 520px;
+  background: var(--brillo-marca);
+}
+
+.brillos span:nth-child(2) {
+  top: -180px;
+  right: -60px;
+  width: 520px;
+  height: 520px;
+  background: var(--brillo-detalle);
+}
+
+.brillos span:nth-child(3) {
+  top: 520px;
+  right: -80px;
+  width: 420px;
+  height: 420px;
+  background: var(--brillo-marca-tenue);
+}

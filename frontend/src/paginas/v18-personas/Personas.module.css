@@ -1,0 +1,5 @@
+/* V-18 Personas y usuarios (Figma 52:2531). */
+.rol {
+  font: var(--etiqueta-s);
+  color: var(--texto-marca);
+}

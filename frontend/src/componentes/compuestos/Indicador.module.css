@@ -1,0 +1,42 @@
+/* Indicador (V-02 «Indicadores»): relieve, o degradado guinda el destacado. */
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  min-width: 0;
+  padding: var(--espacio-20);
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-relieve);
+  box-shadow: var(--relieve-sombra);
+}
+
+.etiqueta {
+  font: var(--cuerpo-s);
+  color: var(--texto-secundario);
+}
+
+.valor {
+  font: 600 34px / normal var(--fuente-display);
+  letter-spacing: -0.02em;
+  color: var(--texto-principal);
+}
+
+.nota {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.destacado {
+  --forma-color: color-mix(in srgb, var(--texto-sobre-marca) 22%, transparent);
+  background: var(--destacado-fondo);
+  box-shadow: var(--destacado-sombra);
+}
+
+.destacado .etiqueta,
+.destacado .nota {
+  color: var(--fondo-detalle-suave);
+}
+
+.destacado .valor {
+  color: var(--texto-sobre-marca);
+}

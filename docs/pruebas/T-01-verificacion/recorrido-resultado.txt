@@ -1,0 +1,30 @@
+mflores: entra en /bandeja como Marta Flores
+  menú: Bandeja, Registrar documento, Buscar, Salidas externas, Posibles duplicados, Asuntos, Rebotes, Actores externos, Organización
+  vista: Bandeja (pendientes en el área: 24)
+  ficha: OP-2026-0143 → Requerimiento de información · acciones: Más acciones, Relacionar, Turnar
+  cerrar sesión → /iniciar-sesion
+alopez: entra en /bandeja como Lic. Ana López
+  menú: Bandeja, Buscar, Asuntos, Rebotes, Organización
+  vista: Bandeja (pendientes en el área: 1)
+  ficha: OP-2026-0097 → Propuesta de convenio de colaboración · acciones: Turnar
+  cerrar sesión → /iniciar-sesion
+rperez: entra en /bandeja como Ing. Raúl Pérez
+  menú: Bandeja, Buscar, Asuntos, Organización
+  vista: Bandeja (pendientes en el área: 8)
+  ficha: OP-2026-0152 → Cotización de papelería 2027 · acciones: Más, Devolver, Turnar, Concluir
+  cerrar sesión → /iniciar-sesion
+ediaz: entra en /bandeja como C.P. Elena Díaz
+  menú: Bandeja, Buscar, Asuntos, Organización
+  vista: Bandeja (pendientes en el área: 2)
+  ficha: OP-2026-0128 → Conciliación bancaria de octubre · acciones: Más, Devolver, Turnar, Concluir
+  cerrar sesión → /iniciar-sesion
+jruiz: entra en /bandeja como Jorge Ruiz
+  menú: Bandeja, Buscar, Asuntos, Organización
+  vista: Bandeja (pendientes en el área: 8)
+  ficha: OP-2026-0152 → Cotización de papelería 2027 · acciones: Más, Concluir
+  cerrar sesión → /iniciar-sesion
+lgomez: entra en /organizacion como Mtro. Luis Gómez
+  menú: Organización, Áreas, Personas y usuarios, Actores externos
+  vista: Organización
+  ficha: —
+  cerrar sesión → /iniciar-sesion

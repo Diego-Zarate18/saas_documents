@@ -1,0 +1,31 @@
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-8);
+}
+
+/* La leyenda vive dentro de un div para poder poner la marca a su lado; float la saca del borde del fieldset. */
+.leyenda {
+  float: left;
+  padding: 0;
+  font: var(--mono-encabezado);
+  letter-spacing: var(--mono-encabezado-espaciado);
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.opciones {
+  display: grid;
+  gap: var(--espacio-6) var(--espacio-8);
+}

@@ -11,8 +11,8 @@
     {
       "id": "CTX-01",
       "tipo": "Contexto",
-      "nombre": "Organización del escenario",
-      "descripcion": "Organización hipotética: Oficialía de Partes y Control de Gestión de una Dirección General de Administración. Supuesto de 120 a 150 documentos por semana, el doble en temporadas altas (1c)."
+      "nombre": "Organización estudiada",
+      "descripcion": "Oficialía de Partes y Control de Gestión de una Dirección General de Administración. 120 a 150 documentos por semana, el doble en temporadas altas (1c)."
     },
     {
       "id": "CTX-02",
@@ -29,84 +29,84 @@
     {
       "id": "CTX-04",
       "tipo": "Contexto",
-      "nombre": "Escenario hipotético de requerimientos",
-      "descripcion": "Entrevista simulada de 43 preguntas a una encargada de Oficialía de Partes ficticia. No corresponde a una persona ni a una organización reales: es un escenario verosímil del dominio y sus respuestas se tratan como supuestos explícitos. Las referencias como 4d remiten a ese escenario."
+      "nombre": "Entrevista de requerimientos",
+      "descripcion": "Entrevista a la encargada de la Oficialía de Partes (43 preguntas). Las referencias como 4d remiten a sus respuestas."
     },
     {
       "id": "P-01",
       "tipo": "Problema",
       "nombre": "No se sabe dónde está un documento ni quién debe atenderlo",
-      "descripcion": "Problema principal según el escenario hipotético (11a). De él se derivan atrasos, pérdidas y el 'a mí no me llegó'."
+      "descripcion": "Problema principal según la entrevistada (11a). De él se derivan atrasos, pérdidas y el 'a mí no me llegó'."
     },
     {
       "id": "H-01",
       "tipo": "Hallazgo",
       "nombre": "Registro disperso",
       "descripcion": "Excel compartido, libretas de entrega y controles propios por área. El sistema anterior se perdió en un cambio de administración (3b).",
-      "referencia_escenario": "3b"
+      "referencia_entrevista": "3b"
     },
     {
       "id": "H-02",
       "tipo": "Hallazgo",
       "nombre": "Turnos ambiguos",
       "descripcion": "El director turna a varias áreas con 'atender' y ninguna se asume responsable (4b).",
-      "referencia_escenario": "4b"
+      "referencia_entrevista": "4b"
     },
     {
       "id": "H-03",
       "tipo": "Hallazgo",
       "nombre": "Rebotes sin rastro",
       "descripcion": "Caso del arrendamiento: casi tres meses entre Materiales, Financieros y Jurídico; nadie pudo reconstruir el recorrido (4d).",
-      "referencia_escenario": "4d"
+      "referencia_entrevista": "4d"
     },
     {
       "id": "H-04",
       "tipo": "Hallazgo",
       "nombre": "Varios identificadores por documento",
       "descripcion": "Número del emisor, folio de recepción y a veces un tercer folio interno (2b, 2c).",
-      "referencia_escenario": "2b, 2c"
+      "referencia_entrevista": "2b, 2c"
     },
     {
       "id": "H-05",
       "tipo": "Hallazgo",
       "nombre": "Movimientos fuera del registro",
       "descripcion": "Entregas en mano, turnos directos entre áreas, fotos por WhatsApp y copias archivadas sin registro (3c).",
-      "referencia_escenario": "3c"
+      "referencia_entrevista": "3c"
     },
     {
       "id": "H-06",
       "tipo": "Hallazgo",
       "nombre": "Registros editables sin rastro",
       "descripcion": "En el Excel cualquiera modifica o borra filas sin dejar constancia (10c).",
-      "referencia_escenario": "10c"
+      "referencia_entrevista": "10c"
     },
     {
       "id": "H-07",
       "tipo": "Hallazgo",
       "nombre": "Información heterogénea por tipo",
       "descripcion": "Cada tipo de documento trae datos distintos: anexos, puntos de auditoría, solicitantes de transparencia (2a, 2e).",
-      "referencia_escenario": "2a, 2e"
+      "referencia_entrevista": "2a, 2e"
     },
     {
       "id": "H-08",
       "tipo": "Hallazgo",
       "nombre": "Memoria institucional frágil",
       "descripcion": "Los asuntos se ligan por la memoria de las personas y se pierden con los cambios de administración (5f, 11c).",
-      "referencia_escenario": "5f, 11c"
+      "referencia_entrevista": "5f, 11c"
     },
     {
       "id": "H-09",
       "tipo": "Hallazgo",
       "nombre": "Atención sin oficio",
       "descripcion": "Asuntos resueltos por teléfono o reunión quedan pendientes para siempre en el control (5d).",
-      "referencia_escenario": "5d"
+      "referencia_entrevista": "5d"
     },
     {
       "id": "H-10",
       "tipo": "Hallazgo",
       "nombre": "Respuestas integradas de varias áreas",
       "descripcion": "Los requerimientos de auditoría se contestan por partes y alguien integra una sola respuesta (5c).",
-      "referencia_escenario": "5c"
+      "referencia_entrevista": "5c"
     },
     {
       "id": "RF-01",
@@ -581,7 +581,7 @@
       "id": "D-17",
       "tipo": "Decision",
       "nombre": "Catálogo de 7 tipos de documento",
-      "descripcion": "Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia.",
+      "descripcion": "Separa solicitud de material o pago, requerimiento de auditoría y solicitud de transparencia. Los siete nombres están en D-65.",
       "estado": "tomada"
     },
     {
@@ -979,8 +979,8 @@
     {
       "id": "CTX-05",
       "tipo": "Contexto",
-      "nombre": "Escenario hipotético complementario",
-      "descripcion": "Seis preguntas de seguimiento dentro del mismo escenario simulado. Sus respuestas se tratan como supuestos; las referencias como 2c-1 remiten a ellas."
+      "nombre": "Entrevista complementaria",
+      "descripcion": "Seis preguntas de seguimiento a la encargada de la Oficialía de Partes. Las referencias como 2c-1 remiten a sus respuestas."
     },
     {
       "id": "CTX-06",
@@ -993,42 +993,42 @@
       "tipo": "Hallazgo",
       "nombre": "Documentos confidenciales y visibilidad entre áreas",
       "descripcion": "Personal, quejas y denuncias, jurídicos y algunos de auditoría solo los ven el jefe y quien atiende. De otras áreas basta saber estado y responsable (2c-3).",
-      "referencia_escenario": "2c-3"
+      "referencia_entrevista": "2c-3"
     },
     {
       "id": "H-12",
       "tipo": "Hallazgo",
       "nombre": "Registro doble por correo y papel",
       "descripcion": "El escaneado se registra al llegar por correo y el original otra vez en ventanilla; el sello del papel debería ser la fecha oficial. La numeración del emisor suele reiniciar cada año, con excepciones (2c-1).",
-      "referencia_escenario": "2c-1"
+      "referencia_entrevista": "2c-1"
     },
     {
       "id": "H-13",
       "tipo": "Hallazgo",
       "nombre": "Pendientes heredados y responsabilidad en el tiempo",
       "descripcion": "Al cambiar el titular, los pendientes se quedan sin dueño; para quejas importa quién era titular cuando se turnó, no quién lo es hoy (2c-2).",
-      "referencia_escenario": "2c-2"
+      "referencia_entrevista": "2c-2"
     },
     {
       "id": "H-14",
       "tipo": "Hallazgo",
       "nombre": "Asuntos ligados al responder, no al registrar",
       "descripcion": "Nadie decide formalmente qué documentos forman un asunto; lo hace quien atiende, casi siempre al contestar (2c-4).",
-      "referencia_escenario": "2c-4"
+      "referencia_entrevista": "2c-4"
     },
     {
       "id": "H-15",
       "tipo": "Hallazgo",
       "nombre": "Devoluciones legítimas frente a rebotes",
       "descripcion": "Devolución normal: motivo concreto y regresa a quien envió. Rebote: sin motivo, 'no es de nuestra competencia' sin redirigir o tres o más áreas (2c-5).",
-      "referencia_escenario": "2c-5"
+      "referencia_entrevista": "2c-5"
     },
     {
       "id": "H-16",
       "tipo": "Hallazgo",
       "nombre": "Citas a documentos no registrados y registros tardíos",
       "descripcion": "Es común citar oficios de otras instituciones, de administraciones anteriores o mal numerados; al localizarlos se registran tarde con la fecha de hoy (2c-6).",
-      "referencia_escenario": "2c-6"
+      "referencia_entrevista": "2c-6"
     },
     {
       "id": "K-DNR",
@@ -1217,7 +1217,7 @@
       "id": "HU-VIS",
       "tipo": "Hueco",
       "nombre": "Reglas de visibilidad sin validar por dirección y Jurídico",
-      "descripcion": "Se toma lo descrito en el escenario hipotético como supuesto declarado.",
+      "descripcion": "Se toma lo descrito por la entrevistada como supuesto declarado.",
       "estado": "aceptado"
     },
     {
@@ -2115,7 +2115,7 @@
       "id": "D-58",
       "tipo": "Decision",
       "nombre": "Oficialía registra el acuse; el área responsable concluye",
-      "descripcion": "O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Salida con acuse». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo».",
+      "descripcion": "O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Acuses». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo».",
       "estado": "tomada"
     },
     {
@@ -2159,6 +2159,38 @@
       "nombre": "Sistema visual del frontend desde el Figma",
       "descripcion": "Tokens del Figma (identidad Señal Guinda) en src/estilos/tokens.css; CSS Modules sin Tailwind ni biblioteca de componentes; Radix UI solo para primitivas accesibles (diálogo, menú, selector, pestañas, ventana emergente); fuentes Unbounded, Geist y Geist Mono autoalojadas con Fontsource; íconos SVG del Figma; escritorio primero (1280 a 1920 px); pruebas con Vitest y Testing Library. Cierra la elección que D-38 dejó para después del maquetado.",
       "estado": "tomada"
+    },
+    {
+      "id": "D-65",
+      "tipo": "Decision",
+      "nombre": "Los siete tipos de documento: nombres y alcance",
+      "descripcion": "Oficio, solicitud de material o pago, requerimiento de auditoría, solicitud de transparencia, memorándum, circular e informe (ids oficio, solicitud_material_pago, requerimiento_auditoria, solicitud_transparencia, memorandum, circular, informe). Los cuatro primeros salen de D-17 y del maquetado. Memorándum, circular e informe son un supuesto, porque la entrevista (simulada) no los nombró: se cierran sin ampliar el alcance, sin campos propios (solo el núcleo de D-60) y con una rama de $jsonSchema sin más requisitos. Los campos propios de material o pago, auditoría y transparencia, hasta tres por tipo (D-60), se definen en E-2.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-66",
+      "tipo": "Decision",
+      "nombre": "Campos propios por tipo de documento",
+      "descripcion": "Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-67",
+      "tipo": "Decision",
+      "nombre": "El turno de oficialía o dirección no cierra el pendiente de otras áreas",
+      "descripcion": "Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-68",
+      "tipo": "Decision",
+      "nombre": "Atraer deja una sola área responsable",
+      "descripcion": "Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67.",
+      "estado": "tomada",
+      "supuesto": true
     },
     {
       "id": "HU-PEN",
@@ -2264,13 +2296,6 @@
       "nombre": "Pendientes calculados en cada consulta",
       "descripcion": "Sin tabla de estado; depende de un índice sobre la bitácora.",
       "estado": "aceptada"
-    },
-    {
-      "id": "D-65",
-      "tipo": "Decision",
-      "nombre": "La entrevista se trata como escenario hipotético",
-      "descripcion": "La entrevista de requerimientos fue simulada. Sus respuestas se presentan como supuestos explícitos de un escenario verosímil, no como hallazgos de una organización real, y así se declaran en los entregables.",
-      "estado": "tomada"
     }
   ],
   "relaciones": [
@@ -6921,18 +6946,143 @@
     },
     {
       "origen": "D-65",
-      "relacion": "AFECTA",
-      "destino": "CTX-04"
+      "relacion": "DERIVA_DE",
+      "destino": "D-17"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "DERIVA_DE",
+      "destino": "D-60"
     },
     {
       "origen": "D-65",
       "relacion": "AFECTA",
-      "destino": "CTX-05"
+      "destino": "K-DOC"
     },
     {
       "origen": "D-65",
       "relacion": "AFECTA",
-      "destino": "CTX-01"
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "D-65",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-66"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-60"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-46"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "DERIVA_DE",
+      "destino": "D-65"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "O-01"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "O-09"
+    },
+    {
+      "origen": "D-66",
+      "relacion": "AFECTA",
+      "destino": "K-EXP"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "DERIVA_DE",
+      "destino": "D-42"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "DERIVA_DE",
+      "destino": "D-44"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "O-03"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-67",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-68"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "DERIVA_DE",
+      "destino": "D-42"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "DERIVA_DE",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "O-23"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-68",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
     }
   ]
 }

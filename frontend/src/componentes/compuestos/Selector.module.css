@@ -1,0 +1,217 @@
+/* Selector: «Área:» (V-02, hundido), filtros «Tipo:» y «Antigüedad:» (V-02, píldora) y área destino (V-05, fila).
+   La lista desplegada no la dibuja el Figma: usa la superficie de vidrio de los menús. */
+.disparador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  border: 0;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--texto-principal);
+}
+
+.hundido {
+  padding: var(--espacio-10) var(--espacio-14);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
+}
+
+.hundido .prefijo {
+  font: var(--cuerpo-s);
+}
+
+.hundido .valor {
+  font: var(--etiqueta-m);
+}
+
+.pildora {
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-12);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-pildora);
+  background: transparent;
+}
+
+.pildora .prefijo {
+  font: var(--pie);
+}
+
+.pildora .valor {
+  font: var(--etiqueta-s);
+}
+
+.fila {
+  width: 190px;
+  padding: var(--espacio-9) var(--espacio-12);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  /* Sin borde en el Figma: el anillo interior marca el límite (WCAG 1.4.11) sin cambiar las medidas. */
+  box-shadow:
+    var(--hundida-sombra),
+    inset 0 0 0 1px var(--borde-campo);
+}
+
+.fila .valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--etiqueta-s);
+}
+
+.prefijo {
+  color: var(--texto-secundario);
+}
+
+.marcador {
+  color: var(--texto-secundario);
+}
+
+.disparador[data-placeholder] .valor {
+  color: var(--texto-secundario);
+}
+
+.disparador:focus-visible {
+  box-shadow: var(--foco-anillo);
+}
+
+.flecha {
+  flex: none;
+  color: var(--texto-secundario);
+  transition: transform var(--mov-corto) var(--curva-estandar);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .disparador[data-state='open'] .flecha {
+    transform: rotate(180deg);
+  }
+}
+
+.lista {
+  z-index: 20;
+  min-width: var(--radix-select-trigger-width);
+  max-height: var(--radix-select-content-available-height);
+  padding: var(--espacio-4);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-aviso);
+  background: var(--vidrio-fondo-modal);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-sombra);
+  animation: desplegar var(--mov-corto) var(--curva-salida);
+}
+
+@keyframes desplegar {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lista {
+    animation-name: desplegar-bajando;
+  }
+}
+
+@keyframes desplegar-bajando {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Lista de opciones mientras se leen (V-05): una forma por opción, con su misma medida. */
+.cargando {
+  display: flex;
+  flex-direction: column;
+}
+
+.cargando .opcion {
+  cursor: progress;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-8);
+  padding: var(--espacio-8) var(--espacio-10);
+  border-radius: var(--radio-segmento);
+  font: var(--cuerpo-s);
+  color: var(--texto-principal);
+  cursor: pointer;
+  outline: none;
+}
+
+.opcion[data-highlighted] {
+  background: var(--fondo-marca-suave);
+}
+
+.opcion[data-state='checked'] {
+  font-weight: 500;
+  color: var(--texto-marca);
+}
+
+.marca {
+  margin-left: auto;
+  color: var(--texto-marca);
+}
+
+/* Variante de campo (V-03, V-07b, V-13b, V-15b): mide y se ve como la caja de Campo. */
+.envoltura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiquetaCampo {
+  font: var(--etiqueta-s);
+  color: var(--texto-principal);
+}
+
+.campo {
+  width: 100%;
+  padding: var(--espacio-10) var(--espacio-12);
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radio-control);
+  background: var(--fondo-base);
+  box-shadow: var(--hundida-sombra);
+}
+
+.blanco .campo {
+  background: var(--fondo-superficie);
+  box-shadow: none;
+}
+
+.campo .valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--cuerpo-m);
+}
+
+.blanco .campo .valor {
+  font: var(--cuerpo-s);
+}
+
+.campo[aria-invalid='true'] {
+  border-color: var(--estado-error);
+}
+
+.campo:focus-visible {
+  border-color: var(--borde-marca);
+  box-shadow: var(--foco-anillo);
+}
+
+.ayuda {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}
+
+.error {
+  font: var(--pie);
+  color: var(--estado-error);
+}

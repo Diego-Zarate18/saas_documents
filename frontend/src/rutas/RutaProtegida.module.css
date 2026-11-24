@@ -1,0 +1,11 @@
+/* Pantalla neutra mientras se resuelve la sesión (T-01b, diseño propio): isotipo y «Cargando…». */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-16);
+  min-height: 100vh;
+  font: var(--pie);
+  color: var(--texto-secundario);
+}

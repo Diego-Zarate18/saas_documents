@@ -1,0 +1,28 @@
+/* V-15b (Figma 51:2425). */
+.grupo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-8);
+}
+
+.grupo li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-8);
+}
+
+.valor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+.etiqueta {
+  font: var(--etiqueta-s);
+}
+
+.ayuda {
+  font: var(--pie);
+  color: var(--texto-secundario);
+}

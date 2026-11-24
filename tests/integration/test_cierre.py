@@ -26,7 +26,12 @@ async def test_o11_ficha_integrada_y_degradada(api, monkeypatch):
     assert ficha['expediente']['datos_tipo']['concepto'].startswith('Equipo de cómputo')  # MongoDB
     assert ficha['expediente']['notas'][0]['autor'] == 'Ing. Raúl Pérez'
     assert [m['tipo'] for m in ficha['recorrido']] == ['registro', 'turno', 'turno', 'devolucion']  # Neo4j
-    assert {r['referencia'] for r in ficha['relaciones']} == {'OP-2026-0087', 'SIS/0198/2026'}
+    # Las que salen y las que llegan (la salida CO-2026-0048 responde a este documento).
+    assert {(r['referencia'], r['sentido']) for r in ficha['relaciones']} == {
+        ('OP-2026-0087', 'sale'),
+        ('SIS/0198/2026', 'sale'),
+        ('CO-2026-0048', 'entra'),
+    }
     assert [a['nombre'] for a in ficha['asuntos']] == ['Equipamiento de laboratorios 2026']
 
     # Neo4j no responde: la ficha devuelve lo demás y marca las secciones (D-53).

@@ -238,3 +238,31 @@ async def candidato_duplicado(con: AsyncConnection, marcado: dict) -> dict | Non
         },
     )
     return await cursor.fetchone()
+
+
+async def dejar_sin_efecto(con: AsyncConnection, id_documento: UUID) -> bool:
+    """AR-07. D-14: el documento sustituido queda `sin_efecto` y guarda su estado anterior. Falso si ya no estaba
+    vigente (en trámite o concluido)."""
+    cursor = await con.execute(
+        """UPDATE documento SET estado_previo = estado, estado = 'sin_efecto'
+           WHERE id_documento = %s AND estado IN ('en_tramite', 'concluido') RETURNING id_documento""",
+        (id_documento,),
+    )
+    return await cursor.fetchone() is not None
+
+
+async def restaurar_estado(con: AsyncConnection, id_documento: UUID) -> str | None:
+    """AR-07. D-14: al quitar SUSTITUYE_A el documento vuelve a su estado anterior; devuelve ese estado."""
+    cursor = await con.execute(
+        """UPDATE documento SET estado = estado_previo, estado_previo = NULL
+           WHERE id_documento = %s AND estado = 'sin_efecto' RETURNING estado""",
+        (id_documento,),
+    )
+    fila = await cursor.fetchone()
+    return fila['estado'] if fila else None
+
+
+async def id_por_folio(con: AsyncConnection, folio: str) -> UUID | None:
+    cursor = await con.execute('SELECT id_documento FROM folio WHERE folio = %s', (folio,))
+    fila = await cursor.fetchone()
+    return fila['id_documento'] if fila else None

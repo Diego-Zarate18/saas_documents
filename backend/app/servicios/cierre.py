@@ -117,6 +117,7 @@ async def concluir(
                     'id_persona': ctx.id_persona,
                     'fecha_hora': ahora,
                 },
+                espera_a=id_documento,
             )
         if nota:
             evidencia = conclusion.forma == 'atencion_sin_oficio'

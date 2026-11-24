@@ -219,6 +219,8 @@ class Recepcion(BaseModel):
 
 
 class RegistroDocumento(BaseModel):
+    """Con acceso restringido solo traen valor folio, tipo y estado (D-29, igual que O-30)."""
+
     id: UUID
     folio: str
     asunto: str | None
@@ -228,14 +230,14 @@ class RegistroDocumento(BaseModel):
     posible_duplicado: bool
     extemporaneo: bool
     numero_emisor: str | None
-    emisor: str
-    tipo_emisor: Literal['area', 'externo']
+    emisor: str | None
+    tipo_emisor: Literal['area', 'externo'] | None
     fecha_documento: date | None
-    canal: Canal
-    fecha_recepcion: datetime
+    canal: Canal | None
+    fecha_recepcion: datetime | None
     segunda_recepcion: Recepcion | None
-    fecha_oficial: date
-    origen_fecha_oficial: str
+    fecha_oficial: date | None
+    origen_fecha_oficial: str | None
     sintesis: str | None
 
 
@@ -271,6 +273,7 @@ class Expediente(BaseModel):
 
 class Relacion(BaseModel):
     tipo: str
+    sentido: Literal['sale', 'entra']  # «entra»: el otro documento apunta a este (AG-05)
     id_documento: UUID | None
     referencia: str
     descripcion: str | None
@@ -382,3 +385,185 @@ class ComparacionDuplicado(BaseModel):
 class ResolucionDuplicado(BaseModel):
     id_otro: UUID | None = None
     decision: str = ''
+
+
+# ── Referencias, asuntos y consultas de grafo (O-07, O-08, O-18, O-27, C2, C3, C5) ──
+
+
+class DestinoRelacion(BaseModel):
+    id_documento: UUID | None = None
+    numero: str | None = None
+    emisor: str | None = None
+
+
+class NuevaRelacion(BaseModel):
+    tipo: str = ''
+    destino: DestinoRelacion = Field(default_factory=DestinoRelacion)
+
+
+class Asunto(BaseModel):
+    id: UUID
+    nombre: str
+    descripcion: str
+    creador: str
+    fecha: datetime
+    documentos: int
+    areas: list[str]
+
+
+class NuevoAsunto(BaseModel):
+    nombre: str = ''
+    descripcion: str = ''
+    id_documento: UUID | None = None
+
+
+class AsignacionAsunto(BaseModel):
+    id_documento: UUID | None = None
+
+
+class RelacionHilo(BaseModel):
+    tipo: str
+    sentido: Literal['entra', 'sale']
+
+
+class NodoHilo(BaseModel):
+    id_documento: UUID | None
+    referencia: str
+    descripcion: str | None
+    estado: str | None
+    registrado: bool
+    pertenece: bool
+    relacion: RelacionHilo | None
+    profundidad: int
+
+
+class HiloAsunto(BaseModel):
+    asunto: Asunto
+    nodos: list[NodoHilo]
+
+
+class AreaAlcance(BaseModel):
+    area: str
+    documentos: int
+
+
+class AlcanceAsunto(BaseModel):
+    areas: list[AreaAlcance]
+    personas: list[str]
+
+
+class Rebote(BaseModel):
+    id_documento: UUID
+    folio: str
+    asunto: str | None
+    reglas: list[Literal['no_competencia_sin_area', 'tres_devoluciones', 'tres_areas']]
+    areas: int
+    ubicacion: str | None
+
+
+# ── Búsqueda (O-30) ────────────────────────────────────────────────────────────
+
+
+class ResultadoBusqueda(BaseModel):
+    id: UUID
+    folio: str
+    numero_emisor: str | None
+    sintesis: str | None
+    tipo: str
+    estado: str
+    area_responsable: str | None
+    visibilidad: Literal['completa', 'restringida', 'confidencial']
+
+
+class DocumentoEncontrado(BaseModel):
+    id: UUID
+    folio: str
+    asunto: str
+    fecha: datetime
+    salida: bool
+
+
+# ── Administración (O-33 a O-35) ───────────────────────────────────────────────
+
+
+class DatosArea(BaseModel):
+    siglas: str = ''
+    nombre: str = ''
+    id_padre: UUID | None = None
+    id_titular: UUID | None = None
+
+
+class Persona(BaseModel):
+    id: UUID
+    nombre: str
+    correo: str | None
+    id_area: UUID | None
+    nombre_area: str | None
+    rol: str | None
+    activa: bool
+
+
+class DatosPersona(BaseModel):
+    nombre: str = ''
+    correo: str = ''
+    id_area: UUID | None = None
+    rol: str = ''
+
+
+class ActorExterno(BaseModel):
+    id: UUID
+    nombre: str
+    tipo: str
+    correo: str | None
+    telefono: str | None
+    activo: bool
+    documentos: int
+
+
+class DatosActor(BaseModel):
+    nombre: str = ''
+    tipo: str = ''
+    correo: str | None = None
+    telefono: str | None = None
+
+
+# ── Salidas y acuses (O-20, O-21) ──────────────────────────────────────────────
+
+
+class NuevaSalida(BaseModel):
+    tipo: str = ''
+    numero: str = ''
+    id_area_emisora: UUID | None = None
+    destinatario: str = ''
+    sintesis: str = ''
+    id_responde_a: UUID | None = None
+
+
+class AcuseSalida(BaseModel):
+    fecha_hora: datetime
+    recibio: str
+
+
+class Salida(BaseModel):
+    id: UUID
+    folio: str
+    sintesis: str
+    destinatario: str
+    id_responde_a: UUID | None
+    folio_responde_a: str | None
+    area_emisora: str
+    fecha_hora: datetime
+    acuse: AcuseSalida | None
+
+
+class NuevoAcuse(BaseModel):
+    fecha_hora: datetime | None = None
+    recibio: str = ''
+
+
+class Acuse(BaseModel):
+    id_salida: UUID
+    folio_salida: str
+    id_documento: UUID
+    folio_documento: str
+    acusado_por: str

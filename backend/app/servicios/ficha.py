@@ -106,10 +106,13 @@ async def obtener(
         segunda_recepcion=segunda,
     )
     if not completo:
+        # D-29 (igual que O-30): de otra área solo folio, tipo, estado y ubicación actual.
+        solo = {'id', 'folio', 'tipo', 'estado', 'confidencial', 'posible_duplicado', 'extemporaneo'}
+        restringido = m.RegistroDocumento(**{k: (v if k in solo else None) for k, v in registro.model_dump().items()})
         return m.Ficha(
             acceso='restringido',
             contenido_oculto=False,
-            registro=registro,
+            registro=restringido,
             ubicacion_actual=ubicacion,
             expediente=None,
             recorrido=None,
@@ -160,6 +163,7 @@ async def _relaciones(con: AsyncConnection, referencias: list[dict]) -> list[m.R
         relaciones.append(
             m.Relacion(
                 tipo=r['tipo'].lower(),
+                sentido='sale' if r['sale'] else 'entra',
                 id_documento=r['id_documento'],
                 referencia=otro['folio'] if otro else r['numero'] or '',
                 descripcion=otro['sintesis'] if otro else r['emisor'],

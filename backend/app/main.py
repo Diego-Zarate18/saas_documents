@@ -13,7 +13,19 @@ from functools import partial
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import bandeja, catalogos, consultas, documentos, errores, movimientos, salud, sesiones
+from app.api import (
+    administracion,
+    asuntos,
+    bandeja,
+    catalogos,
+    consultas,
+    documentos,
+    errores,
+    movimientos,
+    salidas,
+    salud,
+    sesiones,
+)
 from app.config import Ajustes, cargar_ajustes
 from app.infra import mongo, neo4j, postgres
 
@@ -65,7 +77,18 @@ def crear_app(ajustes: Ajustes) -> FastAPI:
         allow_headers=['*'],
     )
     errores.registrar(app)
-    for modulo in (salud, sesiones, catalogos, documentos, movimientos, bandeja, consultas):
+    for modulo in (
+        salud,
+        sesiones,
+        catalogos,
+        administracion,
+        documentos,
+        movimientos,
+        bandeja,
+        consultas,
+        asuntos,
+        salidas,
+    ):
         app.include_router(modulo.router, prefix='/api')
     return app
 

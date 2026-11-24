@@ -55,9 +55,19 @@ async def encolar_nota(con: AsyncConnection, id_documento: UUID, nota: dict) -> 
     await outbox.encolar(con, 'mongodb', 'nota', id_documento, datos)
 
 
-async def encolar_referencia(con: AsyncConnection, referencia: dict) -> None:
-    """Referencia entre documentos que nace con una conclusión con respuesta (O-05). `id_documento` es el documento
-    concluido: espera a que su nodo esté replicado."""
+async def encolar_referencia(con: AsyncConnection, referencia: dict, espera_a: UUID) -> None:
+    """RESPONDE_A que nace en PostgreSQL: una conclusión con respuesta (O-05) o una salida que responde (O-20).
+    `espera_a` es el documento cuyos eventos anteriores deben entregarse antes (D-48)."""
     datos = {k: _texto(v) for k, v in referencia.items()}
-    datos['id_documento'] = datos['id_destino']
+    datos['id_documento'] = str(espera_a)
     await outbox.encolar(con, 'neo4j', 'referencia', referencia['id'], datos)
+
+
+async def encolar_area(con: AsyncConnection, id_area: UUID, siglas: str) -> None:
+    """Nodo Area (O-33)."""
+    await outbox.encolar(con, 'neo4j', 'area', id_area, {'id_area': str(id_area), 'siglas': siglas})
+
+
+async def encolar_persona(con: AsyncConnection, id_persona: UUID, nombre: str) -> None:
+    """Nodo Persona (O-34)."""
+    await outbox.encolar(con, 'neo4j', 'persona', id_persona, {'id_persona': str(id_persona), 'nombre': nombre})

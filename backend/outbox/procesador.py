@@ -34,6 +34,10 @@ async def entregar(evento: dict, db: AsyncDatabase, grafo: AsyncDriver) -> None:
             await replica.estado(grafo, datos)
         case 'neo4j', 'referencia':
             await replica.referencia(grafo, datos)
+        case 'neo4j', 'area':
+            await replica.area(grafo, datos)
+        case 'neo4j', 'persona':
+            await replica.persona(grafo, datos)
         case destino, tipo:
             raise ValueError(f'Evento desconocido: {destino}/{tipo}')
 

@@ -1,5 +1,6 @@
 """AD-01 a AD-06. Expedientes en MongoDB, fuente del contenido del tipo, los anexos y las notas (D-104)."""
 
+import re
 from datetime import datetime
 
 from pymongo.asynchronous.database import AsyncDatabase
@@ -72,3 +73,17 @@ async def quitar_nota(db: AsyncDatabase, id_documento: str, id_nota: str, ahora:
         },
     )
     return resultado.modified_count == 1
+
+
+# D-46: los dos campos con índice parcial y el tipo al que pertenece cada uno.
+TIPO_DEL_CAMPO = {'ente_auditor': 'requerimiento_auditoria', 'solicitante': 'solicitud_transparencia'}
+
+
+async def buscar_por_campo(db: AsyncDatabase, clave: str, valor: str) -> list[str]:
+    """AD-07. Ids de los expedientes cuyo campo del tipo contiene el valor, sin distinguir mayúsculas. La
+    visibilidad la filtra PostgreSQL después (D-46)."""
+    tipo = TIPO_DEL_CAMPO[clave]
+    cursor = db.expedientes.find(
+        {'tipo': tipo, f'datos_tipo.{clave}': {'$regex': re.escape(valor), '$options': 'i'}}, {'_id': 1}
+    )
+    return [e['_id'] async for e in cursor]

@@ -100,3 +100,17 @@ async def referencia(driver: AsyncDriver, datos: dict) -> None:
     )
     if not resultado.records:
         raise LookupError('Un documento de la referencia aún no está en el grafo')
+
+
+async def area(driver: AsyncDriver, datos: dict) -> None:
+    """AG-06. Nodo Area (O-33)."""
+    await driver.execute_query(
+        'MERGE (a:Area {id: $id}) SET a.siglas = $siglas', id=datos['id_area'], siglas=datos['siglas']
+    )
+
+
+async def persona(driver: AsyncDriver, datos: dict) -> None:
+    """AG-06. Nodo Persona (O-34)."""
+    await driver.execute_query(
+        'MERGE (p:Persona {id: $id}) SET p.nombre = $nombre', id=datos['id_persona'], nombre=datos['nombre']
+    )

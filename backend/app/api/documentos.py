@@ -1,5 +1,6 @@
 """O-01, O-03, O-22 y O-23. /api/documentos."""
 
+from datetime import date
 from typing import Literal
 from uuid import UUID
 
@@ -16,9 +17,31 @@ from app.dominio.modelos import (
     ResultadoTurno,
     Turno,
 )
-from app.servicios import cierre, documentos, expediente, ficha, recorrido
+from app.servicios import cierre, consultas, documentos, expediente, ficha, recorrido, referencias
 
 router = APIRouter(prefix='/documentos', tags=['documentos'])
+
+
+@router.get('', summary='O-30 Buscar documentos')
+async def buscar(
+    ctx: Contexto,
+    pool: Pool,
+    db: Documental,
+    texto: str | None = None,
+    folio: str | None = None,
+    numero: str | None = None,
+    emisor: str | None = None,
+    tipo: str | None = None,
+    estado: str | None = None,
+    desde: date | None = None,
+    hasta: date | None = None,
+    campo_tipo: str | None = None,
+    valor_campo: str | None = None,
+    pagina: int = 1,
+    tamano: int = 20,
+) -> m.Listado[m.ResultadoBusqueda]:
+    filtros = consultas.filtros_de_busqueda(texto, folio, numero, emisor, tipo, estado, desde, hasta)
+    return await consultas.buscar(pool, db, ctx, filtros, campo_tipo, valor_campo, pagina, tamano)
 
 
 @router.get('/folio-siguiente', summary='Vista previa del folio (D-21)')
@@ -108,3 +131,15 @@ async def segunda_recepcion(id_documento: UUID, datos: m.SegundaRecepcion, ctx: 
 @router.post('/{id_documento}/resolucion-duplicado', status_code=204, summary='O-26 Resolver posible duplicado')
 async def resolver_duplicado(id_documento: UUID, datos: m.ResolucionDuplicado, ctx: Contexto, pool: Pool) -> None:
     await cierre.resolver(pool, ctx, id_documento, datos)
+
+
+@router.post('/{id_documento}/referencias', status_code=204, summary='O-07 Relacionar documentos')
+async def relacionar(id_documento: UUID, datos: m.NuevaRelacion, ctx: Contexto, pool: Pool, grafo: Grafo) -> None:
+    await referencias.relacionar(pool, grafo, ctx, id_documento, datos)
+
+
+@router.delete('/{id_documento}/referencias/{tipo}', status_code=204, summary='O-18 Quitar referencia')
+async def quitar_relacion(
+    id_documento: UUID, tipo: str, referencia: str, ctx: Contexto, pool: Pool, grafo: Grafo, emisor: str | None = None
+) -> None:
+    await referencias.quitar(pool, grafo, ctx, id_documento, tipo, referencia, emisor)

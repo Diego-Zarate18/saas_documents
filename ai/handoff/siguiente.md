@@ -1,31 +1,36 @@
-# T-08: Interfaz conectada a la API real y retiro del simulador
+# T-09: Cierre: consistencia, respaldo, despliegue y evidencia medida
 
 - Asignada: 2026-11-24
-- Depende de: T-07 (`5cef832`)
-- Entrega: miércoles 25. La aplicación debe funcionar de punta a punta con las tres bases; no queda ningún dato simulado.
-
-## Fuentes
-
-- `frontend/src/api/contrato.ts` (`ApiSigedoc`), `tipos.ts` e `index.ts`: la frontera que se conecta.
-- `docs/api/openapi.json` o `GET /openapi.json` del backend: rutas reales (D-106).
-- D-36, D-38, D-63, D-108.
+- Depende de: T-08 (`efc7958`)
+- Entrega: miércoles 25. Esta tarea produce los números del póster y la evidencia que pide la guía (secciones 9 y 12).
 
 ## Alcance
 
-1. **Cliente real**: `src/api/real.ts` implementa `ApiSigedoc` con `fetch` sobre `/api` (proxy de Vite), `credentials: 'include'`, y convierte los errores RFC 9457 al mismo error con `codigo` que hoy usan las páginas. Se escribe a mano con los tipos de `tipos.ts` (D-108); no se agrega generador.
-2. **Retiro del simulador**: `index.ts` usa solo el cliente real. Se borran `src/api/simulado/`, `VITE_API_MODO`, `API_DISPONIBLE`, `AvisoApiReal` y `usuariosDePrueba` (V-01 queda con correo y contraseña). El indicador de salud de T-03 se conserva solo si sigue teniendo sentido sin el modo simulado; si no, se borra.
-3. **Pruebas del frontend**: las que dependen del simulador se borran; las que prueban componentes o reglas puras (`reglas.ts`) se quedan. No se escriben pruebas nuevas.
-4. **Semilla**: se borra `database/semilla.mjs`, que leía `datos.ts`; los JSON generados quedan como fuente de la semilla.
-5. **Recorrido de las pantallas** con la API real, usuario por rol (contraseña `sigedoc-dev`): iniciar sesión, bandeja, registrar, turnar, devolver, atraer, concluir, ficha, relacionar, asuntos e hilo, búsqueda, rebotes, salidas y acuse, administración. Corrige lo que falle por diferencias entre el contrato y la API; si la diferencia está en el backend, corrígela ahí.
-6. `README.md` y `CLAUDE.md`: comandos sin el modo simulado.
+1. **Reconciliación** (O-40): `python -m herramientas.reconciliar` compara existencia, estado y tipo entre las tres bases y las sustituciones a medias (D-14, D-26), reporta diferencias y reencola en el outbox lo que falte.
+2. **Respaldo y carga** (O-41): `python -m herramientas.respaldo` con `pg_dump`, `mongodump` y `neo4j-admin database dump` a `respaldos/` (ignorada por git), y restauración.
+3. **Despliegue**: servicio `web` en `docker-compose.yml` (frontend compilado servido como estático, con `/api` hacia la API). `docker compose up -d --build` levanta todo desde cero; `README.md` explica instalación, configuración, carga de datos y ejecución.
+4. **OpenAPI**: exportar a `docs/api/openapi.json`.
+5. **Medición**: `python -m herramientas.medir` ejecuta los escenarios de abajo contra las bases levantadas y escribe `docs/pruebas/evidencia.md` con fecha, entorno (CPU, RAM, sistema, versiones) y una tabla «tipo de prueba · escenario · resultado medido». Volumen: genera 4 semanas de temporada alta (unos 1200 documentos con sus movimientos, D-35) antes de medir rendimiento, y recarga la semilla al final.
+
+| Tipo (guía, sección 9) | Escenario | Resultado que se registra |
+|---|---|---|
+| Conectividad | `/api/salud` con las tres bases | Estado y ms por base |
+| Funcional | Las pruebas de `pytest` y de `npm test` | Pasadas / total de cada una |
+| Integridad | 20 registros simultáneos; folio repetido; UPDATE de movimiento; expediente inválido; id repetido en Neo4j | Huecos y repetidos (0); rechazos |
+| Integración | Registrar → turnar → outbox → ficha con las tres bases | Tiempo de réplica (mediana y máximo, ms); eventos enviados y fallidos |
+| Consistencia | Contradicción inducida (cambiar a mano el estado en Neo4j y borrar un expediente) y reconciliar | Diferencias detectadas y corregidas |
+| Errores | Neo4j detenido: registrar y abrir la ficha; reanudar | La ficha responde con la sección marcada; eventos pendientes y luego enviados, 0 perdidos |
+| Rendimiento | 50 peticiones de bandeja, ficha, recorrido C1, búsqueda e hilo C2 con el volumen generado | p50 y p95 en ms |
+| Comparación | Recorrido C1 en Cypher frente al mismo recorrido con `WITH RECURSIVE` en PostgreSQL sobre la bitácora | Líneas de cada consulta y p50 en ms |
+
+6. `docs/pruebas/`: borrar los `T-xx-*.md` de tareas anteriores; queda solo `LEEME.md` y `evidencia.md`.
 
 ## Fuera de alcance
 
-Reconciliación, respaldo, servicio `web`, mediciones y evidencia (T-09).
+Cambio de contraseña y nuevas pantallas. Si la medición descubre un error, se corrige y se anota en el reporte.
 
 ## Criterios de aceptación
 
-1. `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` en verde; `uv run pytest ../tests` en verde.
-2. `grep -ri "simulad" frontend/src` no devuelve nada.
-3. En el reporte, una tabla con cada pantalla del punto 5: funciona o qué se corrigió. Sin capturas.
-4. Un solo commit `T-08: …` sin coautoría.
+1. Desde un clon limpio, `docker compose up -d --build` y los comandos del README dejan la aplicación usable en el navegador.
+2. `docs/pruebas/evidencia.md` generado por `herramientas.medir`, con todas las filas llenas por la ejecución.
+3. Pruebas y lint en verde. Un solo commit `T-09: …` sin coautoría.

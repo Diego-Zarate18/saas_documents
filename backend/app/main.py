@@ -13,7 +13,7 @@ from functools import partial
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import bandeja, catalogos, documentos, errores, salud, sesiones
+from app.api import bandeja, catalogos, consultas, documentos, errores, movimientos, salud, sesiones
 from app.config import Ajustes, cargar_ajustes
 from app.infra import mongo, neo4j, postgres
 
@@ -38,6 +38,8 @@ def crear_app(ajustes: Ajustes) -> FastAPI:
         driver_neo4j = neo4j.crear_driver(ajustes)
         app.state.ajustes = ajustes
         app.state.pool = pool
+        app.state.documental = cliente_mongo[ajustes.mongo_db]
+        app.state.grafo = driver_neo4j
         app.state.verificaciones = {
             'postgres': partial(postgres.verificar, pool),
             'mongo': partial(mongo.verificar, cliente_mongo),
@@ -63,7 +65,7 @@ def crear_app(ajustes: Ajustes) -> FastAPI:
         allow_headers=['*'],
     )
     errores.registrar(app)
-    for modulo in (salud, sesiones, catalogos, documentos, bandeja):
+    for modulo in (salud, sesiones, catalogos, documentos, movimientos, bandeja, consultas):
         app.include_router(modulo.router, prefix='/api')
     return app
 

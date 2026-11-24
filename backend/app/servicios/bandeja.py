@@ -7,6 +7,7 @@ from psycopg_pool import AsyncConnectionPool
 from app.dominio.errores import sin_permiso
 from app.dominio.modelos import ContextoUsuario, Listado, PendienteBandeja, UltimoMovimiento
 from app.repositorios.relacional import bandeja
+from app.seguridad import visibilidad
 
 
 def describir(fila: dict) -> str:
@@ -41,12 +42,20 @@ async def consultar(
     tamano = min(max(tamano, 1), 100)
     pagina = max(pagina, 1)
     async with pool.connection() as con:
-        filas = await bandeja.listar(con, id_area, tipo, antiguedad_minima, tamano, (pagina - 1) * tamano)
-    elementos = [
-        PendienteBandeja(
-            **{k: f[k] for k in PendienteBandeja.model_fields if k in f},
-            ultimo_movimiento=UltimoMovimiento(tipo=f['tipo_movimiento'], descripcion=describir(f)),
+        filas = await bandeja.listar(
+            con, id_area, tipo, antiguedad_minima, tamano, (pagina - 1) * tamano, ctx.id_persona, ctx.id_area
         )
-        for f in filas
-    ]
+    elementos = []
+    for f in filas:
+        # D-29: en la bandeja de su propia área se muestra; si no, decide la función central de visibilidad.
+        visible = id_area == ctx.id_area or visibilidad.contenido_visible(
+            ctx, f['confidencial'], f['persona_involucrada'], f['area_involucrada']
+        )
+        elementos.append(
+            PendienteBandeja(
+                **{k: f[k] for k in PendienteBandeja.model_fields if k in f and k != 'asunto'},
+                asunto=f['asunto'] if visible else None,
+                ultimo_movimiento=UltimoMovimiento(tipo=f['tipo_movimiento'], descripcion=describir(f)),
+            )
+        )
     return Listado[PendienteBandeja](elementos=elementos, total=filas[0]['total'] if filas else 0)

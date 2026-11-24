@@ -21,7 +21,7 @@ from app.repositorios.relacional import catalogos, documentos, movimientos
 from app.servicios import replicas
 
 
-async def _en_tramite(con: AsyncConnection, id_documento: UUID, mensaje: str) -> None:
+async def en_tramite(con: AsyncConnection, id_documento: UUID, mensaje: str) -> None:
     """Bloquea el documento (un movimiento a la vez) y exige que exista y esté en trámite."""
     fila = await documentos.bloquear_documento(con, id_documento)
     if fila is None:
@@ -30,7 +30,7 @@ async def _en_tramite(con: AsyncConnection, id_documento: UUID, mensaje: str) ->
         raise estado_invalido(mensaje)
 
 
-def _movimiento(ctx: ContextoUsuario, id_documento: UUID, ahora: datetime, **campos) -> dict:
+def nuevo_movimiento(ctx: ContextoUsuario, id_documento: UUID, ahora: datetime, **campos) -> dict:
     return {
         'id_movimiento': uuid.uuid4(),
         'id_documento': id_documento,
@@ -46,9 +46,14 @@ def _movimiento(ctx: ContextoUsuario, id_documento: UUID, ahora: datetime, **cam
     }
 
 
-def _salida(fila: dict, otros_origenes: list[UUID] = ()) -> Movimiento:
-    campos = {k: v for k, v in fila.items() if k != 'id_movimiento'}
-    return Movimiento(**campos, id=fila['id_movimiento'], otros_origenes=list(otros_origenes))
+def a_salida(fila: dict, otros_origenes: list[UUID] = ()) -> Movimiento:
+    campos = {k: v for k, v in fila.items() if k not in ('id_movimiento', 'id_movimiento_corregido')}
+    return Movimiento(
+        **campos,
+        id=fila['id_movimiento'],
+        id_corrige=fila.get('id_movimiento_corregido'),
+        otros_origenes=list(otros_origenes),
+    )
 
 
 def validar_grupo(turno: Turno) -> None:
@@ -81,7 +86,7 @@ async def turnar(
     ahora = ahora or datetime.now(UTC)
     grupo = uuid.uuid4()
     async with transaccion(pool) as con:
-        await _en_tramite(con, id_documento, 'No se turnan documentos concluidos ni cancelados.')
+        await en_tramite(con, id_documento, 'No se turnan documentos concluidos ni cancelados.')
         if ctx.rol == 'TI' and not any(
             p['id_area'] == ctx.id_area for p in await movimientos.pendientes(con, id_documento)
         ):
@@ -91,7 +96,7 @@ async def turnar(
             raise validacion('Un área destino no existe.')
         filas = []
         for destino in turno.destinos:
-            fila = _movimiento(
+            fila = nuevo_movimiento(
                 ctx,
                 id_documento,
                 ahora,
@@ -105,7 +110,7 @@ async def turnar(
             await movimientos.insertar(con, fila)
             await replicas.encolar_movimiento(con, fila)
             filas.append(fila)
-    return ResultadoTurno(id_grupo_turno=grupo, movimientos=[_salida(f) for f in filas])
+    return ResultadoTurno(id_grupo_turno=grupo, movimientos=[a_salida(f) for f in filas])
 
 
 async def devolver(
@@ -121,7 +126,7 @@ async def devolver(
         raise sin_permiso('Solo devuelve el titular del área que tiene el documento pendiente.')
     ahora = ahora or datetime.now(UTC)
     async with transaccion(pool) as con:
-        await _en_tramite(con, id_documento, 'El documento ya no está en trámite.')
+        await en_tramite(con, id_documento, 'El documento ya no está en trámite.')
         mio = next((p for p in await movimientos.pendientes(con, id_documento) if p['id_area'] == ctx.id_area), None)
         if mio is None:
             raise sin_permiso('Solo devuelve el titular del área que tiene el documento pendiente.')
@@ -134,7 +139,7 @@ async def devolver(
         titulares = await movimientos.titulares(con, [destino]) if destino else {}
         if destino is None or destino == ctx.id_area or destino not in titulares:
             raise validacion('Elige otra área para returnarlo.')
-        fila = _movimiento(
+        fila = nuevo_movimiento(
             ctx,
             id_documento,
             ahora,
@@ -147,7 +152,7 @@ async def devolver(
         )
         await movimientos.insertar(con, fila)
         await replicas.encolar_movimiento(con, fila)
-    return _salida(fila)
+    return a_salida(fila)
 
 
 async def atraer(
@@ -167,7 +172,7 @@ async def atraer(
         raise validacion('Escribe la justificación.')
     ahora = ahora or datetime.now(UTC)
     async with transaccion(pool) as con:
-        await _en_tramite(con, id_documento, 'El documento ya no está en trámite.')
+        await en_tramite(con, id_documento, 'El documento ya no está en trámite.')
         if not await movimientos.area_involucrada(con, id_documento, ctx.id_area):
             raise sin_permiso('Tu área no tiene visibilidad sobre el documento.')
         responsables = [
@@ -181,7 +186,7 @@ async def atraer(
         if origen == ctx.id_area:
             raise estado_invalido('Tu área ya es la responsable.')
         titular = (await movimientos.titulares(con, [ctx.id_area]))[ctx.id_area]
-        fila = _movimiento(
+        fila = nuevo_movimiento(
             ctx,
             id_documento,
             ahora,
@@ -193,4 +198,4 @@ async def atraer(
         )
         await movimientos.insertar(con, fila, otras[1:])
         await replicas.encolar_movimiento(con, fila, otras[1:])
-    return _salida(fila, otras[1:])
+    return a_salida(fila, otras[1:])

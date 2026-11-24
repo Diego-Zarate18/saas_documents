@@ -44,3 +44,13 @@ async def personas_activas(con: AsyncConnection) -> list[dict]:
            ORDER BY p.id_persona"""
     )
     return await cursor.fetchall()
+
+
+async def nombres(con: AsyncConnection, personas: list, areas: list) -> tuple[dict, dict]:
+    """AR-10. Nombres de personas y áreas por id (autores y áreas de las notas del expediente)."""
+    cursor = await con.execute(
+        'SELECT id_persona::text AS id, nombre FROM persona WHERE id_persona::text = ANY(%s)', (personas,)
+    )
+    de_personas = {f['id']: f['nombre'] for f in await cursor.fetchall()}
+    cursor = await con.execute('SELECT id_area::text AS id, nombre FROM area WHERE id_area::text = ANY(%s)', (areas,))
+    return de_personas, {f['id']: f['nombre'] for f in await cursor.fetchall()}

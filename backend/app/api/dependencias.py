@@ -3,7 +3,9 @@
 from typing import Annotated
 
 from fastapi import Depends, Request
+from neo4j import AsyncDriver
 from psycopg_pool import AsyncConnectionPool
+from pymongo.asynchronous.database import AsyncDatabase
 
 from app.dominio.modelos import ContextoUsuario
 from app.servicios import sesiones
@@ -13,6 +15,14 @@ COOKIE_SESION = 'sigedoc_sesion'
 
 def pool(request: Request) -> AsyncConnectionPool:
     return request.app.state.pool
+
+
+def documental(request: Request) -> AsyncDatabase:
+    return request.app.state.documental
+
+
+def grafo(request: Request) -> AsyncDriver:
+    return request.app.state.grafo
 
 
 async def contexto_usuario(request: Request) -> ContextoUsuario:
@@ -25,4 +35,6 @@ async def contexto_usuario(request: Request) -> ContextoUsuario:
 
 
 Pool = Annotated[AsyncConnectionPool, Depends(pool)]
+Documental = Annotated[AsyncDatabase, Depends(documental)]
+Grafo = Annotated[AsyncDriver, Depends(grafo)]
 Contexto = Annotated[ContextoUsuario, Depends(contexto_usuario)]

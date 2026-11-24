@@ -22,6 +22,8 @@ CALL (m, d, o) {
 MERGE (p)-[:SIGUIENTE]->(m)
 """
 
+REFERENCIAS = {'RESPONDE_A', 'DA_SEGUIMIENTO_A', 'EN_ALCANCE_A', 'SUSTITUYE_A'}
+
 PROPIEDADES_MOVIMIENTO = (
     'tipo',
     'rol',
@@ -68,3 +70,33 @@ async def movimiento(driver: AsyncDriver, datos: dict) -> None:
         origenes=datos['origenes'],
     )
     await driver.execute_query(SIGUIENTE, ids=[datos['id_movimiento']])
+
+
+async def estado(driver: AsyncDriver, datos: dict) -> None:
+    """AG-06. Cambio de estado del documento (O-05, O-24, O-26)."""
+    resultado = await driver.execute_query(
+        'MATCH (d:Documento {id: $id}) SET d.estado = $estado RETURN d.id',
+        id=datos['id_documento'],
+        estado=datos['estado'],
+    )
+    if not resultado.records:
+        raise LookupError('El documento aún no está en el grafo')
+
+
+async def referencia(driver: AsyncDriver, datos: dict) -> None:
+    """AG-06. RESPONDE_A de una conclusión con respuesta (O-05): de la respuesta hacia el documento (D-05)."""
+    if datos['tipo'] not in REFERENCIAS:
+        raise ValueError(datos['tipo'])
+    # El tipo de relación no se puede parametrizar en Cypher: sale del conjunto cerrado REFERENCIAS.
+    resultado = await driver.execute_query(
+        'MATCH (o:Documento {id: $origen}), (d:Documento {id: $destino}) '
+        f'MERGE (o)-[r:{datos["tipo"]} {{id: $id}}]->(d) '
+        'SET r.id_persona = $id_persona, r.fecha_hora = datetime($fecha_hora) RETURN r.id',
+        origen=datos['id_origen'],
+        destino=datos['id_destino'],
+        id=datos['id'],
+        id_persona=datos['id_persona'],
+        fecha_hora=datos['fecha_hora'],
+    )
+    if not resultado.records:
+        raise LookupError('Un documento de la referencia aún no está en el grafo')

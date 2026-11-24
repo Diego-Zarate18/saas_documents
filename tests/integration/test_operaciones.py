@@ -6,90 +6,14 @@ Necesita las bases levantadas. Recarga la semilla al empezar y al terminar (O-41
 import asyncio
 import uuid
 
-import httpx
 import psycopg
 import pytest
-import pytest_asyncio
+from apoyo_api import CO, CONTRASENA, FI, OP, OP_0139, SG, bandeja, entrar, nuevo, registrar, vaciar_outbox
 
 from app.config import cargar_ajustes
 from app.infra import mongo, neo4j
-from herramientas import esquemas
-from outbox.procesador import procesar_todo
 
 pytestmark = [pytest.mark.integracion, pytest.mark.asyncio(loop_scope='module')]
-
-CONTRASENA = esquemas.CONTRASENA_DESARROLLO
-OP, DG, CO, FI, SG = (f'00000000-0000-4000-8000-000000000{n}' for n in (101, 102, 103, 104, 109))
-OP_0139 = '00000000-0000-4000-8000-000000001004'
-
-
-@pytest.fixture(scope='module')
-def bases():
-    ajustes = cargar_ajustes()
-    pg, cliente, grafo = esquemas.conectar(ajustes)
-    db = cliente[ajustes.mongo_db]
-
-    def recargar():
-        esquemas.esquema_postgres(pg)
-        esquemas.vaciar_datos(pg, db, grafo)
-        esquemas.cargar_semilla(pg, db, grafo)
-
-    recargar()
-    yield pg
-    recargar()
-    grafo.close()
-    cliente.close()
-    pg.close()
-
-
-@pytest_asyncio.fixture(scope='module', loop_scope='module')
-async def api(bases):
-    from app.main import app  # importarla lee el .env
-
-    async with (
-        app.router.lifespan_context(app),
-        httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://prueba') as cliente,
-    ):
-        yield cliente
-
-
-async def entrar(api: httpx.AsyncClient, usuario: str) -> dict:
-    """Inicia sesión y devuelve la cabecera con la cookie (el cliente no la guarda: cada prueba usa varias)."""
-    respuesta = await api.post(
-        '/api/sesiones', json={'correo': f'{usuario}@institucion.gob.mx', 'contrasena': CONTRASENA}
-    )
-    assert respuesta.status_code == 201, respuesta.text
-    api.cookies.clear()
-    return {'Cookie': f'sigedoc_sesion={respuesta.cookies["sigedoc_sesion"]}'}
-
-
-def nuevo(sintesis: str, **extra) -> dict:
-    return {
-        'tipo': 'oficio',
-        'numero_emisor': None,
-        'tipo_emisor': 'externo',
-        'emisor': 'Ciudadano',
-        'fecha_documento': None,
-        'canal': 'papel',
-        'fecha_recepcion': '2026-11-24T10:00:00-06:00',
-        'sintesis': sintesis,
-        'confidencial': False,
-        'extemporaneo': False,
-        'datos_tipo': {},
-        **extra,
-    }
-
-
-async def registrar(api: httpx.AsyncClient, oficialia: dict, sintesis: str) -> dict:
-    respuesta = await api.post('/api/documentos', json=nuevo(sintesis), headers=oficialia)
-    assert respuesta.status_code == 201, respuesta.text
-    return respuesta.json()
-
-
-async def bandeja(api: httpx.AsyncClient, sesion: dict, id_area: str) -> dict:
-    respuesta = await api.get('/api/bandeja', params={'id_area': id_area}, headers=sesion)
-    assert respuesta.status_code == 200, respuesta.text
-    return {fila['id_documento']: fila for fila in respuesta.json()['elementos']}
 
 
 async def test_o36_credenciales_incorrectas_y_bloqueo(api):
@@ -153,7 +77,7 @@ async def test_o01_duplicado(api):
     assert (await api.get('/api/documentos/folio-siguiente', headers=oficialia)).json() == antes
 
 
-async def test_ri10_un_responsable_por_grupo(api, bases):
+async def test_ri10_un_responsable_por_grupo(api, semilla):
     oficialia = await entrar(api, 'mflores')
     documento = await registrar(api, oficialia, 'Grupo de turno')
     ruta = f'/api/documentos/{documento["id"]}/turnos'
@@ -175,8 +99,8 @@ async def test_ri10_un_responsable_por_grupo(api, bases):
     assert turno.status_code == 201
     # La base también lo impide (ux_responsable_por_grupo): un segundo responsable en el mismo grupo.
     movimiento = turno.json()['movimientos'][0]
-    with pytest.raises(psycopg.errors.UniqueViolation), bases.transaction():
-        bases.execute(
+    with pytest.raises(psycopg.errors.UniqueViolation), semilla.transaction():
+        semilla.execute(
             """INSERT INTO movimiento (id_movimiento, id_documento, tipo, id_grupo_turno, id_area_origen,
                                        id_area_destino, rol, id_persona)
                VALUES (%s, %s, 'turno', %s, %s, %s, 'responsable', %s)""",
@@ -215,25 +139,10 @@ async def test_o39_replica_documento_y_movimientos(api):
 
     from app.main import app
 
+    await vaciar_outbox(app)
     ajustes = cargar_ajustes()
     cliente, grafo = mongo.crear_cliente(ajustes), neo4j.crear_driver(ajustes)
     try:
-        # Procesa hasta que los eventos del documento estén enviados (el servicio outbox de compose también puede
-        # tomarlos: SKIP LOCKED evita que dos procesos entreguen el mismo).
-        for _ in range(100):
-            await procesar_todo(app.state.pool, cliente[ajustes.mongo_db], grafo, ajustes.outbox_max_intentos)
-            async with app.state.pool.connection() as con:
-                cursor = await con.execute(
-                    "SELECT count(*) FILTER (WHERE estado <> 'enviado') AS faltan, count(*) AS eventos FROM outbox "
-                    "WHERE datos->>'id_documento' = %s",
-                    (documento['id'],),
-                )
-                cuenta = await cursor.fetchone()
-            if cuenta['faltan'] == 0:
-                break
-            await asyncio.sleep(0.1)
-        assert cuenta == {'faltan': 0, 'eventos': 5}  # expediente, documento y tres movimientos
-
         registros, _, _ = await grafo.execute_query(
             """MATCH (d:Documento {id: $id})<-[:SOBRE]-(r:Movimiento {tipo: 'registro'})-[:HACIA]->(:Area {id: $op})
                OPTIONAL MATCH (r)-[:SIGUIENTE]->(t:Movimiento {tipo: 'turno'})-[:HACIA]->(a:Area)

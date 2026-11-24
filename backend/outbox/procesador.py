@@ -1,6 +1,7 @@
 """O-39. Sincronizar el outbox: un proceso, en orden de id, entrega al menos una vez con escrituras idempotentes."""
 
 import logging
+from datetime import datetime
 
 from neo4j import AsyncDriver
 from psycopg_pool import AsyncConnectionPool
@@ -23,8 +24,16 @@ async def entregar(evento: dict, db: AsyncDatabase, grafo: AsyncDriver) -> None:
             await expedientes.crear(db, {k: v for k, v in datos.items() if k != 'id_documento'})
         case 'neo4j', 'documento':
             await replica.documento(grafo, datos)
+        case 'mongodb', 'nota':
+            nota = {**datos['nota'], 'fecha_hora': datetime.fromisoformat(datos['nota']['fecha_hora'])}
+            if not await expedientes.agregar_nota(db, datos['id_documento'], nota, nota['fecha_hora']):
+                raise LookupError('El expediente aún no existe')
         case 'neo4j', 'movimiento':
             await replica.movimiento(grafo, datos)
+        case 'neo4j', 'estado':
+            await replica.estado(grafo, datos)
+        case 'neo4j', 'referencia':
+            await replica.referencia(grafo, datos)
         case destino, tipo:
             raise ValueError(f'Evento desconocido: {destino}/{tipo}')
 

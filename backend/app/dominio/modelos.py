@@ -179,6 +179,8 @@ class Movimiento(BaseModel):
     instruccion: str | None
     motivo: str | None
     id_area_sugerida: UUID | None
+    forma_conclusion: str | None = None
+    id_corrige: UUID | None = None
     id_persona: UUID
     id_titular_al_turnar: UUID | None
 
@@ -196,7 +198,7 @@ class UltimoMovimiento(BaseModel):
 class PendienteBandeja(BaseModel):
     id_documento: UUID
     folio: str
-    asunto: str
+    asunto: str | None  # nulo si es confidencial y quien consulta no ve su contenido (D-29)
     tipo: str
     emisor: str
     rol: Literal['responsable', 'apoyo']
@@ -206,3 +208,177 @@ class PendienteBandeja(BaseModel):
     ultimo_movimiento: UltimoMovimiento
     posible_duplicado: bool
     confidencial: bool
+
+
+# ── Ficha (O-11) ───────────────────────────────────────────────────────────────
+
+
+class Recepcion(BaseModel):
+    canal: Canal
+    fecha_recepcion: datetime
+
+
+class RegistroDocumento(BaseModel):
+    id: UUID
+    folio: str
+    asunto: str | None
+    tipo: str
+    estado: str
+    confidencial: bool
+    posible_duplicado: bool
+    extemporaneo: bool
+    numero_emisor: str | None
+    emisor: str
+    tipo_emisor: Literal['area', 'externo']
+    fecha_documento: date | None
+    canal: Canal
+    fecha_recepcion: datetime
+    segunda_recepcion: Recepcion | None
+    fecha_oficial: date
+    origen_fecha_oficial: str
+    sintesis: str | None
+
+
+class UbicacionActual(BaseModel):
+    area: str
+    rol: Literal['responsable', 'apoyo']
+    desde: datetime
+    antiguedad_dias: int
+    llegada: str
+
+
+class Anexo(BaseModel):
+    id: UUID
+    titulo: str
+    hojas: int
+    ubicacion: str
+
+
+class Nota(BaseModel):
+    id: UUID
+    tipo: Literal['general', 'evidencia_atencion']
+    area: str
+    autor: str
+    fecha_hora: datetime
+    texto: str
+
+
+class Expediente(BaseModel):
+    datos_tipo: dict[str, Any]
+    anexos: list[Anexo]
+    notas: list[Nota]
+
+
+class Relacion(BaseModel):
+    tipo: str
+    id_documento: UUID | None
+    referencia: str
+    descripcion: str | None
+    estado: str | None
+
+
+class AsuntoResumen(BaseModel):
+    id: UUID
+    nombre: str
+
+
+class MovimientoRecorrido(BaseModel):
+    """Un paso del recorrido (C1) con los nombres que muestra la interfaz."""
+
+    id: UUID
+    tipo: TipoMovimiento
+    id_corrige: UUID | None
+    id_grupo_turno: UUID | None
+    area_origen: str | None
+    area_destino: str
+    rol: RolTurno
+    instruccion: str | None
+    motivo: str | None
+    forma_conclusion: str | None
+    persona: str
+    titular_al_turnar: str | None
+    fecha_hora: datetime
+
+
+class Ficha(BaseModel):
+    acceso: Literal['completo', 'restringido']
+    contenido_oculto: bool
+    registro: RegistroDocumento
+    ubicacion_actual: list[UbicacionActual]
+    expediente: Expediente | None
+    recorrido: list[MovimientoRecorrido] | None
+    relaciones: list[Relacion] | None
+    asuntos: list[AsuntoResumen] | None
+    secciones_no_disponibles: list[Literal['expediente', 'recorrido', 'relaciones']]
+
+
+# ── Expediente (O-09, O-28, O-29) ──────────────────────────────────────────────
+
+
+class DatosExpediente(BaseModel):
+    datos_tipo: dict[str, Any] = Field(default_factory=dict)
+
+
+class NuevoAnexo(BaseModel):
+    titulo: str = ''
+    hojas: int | None = None
+    ubicacion: str = ''
+
+
+class NuevaNota(BaseModel):
+    texto: str = ''
+
+
+# ── Cierre y correcciones (O-05, O-19, O-24, O-25, O-26) ───────────────────────
+
+
+class Conclusion(BaseModel):
+    forma: str = ''
+    id_respuesta: UUID | None = None
+    id_original: UUID | None = None
+    nota: str | None = None
+
+
+class Cancelacion(BaseModel):
+    motivo: str = ''
+
+
+class SegundaRecepcion(BaseModel):
+    canal: str = ''
+    fecha_recepcion: datetime | None = None
+
+
+class Correccion(BaseModel):
+    rol: str = ''
+    motivo: str = ''
+
+
+class ResumenDocumento(BaseModel):
+    id: UUID
+    folio: str
+    asunto: str
+    falta: Literal['numero', 'fecha']
+
+
+class DocumentoComparado(BaseModel):
+    id: UUID
+    folio: str
+    numero_emisor: str | None
+    emisor: str
+    fecha_documento: date | None
+    canal: Canal
+    fecha_recepcion: datetime
+    sintesis: str
+    estado: str
+    ubicacion: str | None
+
+
+class ComparacionDuplicado(BaseModel):
+    posterior: DocumentoComparado
+    candidato: DocumentoComparado | None
+    coincidencias: list[Literal['numero_emisor', 'emisor', 'fecha_documento', 'sintesis']]
+
+
+class ResolucionDuplicado(BaseModel):
+    id_otro: UUID | None = None
+    decision: str = ''

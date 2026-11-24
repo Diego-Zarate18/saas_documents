@@ -43,19 +43,19 @@ async def entregar(evento: dict, db: AsyncDatabase, grafo: AsyncDriver) -> None:
 
 
 async def procesar_lote(pool: AsyncConnectionPool, db: AsyncDatabase, grafo: AsyncDriver, max_intentos: int) -> int:
-    """O-39. Toma un lote (AR-05) y lo entrega en orden. Si un evento falla, queda para reintento con espera creciente
-    y los posteriores del mismo documento y destino esperan a que se entregue. Devuelve cuántos se enviaron."""
+    """O-39. Toma un lote (AR-05) y lo entrega en orden. Si un evento falla, queda para reintento con espera creciente;
+    los demás eventos de ese destino esperan a la siguiente vuelta (una base caída no frena a la otra) y los posteriores
+    del mismo documento, a que ese se entregue (tomar_lote). Devuelve cuántos se enviaron."""
     enviados = 0
     async with transaccion(pool) as con:
-        detenidos: set[tuple[str, str]] = set()
+        detenidos: set[str] = set()
         for evento in await outbox.tomar_lote(con, LOTE):
-            clave = (evento['destino'], evento['datos'].get('id_documento'))
-            if clave in detenidos:
+            if evento['destino'] in detenidos:
                 continue
             try:
                 await entregar(evento, db, grafo)
             except Exception as error:
-                detenidos.add(clave)
+                detenidos.add(evento['destino'])
                 registro.warning('evento %s (%s) falló: %s', evento['id'], evento['tipo_evento'], type(error).__name__)
                 await outbox.marcar_fallo(con, evento['id'], f'{type(error).__name__}: {error}', max_intentos)
             else:

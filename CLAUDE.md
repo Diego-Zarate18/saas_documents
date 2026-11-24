@@ -35,6 +35,7 @@ Bases, desde la raíz (Docker Desktop; credenciales en `.env`, copia de `.env.ex
 docker compose up -d postgres mongo neo4j   # PostgreSQL 17.12, MongoDB 8.0.38, Neo4j 5.26.34; puertos solo en 127.0.0.1
 docker compose ps                           # las tres en (healthy)
 docker compose up -d --build api            # la API en contenedor, http://127.0.0.1:8000
+docker compose up -d --build                # todo: bases, api, outbox y web (interfaz en http://localhost:8080)
 ```
 
 Backend, desde `backend/` (Python 3.13 con uv):
@@ -44,6 +45,9 @@ uv sync                                                        # dependencias ex
 uv run python -m herramientas.esquemas --datos                 # esquemas de las tres bases y semilla (idempotente)
 uv run python -m herramientas.esquemas --reiniciar             # vacía los datos y recarga la semilla
 uv run python -m outbox                                        # proceso del outbox (O-39) en local
+uv run python -m herramientas.reconciliar                      # O-40: reconcilia las tres bases
+uv run python -m herramientas.respaldo                         # O-41: respaldo (--restaurar <carpeta> para restaurar)
+uv run python -m herramientas.medir                            # escenarios de prueba → docs/pruebas/evidencia.md
 uv run uvicorn app.main:app --loop asyncio:SelectorEventLoop   # API en http://127.0.0.1:8000; --loop solo en Windows (psycopg)
 uv run ruff check . ../tests                                   # lint (app y pruebas)
 uv run ruff format --check . ../tests                          # formato

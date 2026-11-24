@@ -1,0 +1,5687 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SIGEDOC",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/salud": {
+      "get": {
+        "tags": [
+          "salud"
+        ],
+        "summary": "Estado de la conexión con PostgreSQL, MongoDB y Neo4j",
+        "operationId": "salud_api_salud_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Alguna base no respondió",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sesiones": {
+      "post": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "O-36 Iniciar sesión",
+        "operationId": "iniciar_sesion_api_sesiones_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credenciales"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sesion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sesiones/actual": {
+      "get": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "O-38 Sesión actual",
+        "operationId": "sesion_actual_api_sesiones_actual_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sesion"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "O-37 Cerrar sesión",
+        "operationId": "cerrar_sesion_api_sesiones_actual_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/catalogos": {
+      "get": {
+        "tags": [
+          "catalogos"
+        ],
+        "summary": "O-31 Consultar catálogos",
+        "operationId": "obtener_catalogos_api_catalogos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/areas": {
+      "get": {
+        "tags": [
+          "catalogos"
+        ],
+        "summary": "O-32 Áreas para los selectores",
+        "operationId": "obtener_areas_api_areas_get",
+        "parameters": [
+          {
+            "name": "activas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Activas"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Area_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-33 Crear área",
+        "operationId": "crear_area_api_areas_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosArea"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Area"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizacion": {
+      "get": {
+        "tags": [
+          "catalogos"
+        ],
+        "summary": "O-32 Estructura organizacional",
+        "operationId": "obtener_organizacion_api_organizacion_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_AreaOrganizacion_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/areas/{id_area}": {
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-33 Actualizar área",
+        "operationId": "actualizar_area_api_areas__id_area__patch",
+        "parameters": [
+          {
+            "name": "id_area",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Area"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosArea"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Area"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/areas/{id_area}/desactivacion": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-33 Desactivar área",
+        "operationId": "desactivar_area_api_areas__id_area__desactivacion_post",
+        "parameters": [
+          {
+            "name": "id_area",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Area"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/personas": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-34 Personas y usuarios",
+        "operationId": "personas_api_personas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Persona_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-34 Alta de persona",
+        "operationId": "crear_persona_api_personas_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosPersona"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Persona"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/personas/{id_persona}": {
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-34 Actualizar persona",
+        "operationId": "actualizar_persona_api_personas__id_persona__patch",
+        "parameters": [
+          {
+            "name": "id_persona",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Persona"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosPersona"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Persona"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/personas/{id_persona}/baja": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-34 Dar de baja",
+        "operationId": "dar_de_baja_api_personas__id_persona__baja_post",
+        "parameters": [
+          {
+            "name": "id_persona",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Persona"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actores-externos": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-35 Actores externos",
+        "operationId": "actores_api_actores_externos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_ActorExterno_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-35 Alta de actor",
+        "operationId": "crear_actor_api_actores_externos_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosActor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorExterno"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actores-externos/{id_actor}": {
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-35 Actualizar actor",
+        "operationId": "actualizar_actor_api_actores_externos__id_actor__patch",
+        "parameters": [
+          {
+            "name": "id_actor",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Actor"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosActor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorExterno"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actores-externos/{id_actor}/desactivacion": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "O-35 Desactivar actor",
+        "operationId": "desactivar_actor_api_actores_externos__id_actor__desactivacion_post",
+        "parameters": [
+          {
+            "name": "id_actor",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Actor"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos": {
+      "get": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-30 Buscar documentos",
+        "operationId": "buscar_api_documentos_get",
+        "parameters": [
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Texto"
+            }
+          },
+          {
+            "name": "folio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Folio"
+            }
+          },
+          {
+            "name": "numero",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Numero"
+            }
+          },
+          {
+            "name": "emisor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emisor"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estado"
+            }
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hasta"
+            }
+          },
+          {
+            "name": "campo_tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Campo Tipo"
+            }
+          },
+          {
+            "name": "valor_campo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Valor Campo"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Tamano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_ResultadoBusqueda_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-01 Registrar documento",
+        "operationId": "registrar_documento_api_documentos_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevoDocumento"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentoRegistrado"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/folio-siguiente": {
+      "get": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "Vista previa del folio (D-21)",
+        "operationId": "folio_siguiente_api_documentos_folio_siguiente_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Folio Siguiente Api Documentos Folio Siguiente Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/turnos": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-03 Turnar",
+        "operationId": "turnar_api_documentos__id_documento__turnos_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Turno"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoTurno"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/devoluciones": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-22 Devolver o returnar",
+        "operationId": "devolver_api_documentos__id_documento__devoluciones_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Devolucion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Movimiento"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/atracciones": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-23 Atraer",
+        "operationId": "atraer_api_documentos__id_documento__atracciones_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Atraccion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Movimiento"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}": {
+      "get": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-11 Ficha completa",
+        "operationId": "obtener_ficha_api_documentos__id_documento__get",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ficha"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/recorrido": {
+      "get": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "C1 Recorrido",
+        "operationId": "obtener_recorrido_api_documentos__id_documento__recorrido_get",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MovimientoRecorrido"
+                  },
+                  "title": "Response Obtener Recorrido Api Documentos  Id Documento  Recorrido Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/expediente": {
+      "get": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-09 Consultar expediente",
+        "operationId": "obtener_expediente_api_documentos__id_documento__expediente_get",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expediente"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-09 Actualizar datos del tipo",
+        "operationId": "actualizar_expediente_api_documentos__id_documento__expediente_patch",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosExpediente"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expediente"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/expediente/anexos": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-28 Agregar anexo",
+        "operationId": "agregar_anexo_api_documentos__id_documento__expediente_anexos_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevoAnexo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/expediente/notas": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-29 Agregar nota",
+        "operationId": "agregar_nota_api_documentos__id_documento__expediente_notas_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaNota"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/expediente/{coleccion}/{id_elemento}": {
+      "delete": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-17 Quitar",
+        "operationId": "quitar_del_expediente_api_documentos__id_documento__expediente__coleccion___id_elemento__delete",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          },
+          {
+            "name": "coleccion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "anexos",
+                "notas"
+              ],
+              "type": "string",
+              "title": "Coleccion"
+            }
+          },
+          {
+            "name": "id_elemento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Elemento"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/conclusion": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-05 Concluir",
+        "operationId": "concluir_api_documentos__id_documento__conclusion_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Conclusion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Movimiento"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/cancelacion": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-24 Cancelar",
+        "operationId": "cancelar_api_documentos__id_documento__cancelacion_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cancelacion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/recepciones": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-19 Segunda recepción",
+        "operationId": "segunda_recepcion_api_documentos__id_documento__recepciones_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SegundaRecepcion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/resolucion-duplicado": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-26 Resolver posible duplicado",
+        "operationId": "resolver_duplicado_api_documentos__id_documento__resolucion_duplicado_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolucionDuplicado"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/referencias": {
+      "post": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-07 Relacionar documentos",
+        "operationId": "relacionar_api_documentos__id_documento__referencias_post",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaRelacion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documentos/{id_documento}/referencias/{tipo}": {
+      "delete": {
+        "tags": [
+          "documentos"
+        ],
+        "summary": "O-18 Quitar referencia",
+        "operationId": "quitar_relacion_api_documentos__id_documento__referencias__tipo__delete",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "referencia",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Referencia"
+            }
+          },
+          {
+            "name": "emisor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emisor"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/movimientos/{id_movimiento}/correcciones": {
+      "post": {
+        "tags": [
+          "movimientos"
+        ],
+        "summary": "O-25 Corregir un movimiento",
+        "operationId": "corregir_api_movimientos__id_movimiento__correcciones_post",
+        "parameters": [
+          {
+            "name": "id_movimiento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Movimiento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Correccion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Movimiento"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeja": {
+      "get": {
+        "tags": [
+          "bandeja"
+        ],
+        "summary": "O-14 Pendientes por área",
+        "operationId": "obtener_bandeja_api_bandeja_get",
+        "parameters": [
+          {
+            "name": "id_area",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Id Area"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tipo"
+            }
+          },
+          {
+            "name": "antiguedad_minima",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Antiguedad Minima"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Tamano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_PendienteBandeja_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/consultas/posibles-duplicados": {
+      "get": {
+        "tags": [
+          "consultas"
+        ],
+        "summary": "O-26 Posibles duplicados",
+        "operationId": "posibles_duplicados_api_consultas_posibles_duplicados_get",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Tamano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_ResumenDocumento_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/consultas/posibles-duplicados/{id_documento}/comparacion": {
+      "get": {
+        "tags": [
+          "consultas"
+        ],
+        "summary": "O-26 Comparación",
+        "operationId": "comparacion_api_consultas_posibles_duplicados__id_documento__comparacion_get",
+        "parameters": [
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparacionDuplicado"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/consultas/rebotes": {
+      "get": {
+        "tags": [
+          "consultas"
+        ],
+        "summary": "C3 Rebotes entre áreas",
+        "operationId": "rebotes_api_consultas_rebotes_get",
+        "parameters": [
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Periodo"
+            }
+          },
+          {
+            "name": "id_area",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Id Area"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Rebote_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/consultas/selector-documentos": {
+      "get": {
+        "tags": [
+          "consultas"
+        ],
+        "summary": "O-30 Selector de documentos",
+        "operationId": "selector_documentos_api_consultas_selector_documentos_get",
+        "parameters": [
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Texto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_DocumentoEncontrado_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/consultas/acuses": {
+      "get": {
+        "tags": [
+          "consultas"
+        ],
+        "summary": "D-58 Acuses del área responsable",
+        "operationId": "acuses_api_consultas_acuses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Acuse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asuntos": {
+      "get": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "Asuntos",
+        "operationId": "listar_api_asuntos_get",
+        "parameters": [
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Texto"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Tamano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Asunto_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "O-27 Crear asunto",
+        "operationId": "crear_api_asuntos_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevoAsunto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asunto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asuntos/{id_asunto}/documentos": {
+      "post": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "O-08 Asignar documento",
+        "operationId": "asignar_api_asuntos__id_asunto__documentos_post",
+        "parameters": [
+          {
+            "name": "id_asunto",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Asunto"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsignacionAsunto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asuntos/{id_asunto}/documentos/{id_documento}": {
+      "delete": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "O-18 Sacar de un asunto",
+        "operationId": "sacar_api_asuntos__id_asunto__documentos__id_documento__delete",
+        "parameters": [
+          {
+            "name": "id_asunto",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Asunto"
+            }
+          },
+          {
+            "name": "id_documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Documento"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asuntos/{id_asunto}/hilo": {
+      "get": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "C2 Hilo de un asunto",
+        "operationId": "hilo_api_asuntos__id_asunto__hilo_get",
+        "parameters": [
+          {
+            "name": "id_asunto",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Asunto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HiloAsunto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asuntos/{id_asunto}/alcance": {
+      "get": {
+        "tags": [
+          "asuntos"
+        ],
+        "summary": "C5 Alcance de un asunto",
+        "operationId": "alcance_api_asuntos__id_asunto__alcance_get",
+        "parameters": [
+          {
+            "name": "id_asunto",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Asunto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlcanceAsunto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/salidas": {
+      "get": {
+        "tags": [
+          "salidas"
+        ],
+        "summary": "Salidas externas",
+        "operationId": "listar_api_salidas_get",
+        "parameters": [
+          {
+            "name": "acuse",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "con",
+                    "sin"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Acuse"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Tamano"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listado_Salida_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "salidas"
+        ],
+        "summary": "O-20 Registrar salida externa",
+        "operationId": "registrar_api_salidas_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaSalida"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentoRegistrado"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/salidas/{id_salida}/acuses": {
+      "post": {
+        "tags": [
+          "salidas"
+        ],
+        "summary": "O-21 Registrar acuse",
+        "operationId": "registrar_acuse_api_salidas__id_salida__acuses_post",
+        "parameters": [
+          {
+            "name": "id_salida",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Salida"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevoAcuse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActorCatalogo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "tipo"
+        ],
+        "title": "ActorCatalogo"
+      },
+      "ActorExterno": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "correo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correo"
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "documentos": {
+            "type": "integer",
+            "title": "Documentos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "tipo",
+          "correo",
+          "telefono",
+          "activo",
+          "documentos"
+        ],
+        "title": "ActorExterno"
+      },
+      "Acuse": {
+        "properties": {
+          "id_salida": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Salida"
+          },
+          "folio_salida": {
+            "type": "string",
+            "title": "Folio Salida"
+          },
+          "id_documento": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Documento"
+          },
+          "folio_documento": {
+            "type": "string",
+            "title": "Folio Documento"
+          },
+          "acusado_por": {
+            "type": "string",
+            "title": "Acusado Por"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_salida",
+          "folio_salida",
+          "id_documento",
+          "folio_documento",
+          "acusado_por"
+        ],
+        "title": "Acuse"
+      },
+      "AcuseSalida": {
+        "properties": {
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora"
+          },
+          "recibio": {
+            "type": "string",
+            "title": "Recibio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fecha_hora",
+          "recibio"
+        ],
+        "title": "AcuseSalida"
+      },
+      "AlcanceAsunto": {
+        "properties": {
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaAlcance"
+            },
+            "type": "array",
+            "title": "Areas"
+          },
+          "personas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Personas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "areas",
+          "personas"
+        ],
+        "title": "AlcanceAsunto"
+      },
+      "Anexo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "hojas": {
+            "type": "integer",
+            "title": "Hojas"
+          },
+          "ubicacion": {
+            "type": "string",
+            "title": "Ubicacion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "hojas",
+          "ubicacion"
+        ],
+        "title": "Anexo"
+      },
+      "Area": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "siglas": {
+            "type": "string",
+            "title": "Siglas"
+          },
+          "id_titular": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Titular"
+          },
+          "nombre_titular": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Titular"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "siglas",
+          "id_titular",
+          "nombre_titular"
+        ],
+        "title": "Area"
+      },
+      "AreaAlcance": {
+        "properties": {
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "documentos": {
+            "type": "integer",
+            "title": "Documentos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "area",
+          "documentos"
+        ],
+        "title": "AreaAlcance"
+      },
+      "AreaOrganizacion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "siglas": {
+            "type": "string",
+            "title": "Siglas"
+          },
+          "id_titular": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Titular"
+          },
+          "nombre_titular": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Titular"
+          },
+          "id_padre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Padre"
+          },
+          "activa": {
+            "type": "boolean",
+            "title": "Activa"
+          },
+          "personas": {
+            "items": {
+              "$ref": "#/components/schemas/PersonaArea"
+            },
+            "type": "array",
+            "title": "Personas"
+          },
+          "pendientes": {
+            "type": "integer",
+            "title": "Pendientes"
+          },
+          "con_folios": {
+            "type": "boolean",
+            "title": "Con Folios"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "siglas",
+          "id_titular",
+          "nombre_titular",
+          "id_padre",
+          "activa",
+          "personas",
+          "pendientes",
+          "con_folios"
+        ],
+        "title": "AreaOrganizacion"
+      },
+      "AsignacionAsunto": {
+        "properties": {
+          "id_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Documento"
+          }
+        },
+        "type": "object",
+        "title": "AsignacionAsunto"
+      },
+      "Asunto": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          },
+          "creador": {
+            "type": "string",
+            "title": "Creador"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha"
+          },
+          "documentos": {
+            "type": "integer",
+            "title": "Documentos"
+          },
+          "areas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Areas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "descripcion",
+          "creador",
+          "fecha",
+          "documentos",
+          "areas"
+        ],
+        "title": "Asunto"
+      },
+      "AsuntoResumen": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "AsuntoResumen"
+      },
+      "Atraccion": {
+        "properties": {
+          "justificacion": {
+            "type": "string",
+            "title": "Justificacion",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Atraccion"
+      },
+      "Bases": {
+        "properties": {
+          "postgres": {
+            "$ref": "#/components/schemas/EstadoBase"
+          },
+          "mongo": {
+            "$ref": "#/components/schemas/EstadoBase"
+          },
+          "neo4j": {
+            "$ref": "#/components/schemas/EstadoBase"
+          }
+        },
+        "type": "object",
+        "required": [
+          "postgres",
+          "mongo",
+          "neo4j"
+        ],
+        "title": "Bases"
+      },
+      "Cancelacion": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "title": "Motivo",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Cancelacion"
+      },
+      "Catalogos": {
+        "properties": {
+          "tipos_documento": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tipos Documento"
+          },
+          "campos_tipo": {
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Campos Tipo"
+          },
+          "actores_externos": {
+            "items": {
+              "$ref": "#/components/schemas/ActorCatalogo"
+            },
+            "type": "array",
+            "title": "Actores Externos"
+          },
+          "motivos_devolucion": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Motivos Devolucion"
+          },
+          "formas_conclusion": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Formas Conclusion"
+          },
+          "canales": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Canales"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "roles_turno": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles Turno"
+          },
+          "estados_documento": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Estados Documento"
+          },
+          "tipos_relacion": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tipos Relacion"
+          },
+          "tipos_actor": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tipos Actor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipos_documento",
+          "campos_tipo",
+          "actores_externos",
+          "motivos_devolucion",
+          "formas_conclusion",
+          "canales",
+          "roles",
+          "roles_turno",
+          "estados_documento",
+          "tipos_relacion",
+          "tipos_actor"
+        ],
+        "title": "Catalogos"
+      },
+      "ComparacionDuplicado": {
+        "properties": {
+          "posterior": {
+            "$ref": "#/components/schemas/DocumentoComparado"
+          },
+          "candidato": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentoComparado"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coincidencias": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "numero_emisor",
+                "emisor",
+                "fecha_documento",
+                "sintesis"
+              ]
+            },
+            "type": "array",
+            "title": "Coincidencias"
+          }
+        },
+        "type": "object",
+        "required": [
+          "posterior",
+          "candidato",
+          "coincidencias"
+        ],
+        "title": "ComparacionDuplicado"
+      },
+      "Conclusion": {
+        "properties": {
+          "forma": {
+            "type": "string",
+            "title": "Forma",
+            "default": ""
+          },
+          "id_respuesta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Respuesta"
+          },
+          "id_original": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Original"
+          },
+          "nota": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nota"
+          }
+        },
+        "type": "object",
+        "title": "Conclusion"
+      },
+      "Correccion": {
+        "properties": {
+          "rol": {
+            "type": "string",
+            "title": "Rol",
+            "default": ""
+          },
+          "motivo": {
+            "type": "string",
+            "title": "Motivo",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Correccion"
+      },
+      "Credenciales": {
+        "properties": {
+          "correo": {
+            "type": "string",
+            "title": "Correo",
+            "default": ""
+          },
+          "contrasena": {
+            "type": "string",
+            "title": "Contrasena",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Credenciales"
+      },
+      "DatosActor": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "default": ""
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo",
+            "default": ""
+          },
+          "correo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correo"
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono"
+          }
+        },
+        "type": "object",
+        "title": "DatosActor"
+      },
+      "DatosArea": {
+        "properties": {
+          "siglas": {
+            "type": "string",
+            "title": "Siglas",
+            "default": ""
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "default": ""
+          },
+          "id_padre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Padre"
+          },
+          "id_titular": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Titular"
+          }
+        },
+        "type": "object",
+        "title": "DatosArea"
+      },
+      "DatosExpediente": {
+        "properties": {
+          "datos_tipo": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Datos Tipo"
+          }
+        },
+        "type": "object",
+        "title": "DatosExpediente"
+      },
+      "DatosPersona": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "default": ""
+          },
+          "correo": {
+            "type": "string",
+            "title": "Correo",
+            "default": ""
+          },
+          "id_area": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area"
+          },
+          "rol": {
+            "type": "string",
+            "title": "Rol",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "DatosPersona"
+      },
+      "DestinoRelacion": {
+        "properties": {
+          "id_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Documento"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emisor"
+          }
+        },
+        "type": "object",
+        "title": "DestinoRelacion"
+      },
+      "DestinoTurno": {
+        "properties": {
+          "id_area": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area"
+          },
+          "rol": {
+            "type": "string",
+            "title": "Rol",
+            "default": ""
+          },
+          "instruccion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruccion"
+          }
+        },
+        "type": "object",
+        "title": "DestinoTurno"
+      },
+      "Devolucion": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "title": "Motivo",
+            "default": ""
+          },
+          "id_area_sugerida": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area Sugerida"
+          },
+          "nota": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nota"
+          }
+        },
+        "type": "object",
+        "title": "Devolucion"
+      },
+      "DocumentoComparado": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "numero_emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Emisor"
+          },
+          "emisor": {
+            "type": "string",
+            "title": "Emisor"
+          },
+          "fecha_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Documento"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "correo",
+              "papel"
+            ],
+            "title": "Canal"
+          },
+          "fecha_recepcion": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Recepcion"
+          },
+          "sintesis": {
+            "type": "string",
+            "title": "Sintesis"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "ubicacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ubicacion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "numero_emisor",
+          "emisor",
+          "fecha_documento",
+          "canal",
+          "fecha_recepcion",
+          "sintesis",
+          "estado",
+          "ubicacion"
+        ],
+        "title": "DocumentoComparado"
+      },
+      "DocumentoEncontrado": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "asunto": {
+            "type": "string",
+            "title": "Asunto"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha"
+          },
+          "salida": {
+            "type": "boolean",
+            "title": "Salida"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "asunto",
+          "fecha",
+          "salida"
+        ],
+        "title": "DocumentoEncontrado"
+      },
+      "DocumentoRegistrado": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio"
+        ],
+        "title": "DocumentoRegistrado"
+      },
+      "ErrorBase": {
+        "type": "string",
+        "enum": [
+          "sin conexión",
+          "tiempo agotado"
+        ]
+      },
+      "EstadoBase": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "ms": {
+            "type": "integer",
+            "title": "Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "ms",
+          "error"
+        ],
+        "title": "EstadoBase"
+      },
+      "Expediente": {
+        "properties": {
+          "datos_tipo": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Datos Tipo"
+          },
+          "anexos": {
+            "items": {
+              "$ref": "#/components/schemas/Anexo"
+            },
+            "type": "array",
+            "title": "Anexos"
+          },
+          "notas": {
+            "items": {
+              "$ref": "#/components/schemas/Nota"
+            },
+            "type": "array",
+            "title": "Notas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datos_tipo",
+          "anexos",
+          "notas"
+        ],
+        "title": "Expediente"
+      },
+      "Ficha": {
+        "properties": {
+          "acceso": {
+            "type": "string",
+            "enum": [
+              "completo",
+              "restringido"
+            ],
+            "title": "Acceso"
+          },
+          "contenido_oculto": {
+            "type": "boolean",
+            "title": "Contenido Oculto"
+          },
+          "registro": {
+            "$ref": "#/components/schemas/RegistroDocumento"
+          },
+          "ubicacion_actual": {
+            "items": {
+              "$ref": "#/components/schemas/UbicacionActual"
+            },
+            "type": "array",
+            "title": "Ubicacion Actual"
+          },
+          "expediente": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Expediente"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorrido": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MovimientoRecorrido"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorrido"
+          },
+          "relaciones": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Relacion"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relaciones"
+          },
+          "asuntos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AsuntoResumen"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asuntos"
+          },
+          "secciones_no_disponibles": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "expediente",
+                "recorrido",
+                "relaciones"
+              ]
+            },
+            "type": "array",
+            "title": "Secciones No Disponibles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "acceso",
+          "contenido_oculto",
+          "registro",
+          "ubicacion_actual",
+          "expediente",
+          "recorrido",
+          "relaciones",
+          "asuntos",
+          "secciones_no_disponibles"
+        ],
+        "title": "Ficha"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HiloAsunto": {
+        "properties": {
+          "asunto": {
+            "$ref": "#/components/schemas/Asunto"
+          },
+          "nodos": {
+            "items": {
+              "$ref": "#/components/schemas/NodoHilo"
+            },
+            "type": "array",
+            "title": "Nodos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "asunto",
+          "nodos"
+        ],
+        "title": "HiloAsunto"
+      },
+      "Listado_ActorExterno_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/ActorExterno"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[ActorExterno]"
+      },
+      "Listado_Acuse_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Acuse"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Acuse]"
+      },
+      "Listado_AreaOrganizacion_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/AreaOrganizacion"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[AreaOrganizacion]"
+      },
+      "Listado_Area_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Area"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Area]"
+      },
+      "Listado_Asunto_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Asunto"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Asunto]"
+      },
+      "Listado_DocumentoEncontrado_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentoEncontrado"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[DocumentoEncontrado]"
+      },
+      "Listado_PendienteBandeja_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/PendienteBandeja"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[PendienteBandeja]"
+      },
+      "Listado_Persona_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Persona"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Persona]"
+      },
+      "Listado_Rebote_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Rebote"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Rebote]"
+      },
+      "Listado_ResultadoBusqueda_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/ResultadoBusqueda"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[ResultadoBusqueda]"
+      },
+      "Listado_ResumenDocumento_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/ResumenDocumento"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[ResumenDocumento]"
+      },
+      "Listado_Salida_": {
+        "properties": {
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/Salida"
+            },
+            "type": "array",
+            "title": "Elementos"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "elementos",
+          "total"
+        ],
+        "title": "Listado[Salida]"
+      },
+      "Movimiento": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "id_documento": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Documento"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "registro",
+              "turno",
+              "devolucion",
+              "atraccion",
+              "conclusion",
+              "correccion"
+            ],
+            "title": "Tipo"
+          },
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora"
+          },
+          "id_grupo_turno": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Grupo Turno"
+          },
+          "id_area_origen": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area Origen"
+          },
+          "otros_origenes": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Otros Origenes"
+          },
+          "id_area_destino": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Area Destino"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "responsable",
+              "apoyo",
+              "conocimiento"
+            ],
+            "title": "Rol"
+          },
+          "instruccion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruccion"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo"
+          },
+          "id_area_sugerida": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area Sugerida"
+          },
+          "forma_conclusion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forma Conclusion"
+          },
+          "id_corrige": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Corrige"
+          },
+          "id_persona": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Persona"
+          },
+          "id_titular_al_turnar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Titular Al Turnar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "id_documento",
+          "tipo",
+          "fecha_hora",
+          "id_grupo_turno",
+          "id_area_origen",
+          "id_area_destino",
+          "rol",
+          "instruccion",
+          "motivo",
+          "id_area_sugerida",
+          "id_persona",
+          "id_titular_al_turnar"
+        ],
+        "title": "Movimiento"
+      },
+      "MovimientoRecorrido": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "registro",
+              "turno",
+              "devolucion",
+              "atraccion",
+              "conclusion",
+              "correccion"
+            ],
+            "title": "Tipo"
+          },
+          "id_corrige": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Corrige"
+          },
+          "id_grupo_turno": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Grupo Turno"
+          },
+          "area_origen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Origen"
+          },
+          "area_destino": {
+            "type": "string",
+            "title": "Area Destino"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "responsable",
+              "apoyo",
+              "conocimiento"
+            ],
+            "title": "Rol"
+          },
+          "instruccion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruccion"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo"
+          },
+          "forma_conclusion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forma Conclusion"
+          },
+          "persona": {
+            "type": "string",
+            "title": "Persona"
+          },
+          "titular_al_turnar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titular Al Turnar"
+          },
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "id_corrige",
+          "id_grupo_turno",
+          "area_origen",
+          "area_destino",
+          "rol",
+          "instruccion",
+          "motivo",
+          "forma_conclusion",
+          "persona",
+          "titular_al_turnar",
+          "fecha_hora"
+        ],
+        "title": "MovimientoRecorrido",
+        "description": "Un paso del recorrido (C1) con los nombres que muestra la interfaz."
+      },
+      "NodoHilo": {
+        "properties": {
+          "id_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Documento"
+          },
+          "referencia": {
+            "type": "string",
+            "title": "Referencia"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          },
+          "registrado": {
+            "type": "boolean",
+            "title": "Registrado"
+          },
+          "pertenece": {
+            "type": "boolean",
+            "title": "Pertenece"
+          },
+          "relacion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelacionHilo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profundidad": {
+            "type": "integer",
+            "title": "Profundidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_documento",
+          "referencia",
+          "descripcion",
+          "estado",
+          "registrado",
+          "pertenece",
+          "relacion",
+          "profundidad"
+        ],
+        "title": "NodoHilo"
+      },
+      "Nota": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "general",
+              "evidencia_atencion"
+            ],
+            "title": "Tipo"
+          },
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "autor": {
+            "type": "string",
+            "title": "Autor"
+          },
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "area",
+          "autor",
+          "fecha_hora",
+          "texto"
+        ],
+        "title": "Nota"
+      },
+      "NuevaNota": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "title": "Texto",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "NuevaNota"
+      },
+      "NuevaRelacion": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo",
+            "default": ""
+          },
+          "destino": {
+            "$ref": "#/components/schemas/DestinoRelacion"
+          }
+        },
+        "type": "object",
+        "title": "NuevaRelacion"
+      },
+      "NuevaSalida": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo",
+            "default": ""
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero",
+            "default": ""
+          },
+          "id_area_emisora": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area Emisora"
+          },
+          "destinatario": {
+            "type": "string",
+            "title": "Destinatario",
+            "default": ""
+          },
+          "sintesis": {
+            "type": "string",
+            "title": "Sintesis",
+            "default": ""
+          },
+          "id_responde_a": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Responde A"
+          }
+        },
+        "type": "object",
+        "title": "NuevaSalida"
+      },
+      "NuevoAcuse": {
+        "properties": {
+          "fecha_hora": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Hora"
+          },
+          "recibio": {
+            "type": "string",
+            "title": "Recibio",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "NuevoAcuse"
+      },
+      "NuevoAnexo": {
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "title": "Titulo",
+            "default": ""
+          },
+          "hojas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hojas"
+          },
+          "ubicacion": {
+            "type": "string",
+            "title": "Ubicacion",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "NuevoAnexo"
+      },
+      "NuevoAsunto": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "default": ""
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion",
+            "default": ""
+          },
+          "id_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Documento"
+          }
+        },
+        "type": "object",
+        "title": "NuevoAsunto"
+      },
+      "NuevoDocumento": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo",
+            "default": ""
+          },
+          "numero_emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Emisor"
+          },
+          "tipo_emisor": {
+            "type": "string",
+            "title": "Tipo Emisor",
+            "default": ""
+          },
+          "emisor": {
+            "type": "string",
+            "title": "Emisor",
+            "default": ""
+          },
+          "fecha_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Documento"
+          },
+          "canal": {
+            "type": "string",
+            "title": "Canal",
+            "default": ""
+          },
+          "fecha_recepcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Recepcion"
+          },
+          "sintesis": {
+            "type": "string",
+            "title": "Sintesis",
+            "default": ""
+          },
+          "confidencial": {
+            "type": "boolean",
+            "title": "Confidencial",
+            "default": false
+          },
+          "extemporaneo": {
+            "type": "boolean",
+            "title": "Extemporaneo",
+            "default": false
+          },
+          "datos_tipo": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Datos Tipo"
+          }
+        },
+        "type": "object",
+        "title": "NuevoDocumento"
+      },
+      "PendienteBandeja": {
+        "properties": {
+          "id_documento": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Documento"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "asunto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asunto"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "emisor": {
+            "type": "string",
+            "title": "Emisor"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "responsable",
+              "apoyo"
+            ],
+            "title": "Rol"
+          },
+          "antiguedad_dias": {
+            "type": "integer",
+            "title": "Antiguedad Dias"
+          },
+          "titular_al_turnar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titular Al Turnar"
+          },
+          "titular_ya_no_adscrito": {
+            "type": "boolean",
+            "title": "Titular Ya No Adscrito"
+          },
+          "ultimo_movimiento": {
+            "$ref": "#/components/schemas/UltimoMovimiento"
+          },
+          "posible_duplicado": {
+            "type": "boolean",
+            "title": "Posible Duplicado"
+          },
+          "confidencial": {
+            "type": "boolean",
+            "title": "Confidencial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_documento",
+          "folio",
+          "asunto",
+          "tipo",
+          "emisor",
+          "rol",
+          "antiguedad_dias",
+          "titular_al_turnar",
+          "titular_ya_no_adscrito",
+          "ultimo_movimiento",
+          "posible_duplicado",
+          "confidencial"
+        ],
+        "title": "PendienteBandeja"
+      },
+      "Persona": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "correo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correo"
+          },
+          "id_area": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area"
+          },
+          "nombre_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Area"
+          },
+          "rol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rol"
+          },
+          "activa": {
+            "type": "boolean",
+            "title": "Activa"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "correo",
+          "id_area",
+          "nombre_area",
+          "rol",
+          "activa"
+        ],
+        "title": "Persona"
+      },
+      "PersonaArea": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "rol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rol"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "rol"
+        ],
+        "title": "PersonaArea"
+      },
+      "Rebote": {
+        "properties": {
+          "id_documento": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Documento"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "asunto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asunto"
+          },
+          "reglas": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "no_competencia_sin_area",
+                "tres_devoluciones",
+                "tres_areas"
+              ]
+            },
+            "type": "array",
+            "title": "Reglas"
+          },
+          "areas": {
+            "type": "integer",
+            "title": "Areas"
+          },
+          "ubicacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ubicacion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_documento",
+          "folio",
+          "asunto",
+          "reglas",
+          "areas",
+          "ubicacion"
+        ],
+        "title": "Rebote"
+      },
+      "Recepcion": {
+        "properties": {
+          "canal": {
+            "type": "string",
+            "enum": [
+              "correo",
+              "papel"
+            ],
+            "title": "Canal"
+          },
+          "fecha_recepcion": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Recepcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "canal",
+          "fecha_recepcion"
+        ],
+        "title": "Recepcion"
+      },
+      "RegistroDocumento": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "asunto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asunto"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "confidencial": {
+            "type": "boolean",
+            "title": "Confidencial"
+          },
+          "posible_duplicado": {
+            "type": "boolean",
+            "title": "Posible Duplicado"
+          },
+          "extemporaneo": {
+            "type": "boolean",
+            "title": "Extemporaneo"
+          },
+          "numero_emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Emisor"
+          },
+          "emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emisor"
+          },
+          "tipo_emisor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "area",
+                  "externo"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Emisor"
+          },
+          "fecha_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Documento"
+          },
+          "canal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "correo",
+                  "papel"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canal"
+          },
+          "fecha_recepcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Recepcion"
+          },
+          "segunda_recepcion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Recepcion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fecha_oficial": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Oficial"
+          },
+          "origen_fecha_oficial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origen Fecha Oficial"
+          },
+          "sintesis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sintesis"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "asunto",
+          "tipo",
+          "estado",
+          "confidencial",
+          "posible_duplicado",
+          "extemporaneo",
+          "numero_emisor",
+          "emisor",
+          "tipo_emisor",
+          "fecha_documento",
+          "canal",
+          "fecha_recepcion",
+          "segunda_recepcion",
+          "fecha_oficial",
+          "origen_fecha_oficial",
+          "sintesis"
+        ],
+        "title": "RegistroDocumento",
+        "description": "Con acceso restringido solo traen valor folio, tipo y estado (D-29, igual que O-30)."
+      },
+      "Relacion": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "entra"
+            ],
+            "title": "Sentido"
+          },
+          "id_documento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Documento"
+          },
+          "referencia": {
+            "type": "string",
+            "title": "Referencia"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "sentido",
+          "id_documento",
+          "referencia",
+          "descripcion",
+          "estado"
+        ],
+        "title": "Relacion"
+      },
+      "RelacionHilo": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "entra",
+              "sale"
+            ],
+            "title": "Sentido"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "sentido"
+        ],
+        "title": "RelacionHilo"
+      },
+      "ResolucionDuplicado": {
+        "properties": {
+          "id_otro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Otro"
+          },
+          "decision": {
+            "type": "string",
+            "title": "Decision",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ResolucionDuplicado"
+      },
+      "ResultadoBusqueda": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "numero_emisor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Emisor"
+          },
+          "sintesis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sintesis"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "area_responsable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Responsable"
+          },
+          "visibilidad": {
+            "type": "string",
+            "enum": [
+              "completa",
+              "restringida",
+              "confidencial"
+            ],
+            "title": "Visibilidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "numero_emisor",
+          "sintesis",
+          "tipo",
+          "estado",
+          "area_responsable",
+          "visibilidad"
+        ],
+        "title": "ResultadoBusqueda"
+      },
+      "ResultadoTurno": {
+        "properties": {
+          "id_grupo_turno": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Grupo Turno"
+          },
+          "movimientos": {
+            "items": {
+              "$ref": "#/components/schemas/Movimiento"
+            },
+            "type": "array",
+            "title": "Movimientos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_grupo_turno",
+          "movimientos"
+        ],
+        "title": "ResultadoTurno"
+      },
+      "ResumenDocumento": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "asunto": {
+            "type": "string",
+            "title": "Asunto"
+          },
+          "falta": {
+            "type": "string",
+            "enum": [
+              "numero",
+              "fecha"
+            ],
+            "title": "Falta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "asunto",
+          "falta"
+        ],
+        "title": "ResumenDocumento"
+      },
+      "Salida": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "folio": {
+            "type": "string",
+            "title": "Folio"
+          },
+          "sintesis": {
+            "type": "string",
+            "title": "Sintesis"
+          },
+          "destinatario": {
+            "type": "string",
+            "title": "Destinatario"
+          },
+          "id_responde_a": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Responde A"
+          },
+          "folio_responde_a": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folio Responde A"
+          },
+          "area_emisora": {
+            "type": "string",
+            "title": "Area Emisora"
+          },
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora"
+          },
+          "acuse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AcuseSalida"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "folio",
+          "sintesis",
+          "destinatario",
+          "id_responde_a",
+          "folio_responde_a",
+          "area_emisora",
+          "fecha_hora",
+          "acuse"
+        ],
+        "title": "Salida"
+      },
+      "Salud": {
+        "properties": {
+          "estado": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degradado"
+            ],
+            "title": "Estado"
+          },
+          "bases": {
+            "$ref": "#/components/schemas/Bases"
+          }
+        },
+        "type": "object",
+        "required": [
+          "estado",
+          "bases"
+        ],
+        "title": "Salud"
+      },
+      "SegundaRecepcion": {
+        "properties": {
+          "canal": {
+            "type": "string",
+            "title": "Canal",
+            "default": ""
+          },
+          "fecha_recepcion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Recepcion"
+          }
+        },
+        "type": "object",
+        "title": "SegundaRecepcion"
+      },
+      "Sesion": {
+        "properties": {
+          "id_persona": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id Persona"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "OF",
+              "DI",
+              "TI",
+              "PE",
+              "AD"
+            ],
+            "title": "Rol"
+          },
+          "id_area": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Area"
+          },
+          "nombre_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Area"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_persona",
+          "nombre",
+          "rol",
+          "id_area",
+          "nombre_area"
+        ],
+        "title": "Sesion"
+      },
+      "Turno": {
+        "properties": {
+          "destinos": {
+            "items": {
+              "$ref": "#/components/schemas/DestinoTurno"
+            },
+            "type": "array",
+            "title": "Destinos"
+          }
+        },
+        "type": "object",
+        "title": "Turno"
+      },
+      "UbicacionActual": {
+        "properties": {
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "responsable",
+              "apoyo"
+            ],
+            "title": "Rol"
+          },
+          "desde": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Desde"
+          },
+          "antiguedad_dias": {
+            "type": "integer",
+            "title": "Antiguedad Dias"
+          },
+          "llegada": {
+            "type": "string",
+            "title": "Llegada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "area",
+          "rol",
+          "desde",
+          "antiguedad_dias",
+          "llegada"
+        ],
+        "title": "UbicacionActual"
+      },
+      "UltimoMovimiento": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "registro",
+              "turno",
+              "devolucion",
+              "atraccion",
+              "conclusion",
+              "correccion"
+            ],
+            "title": "Tipo"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "descripcion"
+        ],
+        "title": "UltimoMovimiento"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

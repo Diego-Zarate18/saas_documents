@@ -1,4 +1,4 @@
-# SIGEDOC: las tres bases, la API y el proceso del outbox (D-41). El servicio web llega después.
+# SIGEDOC: las tres bases, la API, el proceso del outbox y la interfaz (D-41).
 # Todo valor sale de .env (copia de .env.example); aquí no hay credenciales.
 # Los puertos se publican solo en 127.0.0.1 (arquitectura, sección 6).
 # Healthchecks: cada 2 s mientras la base arranca (start_interval) y cada 30 s después.
@@ -91,6 +91,14 @@ services:
     environment: *red_interna
     depends_on: *bases_sanas
     restart: unless-stopped
+
+  # La interfaz compilada; /api va al servicio api. http://localhost:8080
+  web:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
 
 volumes:
   postgres-datos:

@@ -7,7 +7,8 @@ Sistema de Seguimiento de Documentos entre Departamentos. Proyecto final de base
 - Operaciones y patrones de acceso: [`docs/operaciones/`](docs/operaciones/).
 - Método de trabajo con Claude Code: [`ai/handoff/README.md`](ai/handoff/README.md).
 
-Las instrucciones se agregan con cada tarea: la interfaz en T-01 y las bases y el backend en T-03.
+- Evidencia de ejecución (pruebas por tipo de la guía, medidas): [`docs/pruebas/evidencia.md`](docs/pruebas/evidencia.md).
+- Contrato de la API: [`docs/api/openapi.json`](docs/api/openapi.json).
 
 ## Requisitos
 
@@ -29,6 +30,23 @@ notepad .env
 ```
 
 `.env.example` publica PostgreSQL en el puerto 5433 y MongoDB en el 27018 para no chocar con instalaciones locales de Windows. Si cambias un puerto, cambia también la URI que lo usa (`MONGO_PORT` con `MONGO_URI`, `NEO4J_BOLT_PORT` con `NEO4J_URI`). Todos los puertos se publican solo en `127.0.0.1`.
+
+## Puesta en marcha desde cero
+
+Desde un clon limpio, en PowerShell y en la raíz del repositorio:
+
+```powershell
+Copy-Item .env.example .env          # y cambia las tres contraseñas
+docker compose up -d --build         # bases, api, outbox y web (la primera vez tarda unos minutos)
+docker compose ps                    # las bases en (healthy); api, outbox y web en running
+cd backend
+uv sync                              # dependencias del backend y de las herramientas
+uv run python -m herramientas.esquemas --datos   # esquemas de las tres bases y semilla
+```
+
+Abre <http://localhost:8080> y entra con un usuario de la semilla (tabla en «Interfaz»), contraseña `sigedoc-dev`. El servicio `web` sirve la interfaz compilada con Nginx y reenvía `/api` al servicio `api`; el servicio `outbox` lleva los cambios a MongoDB y Neo4j.
+
+Las secciones siguientes explican cada parte por separado, para desarrollar.
 
 ## Bases de datos (docker-compose)
 
@@ -87,6 +105,19 @@ uv run pytest ../tests                  # todas: unitarias y de integración
 uv run pytest ../tests -m "not integracion"   # solo unitarias (no necesitan las bases)
 uv run pytest ../tests -m integracion   # solo integración: necesitan las tres bases levantadas y el .env
 ```
+
+## Operación
+
+Desde `backend/`, con el despliegue en marcha:
+
+| Comando | Qué hace |
+| --- | --- |
+| `uv run python -m herramientas.reconciliar` | O-40: compara existencia, estado y tipo entre las tres bases y las sustituciones a medias; reporta y reencola en el outbox lo que falte |
+| `uv run python -m herramientas.respaldo` | O-41: respalda con `pg_dump`, `mongodump` y `neo4j-admin database dump` en `respaldos/AAAAMMDD-HHMMSS/` (Neo4j se detiene unos segundos) |
+| `uv run python -m herramientas.respaldo --restaurar respaldos/<carpeta>` | Restaura ese respaldo en las tres bases |
+| `uv run python -m herramientas.esquemas --reiniciar` | Vacía los datos y recarga la semilla |
+| `uv run python -m herramientas.openapi` | Exporta el contrato a `docs/api/openapi.json` |
+| `uv run python -m herramientas.medir` | Ejecuta los escenarios de prueba de la guía y escribe `docs/pruebas/evidencia.md` (unos minutos; detiene Neo4j unos segundos y genera 1200 documentos, al final recarga la semilla) |
 
 ## Interfaz
 

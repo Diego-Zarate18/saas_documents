@@ -90,10 +90,23 @@ Estas reglas ya tienen prueba en el frontend con el id de la regla en el nombre;
 | D-60, D-66 | Núcleo en PostgreSQL; campos propios por tipo en MongoDB con esquema versionado: `ente_auditor` y `puntos` (auditoría), `solicitante` (transparencia), `concepto` (material o pago). |
 | D-65 | Siete tipos: `oficio`, `solicitud_material_pago`, `requerimiento_auditoria`, `solicitud_transparencia`, `memorandum`, `circular`, `informe`. |
 | D-68 | Atraer deja una sola área responsable: dejan de tenerlo pendiente como responsable todas las demás. |
+| D-69, D-70 | Neo4j: el Movimiento se une con `SOBRE` al Documento, `DESDE` y `HACIA` a las áreas y `REALIZADO_POR` a la Persona; `SIGUIENTE` se crea al replicar, desde el movimiento más reciente que llegó al área de origen (uno por cada origen en una atracción). Propiedades y caso límite en D-69 y D-70; ambos son supuesto hasta E-2. |
+| D-71 | API sin versionado: prefijo `/api` y carpeta `api/`. |
+| D-72 | `GET /catalogos` (O-31) devuelve también las listas cerradas: canales, roles de usuario, roles de turno, estados, tipos de relación y tipos de actor. Son fijas; no se administran. |
 | RI-06 | Todo documento tiene emisor: un área activa o un actor externo activo. |
 | RI-10 | Un solo responsable por grupo de turno. |
 | D-47 | Jerarquía de áreas sin ciclos, validada con consulta recursiva dentro de la transacción; no se desactiva un área con pendientes ni con áreas activas que dependan de ella. |
 | D-20 | Se desactiva, no se borra (áreas, actores, personas). Las siglas son fijas mientras el área tenga folios emitidos. |
+
+### Lo que el simulador hace y el backend no debe copiar
+
+Cuando el simulador y el grafo difieren, manda el grafo (D-57). Las diferencias que más importan son de visibilidad (D-29); el inventario las marca «Dudoso» en cada ficha:
+
+- **Ficha con acceso restringido.** El simulador sigue mostrando número de emisor, emisor, fechas y canal. El backend devuelve solo estado y responsable a quien no tiene acceso completo (el mismo criterio que ya aplica el simulador al ocultar el número en O-30).
+- **Asunto de un documento confidencial en la bandeja.** El simulador lo muestra a todo el personal del área. El backend lo muestra solo a quien tiene acceso al documento: el titular del área y quien tiene movimiento sobre él.
+- **Listado y alcance de asuntos.** El simulador cuenta documentos y áreas que el usuario no ve. El backend cuenta y lista solo lo que la visibilidad permite (C5, O-27).
+
+Otras decisiones dudosas del simulador, que el backend sigue **sin** copiar: aceptar áreas inactivas al turnar, devolver o registrar una salida; dejar al destino como responsable cuando devuelve un área de apoyo; no revisar el estado de los documentos al usar `sustituye_a`; no exigir que el documento esté en trámite en O-19; guardar el motivo de cancelación sin devolverlo; y permitir asuntos con el mismo nombre. Cada una se resuelve con la regla del grafo o del catálogo y se confirma en la tarea correspondiente.
 
 ## 7. Mapa de endpoints
 
@@ -155,7 +168,7 @@ Para que no sorprendan al conectar (T-15). Se completa con la T-02c.
 - Lista de asuntos: el Figma no dibuja un índice; la API necesita `GET /asuntos`.
 - Contenido por tipo en las salidas: O-20 lo recibe y V-13b aún no lo captura.
 - V-15b «desde un paso del recorrido»: sin vista; sin impacto en la API.
-- Reconciliar E-2 (`docs/modelos/`) con D-42 a D-68 antes de T-04.
+- Reconciliar E-2 (`docs/modelos/`) con D-42 a D-72 antes de T-04; D-69 y D-70 son supuesto hasta entonces.
 
 ## 12. Entorno
 

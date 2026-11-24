@@ -1536,12 +1536,12 @@
       "id": "O-31",
       "tipo": "Operacion",
       "nombre": "Consultar catálogos",
-      "descripcion": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos",
+      "descripcion": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos. Las listas cerradas del sistema son fijas: no se administran (D-72)",
       "seccion": "Consultas",
       "roles": "OF, DI, TI, PE, AD",
-      "recibe": "Catálogo: áreas, tipos, motivos de devolución, formas de conclusión, actores externos",
+      "recibe": "Catálogo: áreas, tipos de documento, motivos de devolución, formas de conclusión, actores externos y las listas cerradas del sistema (canales, roles de usuario, roles de turno, estados del documento, tipos de relación y tipos de actor)",
       "devuelve": "Elementos activos del catálogo",
-      "reglas": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos",
+      "reglas": "Solo elementos activos para captura; los inactivos siguen visibles en documentos antiguos. Las listas cerradas del sistema son fijas: no se administran (D-72)",
       "tipo_operacion": "L",
       "bases": "PG",
       "frecuencia": "Alta",
@@ -2213,6 +2213,13 @@
       "tipo": "Decision",
       "nombre": "API sin versionado",
       "descripcion": "La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json.",
+      "estado": "tomada"
+    },
+    {
+      "id": "D-72",
+      "tipo": "Decision",
+      "nombre": "O-31 entrega también las listas cerradas del sistema",
+      "descripcion": "Además de áreas, tipos de documento, motivos de devolución, formas de conclusión y actores externos, la consulta de catálogos (O-31) devuelve las listas cerradas que la interfaz usa: canales, roles de usuario, roles de turno, estados del documento, tipos de relación y tipos de actor. Son fijas, no se administran, y ninguna pantalla las escribe en el código. Recoge lo que el simulador ya hace desde T-02c (HU propuesto por Claude Code).",
       "estado": "tomada"
     },
     {
@@ -7251,6 +7258,21 @@
       "origen": "D-71",
       "relacion": "AFECTA",
       "destino": "E-6"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-72"
+    },
+    {
+      "origen": "D-72",
+      "relacion": "DERIVA_DE",
+      "destino": "D-63"
+    },
+    {
+      "origen": "D-72",
+      "relacion": "AFECTA",
+      "destino": "O-31"
     }
   ]
 }

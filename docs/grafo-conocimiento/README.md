@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 281 nodos y 986 relaciones
+## Contenido: 282 nodos y 989 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 71 | Decisiones de diseño tomadas |
+| Decision | 72 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -261,6 +261,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-69 | Relaciones y propiedades del Movimiento en Neo4j * | — | El nodo Movimiento se une con SOBRE al Documento, con DESDE y HACIA a las áreas de origen y destino y con REALIZADO_POR a la Persona; sin área de origen (registro inicial) no se crea DESDE. Propiedades: id (único), fecha_hora y id_grupo_turno (D-18), tipo, motivo (catálogo D-32), id_area_sugerida (opcional, solo con no_competencia; propiedad y no relación), id_titular_al_turnar (D-31, nulo si el puesto está vacante) y rol. Mantiene las 13 relaciones de D-22 y D-52: parte DESDE_HACIA en DESDE y HACIA y no agrega etiquetas ni relaciones. Se sustituye por el modelo de datos (E-2) cuando este se entregue. |
 | D-70 | Regla para unir movimientos con SIGUIENTE * | — | SIGUIENTE se crea al replicar a Neo4j, no se guarda en PostgreSQL. Al replicar un movimiento M de un documento: si tiene área de origen, se une desde el movimiento más reciente del mismo documento que llegó a esa área (HACIA igual al DESDE de M); con varios orígenes, como en una atracción (D-68), se une uno por cada origen y las ramas se reúnen; un turno a varias áreas crea movimientos con el mismo origen y el mismo predecesor, y así se abren las ramas; el registro inicial no tiene predecesor. Caso límite para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área (D-67) queda unido al último movimiento que llegó a oficialía y no al que dejó el documento en esa área. |
 | D-71 | API sin versionado | — | La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json. |
+| D-72 | O-31 entrega también las listas cerradas del sistema | — | Además de áreas, tipos de documento, motivos de devolución, formas de conclusión y actores externos, la consulta de catálogos (O-31) devuelve las listas cerradas que la interfaz usa: canales, roles de usuario, roles de turno, estados del documento, tipos de relación y tipos de actor. Son fijas, no se administran, y ninguna pantalla las escribe en el código. Recoge lo que el simulador ya hace desde T-02c (HU propuesto por Claude Code). |
 
 ## Tipos de relación
 
@@ -268,12 +269,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 149 |
+| AFECTA | 150 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 45 |
+| DERIVA_DE | 46 |
 | DESCRIBE | 2 |
 | DESDE | 1 |
 | DOCUMENTA | 116 |
@@ -312,7 +313,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 71 |
+| TOMA | 72 |
 | UNE | 2 |
 | USA | 64 |
 

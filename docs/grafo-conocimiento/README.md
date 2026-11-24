@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 282 nodos y 989 relaciones
+## Contenido: 289 nodos y 1068 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,8 +32,8 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 72 | Decisiones de diseño tomadas |
-| Hueco | 54 | Huecos técnicos detectados y su estado |
+| Decision | 78 | Decisiones de diseño tomadas |
+| Hueco | 55 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
 | Entregable | 8 | Entregables de la guía y su estado |
@@ -45,12 +45,13 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | resuelto | 48 | Una decisión lo cerró |
 | aceptado | 5 | Se asume como limitación declarada |
 | eliminado | 1 | Desapareció al cambiar el alcance |
+| abierto | 1 | Sin resolver |
 
 ### Huecos abiertos o parciales
 
 | ID | Hueco | Estado | Nota |
 | --- | --- | --- | --- |
-| — | Ninguno | — | Todos los huecos están resueltos, aceptados o eliminados. |
+| HU-DEST | Destinatarios internos sin captura | abierto | D-04 y D-100 conservan DIRIGIDO_A y COPIA_A con la tabla documento_destinatario, pero O-01 no recibe destinatarios y el contrato del frontend no los captura. Falta decidir si O-01 los captura o si las dos relaciones salen del modelo. |
 
 ### Huecos aceptados
 
@@ -246,7 +247,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-54 | Estructura del repositorio según la guía | CTX-02 | El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers. |
 | D-55 | Esquemas versionados y versiones fijas | CTX-02 | El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes. |
 | D-56 | Pruebas por tipo de la guía con evidencia de ejecución | CTX-02 | Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12). |
-| D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. |
+| D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md (sin copias en historial/), con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. Desde T-04 las tareas se agrupan (T-04 a T-08) y la evidencia de pruebas se junta una sola vez en T-08, por la fecha de entrega. |
 | D-58 | Oficialía registra el acuse; el área responsable concluye | — | O-21 marca la salida como acusada e informa al titular del área responsable que el documento al que responde puede concluirse; la conclusión sigue siendo de O-05 (titular y personal del área responsable), como fija D-44. La bandeja del titular muestra la tarjeta «Acuses». Corrige la regla anterior de O-21, que decía que oficialía «ofrece concluirlo». |
 | D-59 | Catálogo cerrado de formas de conclusión | — | Cinco formas: con_respuesta (exige un documento de salida o respuesta registrado y enlazado), atencion_sin_oficio (nota evidencia_atencion, D-19), enterado (documento informativo, sin más requisitos), no_procede (nota con el motivo) y duplicado (referencia al documento original, D-27). Toda forma salvo con_respuesta y enterado lleva nota obligatoria; ninguna se borra (D-20). Enumeración versionada en PostgreSQL (D-55). Propuesta por confirmar contra E-2. |
 | D-60 | Núcleo en PostgreSQL y campos por tipo en MongoDB | — | PostgreSQL guarda solo el núcleo oficial: folio, tipo, asunto, remitente, fecha y fecha límite. Los campos propios de cada tipo de documento van en el expediente de MongoDB con un esquema JSON versionado por tipo (D-55), máximo tres campos específicos por tipo, opcionales salvo la fecha límite en los tipos que exigen respuesta. El detalle por tipo queda por definir en E-2. |
@@ -262,6 +263,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-70 | Regla para unir movimientos con SIGUIENTE * | — | SIGUIENTE se crea al replicar a Neo4j, no se guarda en PostgreSQL. Al replicar un movimiento M de un documento: si tiene área de origen, se une desde el movimiento más reciente del mismo documento que llegó a esa área (HACIA igual al DESDE de M); con varios orígenes, como en una atracción (D-68), se une uno por cada origen y las ramas se reúnen; un turno a varias áreas crea movimientos con el mismo origen y el mismo predecesor, y así se abren las ramas; el registro inicial no tiene predecesor. Caso límite para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área (D-67) queda unido al último movimiento que llegó a oficialía y no al que dejó el documento en esa área. |
 | D-71 | API sin versionado | — | La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json. |
 | D-72 | O-31 entrega también las listas cerradas del sistema | — | Además de áreas, tipos de documento, motivos de devolución, formas de conclusión y actores externos, la consulta de catálogos (O-31) devuelve las listas cerradas que la interfaz usa: canales, roles de usuario, roles de turno, estados del documento, tipos de relación y tipos de actor. Son fijas, no se administran, y ninguna pantalla las escribe en el código. Recoge lo que el simulador ya hace desde T-02c (HU propuesto por Claude Code). |
+| D-100 | Etiquetas y relaciones de Neo4j * | — | Seis etiquetas: Documento, DocumentoNoRegistrado, Movimiento, Area, Persona y Asunto. Trece relaciones: EMITIDO_POR, DIRIGIDO_A y COPIA_A (Documento a Area, D-04); RESPONDE_A, DA_SEGUIMIENTO_A, EN_ALCANCE_A y SUSTITUYE_A (Documento a Documento; las tres primeras también a DocumentoNoRegistrado, D-33); PERTENECE_A (Documento a Asunto); SOBRE, DESDE, HACIA y REALIZADO_POR (D-69) y SIGUIENTE (D-70). Salen CORRIGE, FIRMADO_POR, RECIBIDO_POR y REGISTRADO_POR del borrador anterior de E-2: la corrección queda en PostgreSQL y en el nodo como propiedad id_corrige (D-102). Las referencias y PERTENECE_A llevan id propio, id_persona y fecha_hora, para que O-18 las quite por id. Es el modelo de grafo de E-2 que D-69 esperaba. |
+| D-101 | Salidas, folios y acuses en PostgreSQL * | — | Una salida externa (O-20) es un documento con sentido salida: área emisora, un actor externo destinatario y sin canal ni recepción. Cada documento tiene un solo folio, en la tabla folio: el del área que registra la entrada o el del área emisora de la salida, con el mismo contador por área y año (D-21) y formato SIGLAS-AAAA-NNNN. El acuse (O-21) tiene un renglón por salida, porque cada salida tiene un destinatario. La salida guarda id_responde_a en PostgreSQL para que la tarjeta de acuses (D-58) se calcule sin Neo4j (D-51); la RESPONDE_A de esa salida se replica desde esa columna. Las demás referencias siguen con fuente en Neo4j (D-24). |
+| D-102 | Movimiento en PostgreSQL * | — | Tipos registro, turno, devolucion, atraccion, conclusion y correccion: el returno es una devolución con id_area_sugerida y el turno directo es un turno. Todos llevan documento, área destino, rol, persona que lo realizó (REALIZADO_POR) y fecha_hora; la conclusión queda en el área que concluye. La atracción guarda su primer origen en id_area_origen y los demás en la tabla movimiento_origen (D-68). La corrección (O-25) solo cambia el rol de un turno: es un movimiento nuevo con id_movimiento_corregido que copia origen, destino, grupo y titular, y los pendientes se calculan con el rol corregido. En Neo4j la corrección es un nodo con id_corrige y sin SIGUIENTE. movimiento y movimiento_origen solo admiten INSERT. |
+| D-103 | Caso límite al unir movimientos con SIGUIENTE * | — | Se confirma el caso que D-70 dejó para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área se une al último movimiento que llegó al área que turna, y la rama de la otra área sigue abierta (D-67). Si ningún movimiento llegó antes al área de origen, como cuando dirección turna un documento que no recibió, se une desde el movimiento más reciente del documento que no sea corrección. Las correcciones no se unen con SIGUIENTE. |
+| D-104 | Estructura del expediente en MongoDB * | — | Colección expedientes con _id (el id_documento), tipo, datos_tipo (los campos de D-66), referencias_citadas (lista de textos, solo informativa, AD-01), anexos, notas, creado_en y actualizado_en. Anexo: id, titulo (la descripción de O-28), hojas, ubicacion, id_persona y fecha_hora; el autor hace posible la regla de O-17. Nota: id, tipo (general o evidencia_atencion), texto, id_persona, id_area, fecha_hora e id_movimiento, obligatorio en evidencia_atencion (D-19). Validación con $jsonSchema y oneOf por tipo, sin control de versión optimista. |
+| D-105 | Tablas y columnas del núcleo en PostgreSQL * | — | Diecisiete tablas: area, persona, usuario, sesion, actor_externo, tipo_documento, motivo_devolucion, forma_conclusion, documento, documento_destinatario, folio, contador_folio, acuse, movimiento, movimiento_origen, outbox y esquema_version (D-55). Tipos de documento, motivos y formas son catálogos con marca de activo (O-31); las listas cerradas (D-72) son CHECK. La fecha límite de D-60 no se modela, porque D-06 retiró los plazos y D-66 excluye fechas por tipo. documento agrega estado_previo (el estado antes de SUSTITUYE_A, para que O-18 lo devuelva, D-14), duplicado_de (O-26 y la forma duplicado) y motivo_cancelacion (O-24). usuario se separa de persona: una persona puede no tener cuenta, y el bloqueo por intentos fallidos de O-36 vive en usuario. |
 
 ## Tipos de relación
 
@@ -269,12 +276,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 150 |
+| AFECTA | 192 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 46 |
+| DERIVA_DE | 76 |
 | DESCRIBE | 2 |
 | DESDE | 1 |
 | DOCUMENTA | 116 |
@@ -312,8 +319,8 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | SOBRE | 1 |
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
-| TIENE_HUECO | 54 |
-| TOMA | 72 |
+| TIENE_HUECO | 55 |
+| TOMA | 78 |
 | UNE | 2 |
 | USA | 64 |
 

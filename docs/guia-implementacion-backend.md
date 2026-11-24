@@ -124,9 +124,11 @@ Ruta, método, cuerpo y errores definitivos por función: Apéndice A (T-02c). L
 
 ## 8. Orden de implementación y qué reutilizar
 
+> El plan vigente (T-04 a T-08, tareas agrupadas) está en `docs/arquitectura.md`, sección 10. Esta tabla queda como mapa de qué pruebas del simulador cubren cada grupo de operaciones.
+
 | Tarea | Qué entrega | De dónde sacar los casos de aceptación |
 | --- | --- | --- |
-| T-03 | Esqueleto, tres bases en docker-compose, `/salud` | Borrador `ai/handoff/borradores/T-03-esqueleto-backend.md` |
+| T-03 | Esqueleto, tres bases en docker-compose, `/salud` | Hecha (`17d725a`) |
 | T-04 a T-06 | Esquemas, validadores y restricciones de cada base, con datos y consultas | Datos de semilla del inventario; tablas de reglas de esta guía; `docs/modelos/` (E-2) |
 | T-07 | Sesiones, roles y visibilidad (O-36 a O-38) | Usuarios de prueba del simulador; pruebas `d29_`, `d44_` |
 | T-08 | O-01 y outbox O-39, concurrencia de folios | `o01_…`, `d21_…` |

@@ -2108,7 +2108,7 @@
       "id": "D-57",
       "tipo": "Decision",
       "nombre": "Desarrollo entre revisor y Claude Code",
-      "descripcion": "El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación.",
+      "descripcion": "El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md (sin copias en historial/), con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. Desde T-04 las tareas se agrupan (T-04 a T-08) y la evidencia de pruebas se junta una sola vez en T-08, por la fecha de entrega.",
       "estado": "tomada"
     },
     {
@@ -2326,6 +2326,61 @@
       "nombre": "Pendientes calculados en cada consulta",
       "descripcion": "Sin tabla de estado; depende de un índice sobre la bitácora.",
       "estado": "aceptada"
+    },
+    {
+      "id": "D-100",
+      "tipo": "Decision",
+      "nombre": "Etiquetas y relaciones de Neo4j",
+      "descripcion": "Seis etiquetas: Documento, DocumentoNoRegistrado, Movimiento, Area, Persona y Asunto. Trece relaciones: EMITIDO_POR, DIRIGIDO_A y COPIA_A (Documento a Area, D-04); RESPONDE_A, DA_SEGUIMIENTO_A, EN_ALCANCE_A y SUSTITUYE_A (Documento a Documento; las tres primeras también a DocumentoNoRegistrado, D-33); PERTENECE_A (Documento a Asunto); SOBRE, DESDE, HACIA y REALIZADO_POR (D-69) y SIGUIENTE (D-70). Salen CORRIGE, FIRMADO_POR, RECIBIDO_POR y REGISTRADO_POR del borrador anterior de E-2: la corrección queda en PostgreSQL y en el nodo como propiedad id_corrige (D-102). Las referencias y PERTENECE_A llevan id propio, id_persona y fecha_hora, para que O-18 las quite por id. Es el modelo de grafo de E-2 que D-69 esperaba.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-101",
+      "tipo": "Decision",
+      "nombre": "Salidas, folios y acuses en PostgreSQL",
+      "descripcion": "Una salida externa (O-20) es un documento con sentido salida: área emisora, un actor externo destinatario y sin canal ni recepción. Cada documento tiene un solo folio, en la tabla folio: el del área que registra la entrada o el del área emisora de la salida, con el mismo contador por área y año (D-21) y formato SIGLAS-AAAA-NNNN. El acuse (O-21) tiene un renglón por salida, porque cada salida tiene un destinatario. La salida guarda id_responde_a en PostgreSQL para que la tarjeta de acuses (D-58) se calcule sin Neo4j (D-51); la RESPONDE_A de esa salida se replica desde esa columna. Las demás referencias siguen con fuente en Neo4j (D-24).",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-102",
+      "tipo": "Decision",
+      "nombre": "Movimiento en PostgreSQL",
+      "descripcion": "Tipos registro, turno, devolucion, atraccion, conclusion y correccion: el returno es una devolución con id_area_sugerida y el turno directo es un turno. Todos llevan documento, área destino, rol, persona que lo realizó (REALIZADO_POR) y fecha_hora; la conclusión queda en el área que concluye. La atracción guarda su primer origen en id_area_origen y los demás en la tabla movimiento_origen (D-68). La corrección (O-25) solo cambia el rol de un turno: es un movimiento nuevo con id_movimiento_corregido que copia origen, destino, grupo y titular, y los pendientes se calculan con el rol corregido. En Neo4j la corrección es un nodo con id_corrige y sin SIGUIENTE. movimiento y movimiento_origen solo admiten INSERT.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-103",
+      "tipo": "Decision",
+      "nombre": "Caso límite al unir movimientos con SIGUIENTE",
+      "descripcion": "Se confirma el caso que D-70 dejó para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área se une al último movimiento que llegó al área que turna, y la rama de la otra área sigue abierta (D-67). Si ningún movimiento llegó antes al área de origen, como cuando dirección turna un documento que no recibió, se une desde el movimiento más reciente del documento que no sea corrección. Las correcciones no se unen con SIGUIENTE.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-104",
+      "tipo": "Decision",
+      "nombre": "Estructura del expediente en MongoDB",
+      "descripcion": "Colección expedientes con _id (el id_documento), tipo, datos_tipo (los campos de D-66), referencias_citadas (lista de textos, solo informativa, AD-01), anexos, notas, creado_en y actualizado_en. Anexo: id, titulo (la descripción de O-28), hojas, ubicacion, id_persona y fecha_hora; el autor hace posible la regla de O-17. Nota: id, tipo (general o evidencia_atencion), texto, id_persona, id_area, fecha_hora e id_movimiento, obligatorio en evidencia_atencion (D-19). Validación con $jsonSchema y oneOf por tipo, sin control de versión optimista.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-105",
+      "tipo": "Decision",
+      "nombre": "Tablas y columnas del núcleo en PostgreSQL",
+      "descripcion": "Diecisiete tablas: area, persona, usuario, sesion, actor_externo, tipo_documento, motivo_devolucion, forma_conclusion, documento, documento_destinatario, folio, contador_folio, acuse, movimiento, movimiento_origen, outbox y esquema_version (D-55). Tipos de documento, motivos y formas son catálogos con marca de activo (O-31); las listas cerradas (D-72) son CHECK. La fecha límite de D-60 no se modela, porque D-06 retiró los plazos y D-66 excluye fechas por tipo. documento agrega estado_previo (el estado antes de SUSTITUYE_A, para que O-18 lo devuelva, D-14), duplicado_de (O-26 y la forma duplicado) y motivo_cancelacion (O-24). usuario se separa de persona: una persona puede no tener cuenta, y el bloqueo por intentos fallidos de O-36 vive en usuario.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "HU-DEST",
+      "tipo": "Hueco",
+      "nombre": "Destinatarios internos sin captura",
+      "descripcion": "D-04 y D-100 conservan DIRIGIDO_A y COPIA_A con la tabla documento_destinatario, pero O-01 no recibe destinatarios y el contrato del frontend no los captura. Falta decidir si O-01 los captura o si las dos relaciones salen del modelo.",
+      "estado": "abierto"
     }
   ],
   "relaciones": [
@@ -7273,6 +7328,401 @@
       "origen": "D-72",
       "relacion": "AFECTA",
       "destino": "O-31"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-100"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-04"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-05"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-22"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-33"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-52"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "DERIVA_DE",
+      "destino": "D-69"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "O-25"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "AG-06"
+    },
+    {
+      "origen": "D-100",
+      "relacion": "AFECTA",
+      "destino": "K-REF"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-101"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "DERIVA_DE",
+      "destino": "D-21"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "DERIVA_DE",
+      "destino": "D-24"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "DERIVA_DE",
+      "destino": "D-28"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "DERIVA_DE",
+      "destino": "D-51"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "DERIVA_DE",
+      "destino": "D-58"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "O-20"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "O-21"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "AR-01"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "AR-10"
+    },
+    {
+      "origen": "D-101",
+      "relacion": "AFECTA",
+      "destino": "K-FOL"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-102"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-03"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-11"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-18"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-31"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-32"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-59"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "DERIVA_DE",
+      "destino": "D-68"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "AR-03"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "O-14"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "O-23"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "O-25"
+    },
+    {
+      "origen": "D-102",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-103"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "DERIVA_DE",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "DERIVA_DE",
+      "destino": "D-70"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "AFECTA",
+      "destino": "AG-01"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "AFECTA",
+      "destino": "AG-06"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "D-103",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-104"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "DERIVA_DE",
+      "destino": "D-16"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "DERIVA_DE",
+      "destino": "D-19"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "DERIVA_DE",
+      "destino": "D-26"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "DERIVA_DE",
+      "destino": "D-66"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "DB-MG"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "AD-01"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "AD-04"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "AD-05"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "O-17"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "O-28"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "O-29"
+    },
+    {
+      "origen": "D-104",
+      "relacion": "AFECTA",
+      "destino": "K-EXP"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-105"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-06"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-14"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-55"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-60"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-66"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "DERIVA_DE",
+      "destino": "D-72"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "DB-PG"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "O-24"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "O-26"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "O-31"
+    },
+    {
+      "origen": "D-105",
+      "relacion": "AFECTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TIENE_HUECO",
+      "destino": "HU-DEST"
+    },
+    {
+      "origen": "HU-DEST",
+      "relacion": "AFECTA",
+      "destino": "O-01"
     }
   ]
 }

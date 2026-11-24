@@ -19,12 +19,10 @@ Las reglas completas están en `ai/handoff/README.md`. Este es el procedimiento.
 ## Mientras trabajas
 
 - Solo lo que dice «Alcance». Si descubres algo fuera de alcance que hace falta, anótalo para «Dudas y huecos propuestos»; no lo implementes.
-- Ejecuta las pruebas con frecuencia, no solo al final.
 
 ## Al terminar
 
-1. Ejecuta todos los comandos de «Criterios de aceptación» y guarda un resumen de su salida.
-2. Copia `ai/handoff/siguiente.md` a `ai/handoff/historial/T-xx-asignacion.md`.
-3. Escribe `ai/handoff/reporte.md` con la plantilla de `ai/handoff/README.md`. Sé concreto: el revisor no ve tu sesión, solo el reporte y el código.
-4. `git add` de los cambios de la tarea, incluidos el reporte y el historial; un solo `git commit -m "T-xx: <resumen>"`.
-5. No hagas push. Dile a Diego, en una línea, el estado de la tarea y el hash del commit.
+1. Ejecuta los comandos de «Criterios de aceptación» una vez.
+2. Escribe `ai/handoff/reporte.md` con la plantilla de `ai/handoff/README.md`. Breve y concreto.
+3. `git add` de los cambios de la tarea y el reporte; un solo `git commit -m "T-xx: <resumen>"`.
+4. No hagas push. Dile a Diego, en una línea, el estado de la tarea y el hash del commit.

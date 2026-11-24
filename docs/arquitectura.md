@@ -13,7 +13,7 @@ Este documento es vinculante para la implementación. Si algo aquí contradice a
    │  HTTPS (en local, HTTP), cookie de sesión httpOnly
    ▼
  frontend/  React + Vite + TypeScript (SPA, solo archivos estáticos)
-   │  REST /api/v1  (cliente generado del OpenAPI)
+   │  REST /api  (cliente generado del OpenAPI)
    ▼
  backend/   FastAPI ─ routers → servicios → repositorios ─┬─ PostgreSQL 17  (registro oficial, bitácora, folios, sesiones, outbox)
                                                          ├─ MongoDB 8.0    (expedientes)
@@ -29,7 +29,7 @@ Reglas de la vista:
 
 ## 2. Estructura del repositorio (D-54, guía sección 10)
 
-La organización sigue la que sugiere la guía (sección 10), con nombres en español donde no choca con ella. Equivalencias: `api/v1` = controladores; `servicios` = services; `repositorios/relacional|documental|grafo` = repositories/relational|document|graph.
+La organización sigue la que sugiere la guía (sección 10), con nombres en español donde no choca con ella. Equivalencias: `api` = controladores; `servicios` = services; `repositorios/relacional|documental|grafo` = repositories/relational|document|graph.
 
 ```
 saas_documents/
@@ -59,7 +59,7 @@ saas_documents/
 │   ├── app/
 │   │   ├── main.py               crea la app, monta routers, CORS, manejadores de error
 │   │   ├── config.py             pydantic-settings; lee .env
-│   │   ├── api/v1/               controladores: un router por recurso; sin lógica de negocio
+│   │   ├── api/               controladores: un router por recurso; sin lógica de negocio
 │   │   ├── servicios/            una función por operación O-xx
 │   │   ├── repositorios/
 │   │   │   ├── relacional/       PostgreSQL, patrones AR-xx
@@ -91,7 +91,7 @@ saas_documents/
 
 | Capa | Hace | No hace |
 | --- | --- | --- |
-| `api/v1` | Valida la entrada con Pydantic, obtiene el contexto del usuario, llama a un servicio, traduce el resultado a HTTP | SQL, Cypher, consultas a MongoDB, reglas de negocio |
+| `api` | Valida la entrada con Pydantic, obtiene el contexto del usuario, llama a un servicio, traduce el resultado a HTTP | SQL, Cypher, consultas a MongoDB, reglas de negocio |
 | `servicios` | Implementa una operación O-xx: permisos por rol, reglas (RI-xx), transacción, encolado en el outbox | Importar drivers; construir consultas |
 | `repositorios` | Implementa un patrón AR/AD/AG con consultas parametrizadas | Decidir permisos; llamar a otro repositorio |
 | `infra` | Pools (`psycopg_pool.AsyncConnectionPool`, `pymongo.AsyncMongoClient`, `neo4j.AsyncGraphDatabase`), unidad de trabajo de PostgreSQL | Lógica de dominio |
@@ -114,7 +114,7 @@ Consecuencia: el contenido del expediente viaja en el payload del outbox. Por es
 - Un solo proceso toma lotes en orden de `id` con `FOR UPDATE SKIP LOCKED` (AR-05).
 - Entrega al menos una vez: cada escritura en el destino es idempotente (`MERGE` en Neo4j; upsert por `_id` en MongoDB). La réplica nunca borra `Asunto` ni referencias (D-25).
 - Si un registro falla, reintenta con espera creciente y guarda `intentos` y `ultimo_error`. Al llegar al máximo lo marca `fallido` y deja en espera los registros posteriores **del mismo documento** (el orden importa para unir movimientos con `SIGUIENTE`); los de otros documentos siguen.
-- `/api/v1/salud` informa cuántos registros pendientes y fallidos hay.
+- `/api/salud` informa cuántos registros pendientes y fallidos hay.
 
 ### 3.3 Escritura con fuente en Neo4j (O-07, O-08, O-18, O-27)
 
@@ -140,7 +140,7 @@ Toda consulta Cypher parte de un `Documento`, un `Asunto` o de movimientos filtr
 
 ## 4. Contrato de la API (D-39)
 
-- Prefijo `/api/v1`. JSON en `snake_case`. Fechas en ISO 8601 con zona horaria; se guardan en UTC y la interfaz las muestra en America/Mexico_City.
+- Prefijo `/api`. JSON en `snake_case`. Fechas en ISO 8601 con zona horaria; se guardan en UTC y la interfaz las muestra en America/Mexico_City.
 - Errores con el formato *problem details* (RFC 9457) más un campo `codigo` estable: `NO_AUTENTICADO`, `SIN_PERMISO`, `NO_ENCONTRADO`, `VALIDACION`, `DUPLICADO`, `ESTADO_INVALIDO`, `CONFLICTO`, `BASE_NO_DISPONIBLE`.
 - Listados paginados con `?pagina=&tamano=` (máximo 100) y respuesta `{ "elementos": [], "total": n }`.
 - IDs: UUID generado por el backend, el mismo en las tres bases (D-15).

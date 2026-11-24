@@ -31,7 +31,7 @@ backend/
 └── app/
     ├── main.py               app, routers, CORS, manejadores de error
     ├── config.py             pydantic-settings; falla al iniciar si falta una variable
-    ├── api/v1/               un router por recurso; sin lógica de negocio
+    ├── api/               un router por recurso; sin lógica de negocio
     ├── servicios/            una función por operación O-xx
     ├── repositorios/
     │   ├── relacional/       PostgreSQL (AR-xx)

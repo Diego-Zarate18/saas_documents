@@ -8,7 +8,7 @@
 
 ## Objetivo
 
-Dejar un proyecto que arranca: las tres bases levantadas con docker-compose, un backend FastAPI que se conecta a las tres y lo demuestra en `/api/v1/salud`, un frontend vacío que consume ese endpoint por el proxy de Vite, y las herramientas de calidad funcionando. Sin lógica de negocio.
+Dejar un proyecto que arranca: las tres bases levantadas con docker-compose, un backend FastAPI que se conecta a las tres y lo demuestra en `/api/salud`, un frontend vacío que consume ese endpoint por el proxy de Vite, y las herramientas de calidad funcionando. Sin lógica de negocio.
 
 ## Alcance
 
@@ -21,17 +21,17 @@ Dejar un proyecto que arranca: las tres bases levantadas con docker-compose, un 
 2. **.env.example** con todas las variables de la sección 6 de la arquitectura y valores de desarrollo evidentes (no reales). Crea también tu `.env` local a partir de él; no se versiona.
 3. **backend/** con uv y Python 3.13:
    - Dependencias: `fastapi`, `uvicorn[standard]`, `pydantic-settings`, `psycopg[binary,pool]`, `pymongo`, `neo4j`. Desarrollo: `pytest`, `pytest-asyncio`, `httpx`, `ruff`. Ninguna otra.
-   - Estructura de la sección 2 de la arquitectura, creando solo lo que esta tarea usa: `app/main.py`, `app/config.py`, `app/infra/` (un módulo por base) y `app/api/v1/salud.py`. Las demás carpetas se crean cuando una tarea las necesite.
+   - Estructura de la sección 2 de la arquitectura, creando solo lo que esta tarea usa: `app/main.py`, `app/config.py`, `app/infra/` (un módulo por base) y `app/api/salud.py`. Las demás carpetas se crean cuando una tarea las necesite.
    - `config.py` con pydantic-settings; falla al iniciar si falta una variable obligatoria.
    - Los clientes de las tres bases se abren en el `lifespan` de FastAPI y se cierran al apagar: `AsyncConnectionPool` de psycopg, `AsyncMongoClient` de PyMongo y `AsyncGraphDatabase.driver` de Neo4j.
    - CORS limitado a `API_CORS_ORIGEN`.
-   - `GET /api/v1/salud`, sin sesión: consulta las tres bases en paralelo con un tiempo límite corto por base y responde `{"estado": "ok" | "degradado", "bases": {"postgres": {"ok": bool, "ms": int, "error": str | null}, "mongo": {…}, "neo4j": {…}}}`. Código 200 si las tres responden, 503 si alguna falla. Nunca expone credenciales ni cadenas de conexión en `error`.
+   - `GET /api/salud`, sin sesión: consulta las tres bases en paralelo con un tiempo límite corto por base y responde `{"estado": "ok" | "degradado", "bases": {"postgres": {"ok": bool, "ms": int, "error": str | null}, "mongo": {…}, "neo4j": {…}}}`. Código 200 si las tres responden, 503 si alguna falla. Nunca expone credenciales ni cadenas de conexión en `error`.
    - `backend/Dockerfile` para producción (sin dependencias de desarrollo) que corre uvicorn.
    - Configuración de ruff y pytest en `pyproject.toml`. Las pruebas viven en `tests/` de la raíz del repositorio (como pide la guía), no dentro de `backend/`: `tests/unit/` (salud con las bases simuladas: todas bien, una caída) y `tests/integration/` (conectividad y salud contra las bases reales, marcada para poder correrla aparte). Configura pytest para que se ejecuten desde `backend/` con `uv run pytest ../tests`.
 4. **frontend/** con la plantilla `react-ts` de Vite:
    - TypeScript estricto, `engines.node >= 24`.
    - Proxy de Vite: `/api` → `http://127.0.0.1:8000`.
-   - Una sola página que llama a `/api/v1/salud` y muestra el estado de cada base en texto plano. Sin biblioteca de componentes, sin router y sin TanStack Query todavía.
+   - Una sola página que llama a `/api/salud` y muestra el estado de cada base en texto plano. Sin biblioteca de componentes, sin router y sin TanStack Query todavía.
    - `npm run lint` y `npm run build` funcionando.
 5. **README.md** de la raíz: requisitos, cómo levantar las bases, el backend y el frontend en Windows, y cómo correr las pruebas.
 6. **CLAUDE.md**: llena solo la sección «Comandos» con los comandos reales que quedaron. No cambies el resto.
@@ -46,9 +46,9 @@ Ejecuta cada uno y pon su resultado resumido en el reporte.
 
 1. `docker compose up -d postgres mongo neo4j` y luego `docker compose ps`: las tres en estado `healthy`.
 2. En `backend/`: `uv sync`, `uv run ruff check`, `uv run ruff format --check` y `uv run pytest ../tests` en verde, incluidas las pruebas de integración. Guarda en `docs/pruebas/` el registro de esa ejecución (`T-03-conectividad.md`: comando, fecha, versión de cada base y resultado).
-3. Con el backend en local (`uv run uvicorn app.main:app`), `GET http://127.0.0.1:8000/api/v1/salud` devuelve 200 y `estado: ok` con las tres bases.
+3. Con el backend en local (`uv run uvicorn app.main:app`), `GET http://127.0.0.1:8000/api/salud` devuelve 200 y `estado: ok` con las tres bases.
 4. Con `docker compose stop neo4j`, el mismo endpoint devuelve 503, `estado: degradado` y solo `neo4j.ok = false`. Vuelve a levantarla después.
-5. `docker compose up -d --build api`: el contenedor arranca y `/api/v1/salud` responde `ok` desde él.
+5. `docker compose up -d --build api`: el contenedor arranca y `/api/salud` responde `ok` desde él.
 6. En `frontend/`: `npm ci`, `npm run lint` y `npm run build` sin errores; con `npm run dev` y el backend arriba, la página muestra las tres bases en `ok`.
 7. `git status` limpio después del commit y `git ls-files` no incluye `.env` ni `node_modules` ni `.venv`.
 

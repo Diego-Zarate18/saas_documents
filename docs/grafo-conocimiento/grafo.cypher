@@ -1,5 +1,5 @@
 // Grafo de conocimiento de SIGEDOC. Ejecutar en una base de Neo4j dedicada.
-// Actualizado: 2026-11-22
+// Actualizado: 2026-11-24
 
 CREATE CONSTRAINT nodo_id IF NOT EXISTS FOR (n:Nodo) REQUIRE n.id IS UNIQUE;
 
@@ -82,7 +82,7 @@ MERGE (n:Nodo:`Decision` {id: 'D-18'}) SET n += {nombre: 'id_grupo_turno para RI
 MERGE (n:Nodo:`Decision` {id: 'D-19'}) SET n += {nombre: 'Evidencia como nota del expediente', descripcion: 'Nota evidencia_atencion ligada al id_movimiento de la conclusión.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-20'}) SET n += {nombre: 'Documentos y movimientos no se borran', descripcion: 'Se cancelan o corrigen; solo se eliminan anexos, notas, referencias y pertenencias a asuntos capturados por error.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-21'}) SET n += {nombre: 'Folios con contador bloqueado', descripcion: 'contador_folio con SELECT ... FOR UPDATE en la transacción para no dejar huecos.', estado: 'tomada'};
-MERGE (n:Nodo:`Decision` {id: 'D-22'}) SET n += {nombre: 'Grafo adelgazado', descripcion: '5 etiquetas y 16 relaciones; sale todo lo que tiene fuente en PostgreSQL y no se recorre.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-22'}) SET n += {nombre: 'Grafo adelgazado', descripcion: '6 etiquetas y 13 relaciones (cifras vigentes tras D-52 y D-69); sale todo lo que tiene fuente en PostgreSQL y no se recorre.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-23'}) SET n += {nombre: 'Proyecto en documentos nuevos', descripcion: 'Los entregables de la actividad de grafos se conservan; el proyecto final vive en un documento propio.', estado: 'tomada'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-A1'}) SET n += {nombre: 'Unidad de seguimiento: documento o asunto', descripcion: 'Se siguen ambos: Documento y Asunto (RF-06).', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-A2'}) SET n += {nombre: 'Varios identificadores y número no único', descripcion: 'UUID propio más folio por área; UNIQUE parcial sobre número, emisor y año de fecha_documento.', estado: 'resuelto'};
@@ -251,7 +251,7 @@ MERGE (n:Nodo:`Decision` {id: 'D-50'}) SET n += {nombre: 'Consultas de grafo anc
 MERGE (n:Nodo:`Decision` {id: 'D-51'}) SET n += {nombre: 'C4 se resuelve en PostgreSQL', descripcion: 'Pendientes por responsable no recorre caminos: todo lo que necesita (movimientos, titular al turnar, adscripción) está en PostgreSQL. Presentarla como consulta de grafo debilitaba la justificación de Neo4j. El flujo integrado de la guía lo cubre O-11.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-52'}) SET n += {nombre: 'Relaciones organizacionales solo en PostgreSQL', descripcion: 'Aplica D-22: DEPENDE_DE, TITULAR_DE y ADSCRITA_A no las recorre ninguna consulta de grafo, así que salen de Neo4j; Área y Persona quedan como nodos de id y nombre para los movimientos.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-53'}) SET n += {nombre: 'Ficha completa con degradación controlada', descripcion: 'Si MongoDB o Neo4j no responden, la ficha devuelve lo disponible y marca la sección faltante, como pide la guía en el flujo integrado.', estado: 'tomada'};
-MERGE (n:Nodo:`Decision` {id: 'D-54'}) SET n += {nombre: 'Estructura del repositorio según la guía', descripcion: 'El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.', estado: 'tomada'};
+MERGE (n:Nodo:`Decision` {id: 'D-54'}) SET n += {nombre: 'Estructura del repositorio según la guía', descripcion: 'El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-55'}) SET n += {nombre: 'Esquemas versionados y versiones fijas', descripcion: 'El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes.', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-56'}) SET n += {nombre: 'Pruebas por tipo de la guía con evidencia de ejecución', descripcion: 'Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12).', estado: 'tomada'};
 MERGE (n:Nodo:`Decision` {id: 'D-57'}) SET n += {nombre: 'Desarrollo entre revisor y Claude Code', descripcion: 'El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación.', estado: 'tomada'};
@@ -266,6 +266,9 @@ MERGE (n:Nodo:`Decision` {id: 'D-65'}) SET n += {nombre: 'Los siete tipos de doc
 MERGE (n:Nodo:`Decision` {id: 'D-66'}) SET n += {nombre: 'Campos propios por tipo de documento', descripcion: 'Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Decision` {id: 'D-67'}) SET n += {nombre: 'El turno de oficialía o dirección no cierra el pendiente de otras áreas', descripcion: 'Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Decision` {id: 'D-68'}) SET n += {nombre: 'Atraer deja una sola área responsable', descripcion: 'Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-69'}) SET n += {nombre: 'Relaciones y propiedades del Movimiento en Neo4j', descripcion: 'El nodo Movimiento se une con SOBRE al Documento, con DESDE y HACIA a las áreas de origen y destino y con REALIZADO_POR a la Persona; sin área de origen (registro inicial) no se crea DESDE. Propiedades: id (único), fecha_hora y id_grupo_turno (D-18), tipo, motivo (catálogo D-32), id_area_sugerida (opcional, solo con no_competencia; propiedad y no relación), id_titular_al_turnar (D-31, nulo si el puesto está vacante) y rol. Mantiene las 13 relaciones de D-22 y D-52: parte DESDE_HACIA en DESDE y HACIA y no agrega etiquetas ni relaciones. Se sustituye por el modelo de datos (E-2) cuando este se entregue.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-70'}) SET n += {nombre: 'Regla para unir movimientos con SIGUIENTE', descripcion: 'SIGUIENTE se crea al replicar a Neo4j, no se guarda en PostgreSQL. Al replicar un movimiento M de un documento: si tiene área de origen, se une desde el movimiento más reciente del mismo documento que llegó a esa área (HACIA igual al DESDE de M); con varios orígenes, como en una atracción (D-68), se une uno por cada origen y las ramas se reúnen; un turno a varias áreas crea movimientos con el mismo origen y el mismo predecesor, y así se abren las ramas; el registro inicial no tiene predecesor. Caso límite para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área (D-67) queda unido al último movimiento que llegó a oficialía y no al que dejó el documento en esa área.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-71'}) SET n += {nombre: 'API sin versionado', descripcion: 'La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json.', estado: 'tomada'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-PEN'}) SET n += {nombre: 'Regla de pendiente y ubicación vigente con ramas', descripcion: 'Calculada de la bitácora en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-SIN'}) SET n += {nombre: 'Descripción corta para listados', descripcion: 'Columna sintesis en PostgreSQL.', estado: 'resuelto'};
 MERGE (n:Nodo:`Hueco` {id: 'HU-ROL'}) SET n += {nombre: 'Roles y permisos de turno sin definir', descripcion: 'Cinco roles con permisos de turno.', estado: 'resuelto'};
@@ -379,7 +382,9 @@ MATCH (a:Nodo {id: 'K-DOC'}), (b:Nodo {id: 'K-FOL'}) MERGE (a)-[:`RECIBE`]->(b);
 MATCH (a:Nodo {id: 'K-MOV'}), (b:Nodo {id: 'K-DOC'}) MERGE (a)-[:`SOBRE`]->(b);
 MATCH (a:Nodo {id: 'K-DOC'}), (b:Nodo {id: 'K-ASU'}) MERGE (a)-[:`PERTENECE_A`]->(b);
 MATCH (a:Nodo {id: 'K-REF'}), (b:Nodo {id: 'K-DOC'}) MERGE (a)-[:`UNE`]->(b);
-MATCH (a:Nodo {id: 'K-MOV'}), (b:Nodo {id: 'K-ARE'}) MERGE (a)-[:`DESDE_HACIA`]->(b);
+MATCH (a:Nodo {id: 'K-MOV'}), (b:Nodo {id: 'K-ARE'}) MERGE (a)-[:`DESDE`]->(b);
+MATCH (a:Nodo {id: 'K-MOV'}), (b:Nodo {id: 'K-ARE'}) MERGE (a)-[:`HACIA`]->(b);
+MATCH (a:Nodo {id: 'K-MOV'}), (b:Nodo {id: 'K-PER'}) MERGE (a)-[:`REALIZADO_POR`]->(b);
 MATCH (a:Nodo {id: 'K-PER'}), (b:Nodo {id: 'K-ARE'}) MERGE (a)-[:`ADSCRITA_A`]->(b);
 MATCH (a:Nodo {id: 'K-ACT'}), (b:Nodo {id: 'K-DOC'}) MERGE (a)-[:`ENVIA_O_RECIBE`]->(b);
 MATCH (a:Nodo {id: 'O-01'}), (b:Nodo {id: 'RF-01'}) MERGE (a)-[:`IMPLEMENTA`]->(b);
@@ -1239,6 +1244,33 @@ MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'D-67'}) MERGE (a)-[:`DERIVA_DE`]->(b)
 MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'O-23'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'O-14'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-68'}), (b:Nodo {id: 'K-MOV'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-69'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-03'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-09'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-11'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-22'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-31'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-32'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-52'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'D-18'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'DB-NJ'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'E-2'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'K-MOV'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-69'}), (b:Nodo {id: 'C3'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-70'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'D-09'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'D-48'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'D-67'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'D-68'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'D-69'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'K-MOV'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'AG-01'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'AG-06'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'C1'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-70'}), (b:Nodo {id: 'E-2'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-71'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-71'}), (b:Nodo {id: 'D-54'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-71'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

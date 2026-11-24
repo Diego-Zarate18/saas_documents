@@ -1,6 +1,6 @@
 # Grafo de conocimiento del proyecto SIGEDOC
 
-Actualizado: 2026-11-22
+Actualizado: 2026-11-24
 
 Este grafo reúne el contexto de la problemática, la solución con tres bases de datos (PostgreSQL, MongoDB y Neo4j), las decisiones tomadas, los huecos detectados y las deudas técnicas, y cómo se conectan entre sí. Sirve para justificar cualquier decisión rastreándola hasta las entrevistas, la guía del proyecto o la retroalimentación del profesor.
 
@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 278 nodos y 957 relaciones
+## Contenido: 281 nodos y 986 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 68 | Decisiones de diseño tomadas |
+| Decision | 71 | Decisiones de diseño tomadas |
 | Hueco | 54 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -211,7 +211,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-19 | Evidencia como nota del expediente | — | Nota evidencia_atencion ligada al id_movimiento de la conclusión. |
 | D-20 | Documentos y movimientos no se borran | — | Se cancelan o corrigen; solo se eliminan anexos, notas, referencias y pertenencias a asuntos capturados por error. |
 | D-21 | Folios con contador bloqueado | — | contador_folio con SELECT ... FOR UPDATE en la transacción para no dejar huecos. |
-| D-22 | Grafo adelgazado | — | 5 etiquetas y 16 relaciones; sale todo lo que tiene fuente en PostgreSQL y no se recorre. |
+| D-22 | Grafo adelgazado | — | 6 etiquetas y 13 relaciones (cifras vigentes tras D-52 y D-69); sale todo lo que tiene fuente en PostgreSQL y no se recorre. |
 | D-23 | Proyecto en documentos nuevos | — | Los entregables de la actividad de grafos se conservan; el proyecto final vive en un documento propio. |
 | D-24 | Asunto y referencias con fuente en Neo4j | — | Son los únicos datos propios del grafo; justifican el paradigma. |
 | D-25 | Protección de los datos propios del grafo | — | Unicidad en id, réplica con MERGE que nunca borra Asunto ni referencias, y respaldo con neo4j-admin database dump. |
@@ -243,7 +243,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-51 | C4 se resuelve en PostgreSQL | CTX-06 | Pendientes por responsable no recorre caminos: todo lo que necesita (movimientos, titular al turnar, adscripción) está en PostgreSQL. Presentarla como consulta de grafo debilitaba la justificación de Neo4j. El flujo integrado de la guía lo cubre O-11. |
 | D-52 | Relaciones organizacionales solo en PostgreSQL | — | Aplica D-22: DEPENDE_DE, TITULAR_DE y ADSCRITA_A no las recorre ninguna consulta de grafo, así que salen de Neo4j; Área y Persona quedan como nodos de id y nombre para los movimientos. |
 | D-53 | Ficha completa con degradación controlada | CTX-02 | Si MongoDB o Neo4j no responden, la ficha devuelve lo disponible y marca la sección faltante, como pide la guía en el flujo integrado. |
-| D-54 | Estructura del repositorio según la guía | CTX-02 | El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers. |
+| D-54 | Estructura del repositorio según la guía | CTX-02 | El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers. |
 | D-55 | Esquemas versionados y versiones fijas | CTX-02 | El esquema de cada base vive en scripts numerados (database/*/schema y validators en MongoDB) que aplica en orden python -m herramientas.esquemas y registra en la tabla esquema_version; también carga data/ y se reproduce desde cero (guía 7.4). Un script aplicado no se edita: se agrega otro. Versiones fijas: Python 3.13 con uv, Node.js 24 LTS, PostgreSQL 17, MongoDB 8.0 y Neo4j 5.26 Community (LTS), con etiqueta de parche fija en las imágenes. |
 | D-56 | Pruebas por tipo de la guía con evidencia de ejecución | CTX-02 | Pruebas en tests/unit, tests/integration y tests/e2e, más las consultas y pruebas propias de cada base en database/*/queries y database/graph/tests. Se cubren los tipos de prueba de la guía (sección 9) y, además, una prueba de visibilidad por cada consulta que lee documentos, porque ningún motor la impone. Los resultados se guardan en docs/pruebas/: un script sin evidencia de ejecución no cuenta (guía 12). |
 | D-57 | Desarrollo entre revisor y Claude Code | — | El revisor (Claude en claude.ai, con Diego) define arquitectura y alcance, asigna tareas en ai/handoff/siguiente.md y revisa; Claude Code implementa solo lo asignado y reporta en reporte.md e historial/, con un commit por tarea y sin push. Diego lleva los archivos y tiene la última palabra. Precedencia de fuentes: grafo, catálogo de operaciones, arquitectura, modelos y asignación. |
@@ -258,6 +258,9 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-66 | Campos propios por tipo de documento * | — | Solo tres tipos llevan campos propios, guardados en el expediente de MongoDB dentro del esquema versionado (D-55, D-60). Requerimiento de auditoría: ente_auditor (texto, obligatorio, con índice parcial según D-46) y puntos (lista de textos, opcional, sin búsqueda). Solicitud de transparencia: solicitante (texto, obligatorio, con índice parcial según D-46). Solicitud de material o pago: concepto (texto, opcional, sin búsqueda; es un supuesto). Oficio, memorándum, circular e informe no tienen campos propios. No se agregan consultas ni índices más allá de D-46, ni montos, fechas o estados por tipo. La interfaz muestra el bloque «Datos del tipo» al registrar y en la ficha solo cuando el tipo lo tiene. |
 | D-67 | El turno de oficialía o dirección no cierra el pendiente de otras áreas * | — | Se aplica D-42 literal: un área deja de tener un documento pendiente solo con un movimiento de salida desde ella, la conclusión o la cancelación. Por eso, cuando oficialía o dirección turnan un documento que otra área ya tiene pendiente, esa área lo conserva y el destino nuevo lo recibe además. Puede haber así varias áreas con el pendiente al mismo tiempo, y hasta dos responsables hasta que una de ellas devuelva, turne, concluya o el documento sea atraído (D-68). La regla RI-10 se aplica a cada grupo de turnos, no entre grupos distintos. |
 | D-68 | Atraer deja una sola área responsable * | — | Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67. |
+| D-69 | Relaciones y propiedades del Movimiento en Neo4j * | — | El nodo Movimiento se une con SOBRE al Documento, con DESDE y HACIA a las áreas de origen y destino y con REALIZADO_POR a la Persona; sin área de origen (registro inicial) no se crea DESDE. Propiedades: id (único), fecha_hora y id_grupo_turno (D-18), tipo, motivo (catálogo D-32), id_area_sugerida (opcional, solo con no_competencia; propiedad y no relación), id_titular_al_turnar (D-31, nulo si el puesto está vacante) y rol. Mantiene las 13 relaciones de D-22 y D-52: parte DESDE_HACIA en DESDE y HACIA y no agrega etiquetas ni relaciones. Se sustituye por el modelo de datos (E-2) cuando este se entregue. |
+| D-70 | Regla para unir movimientos con SIGUIENTE * | — | SIGUIENTE se crea al replicar a Neo4j, no se guarda en PostgreSQL. Al replicar un movimiento M de un documento: si tiene área de origen, se une desde el movimiento más reciente del mismo documento que llegó a esa área (HACIA igual al DESDE de M); con varios orígenes, como en una atracción (D-68), se une uno por cada origen y las ramas se reúnen; un turno a varias áreas crea movimientos con el mismo origen y el mismo predecesor, y así se abren las ramas; el registro inicial no tiene predecesor. Caso límite para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área (D-67) queda unido al último movimiento que llegó a oficialía y no al que dejó el documento en esa área. |
+| D-71 | API sin versionado | — | La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json. |
 
 ## Tipos de relación
 
@@ -265,14 +268,14 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 139 |
+| AFECTA | 149 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 31 |
+| DERIVA_DE | 45 |
 | DESCRIBE | 2 |
-| DESDE_HACIA | 1 |
+| DESDE | 1 |
 | DOCUMENTA | 116 |
 | EJECUTA | 72 |
 | ELIGE | 3 |
@@ -281,6 +284,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | EXPONE | 2 |
 | FUENTE_DE_VERDAD_DE | 10 |
 | GENERA | 19 |
+| HACIA | 1 |
 | IMPLEMENTA | 54 |
 | INTEGRA | 3 |
 | JUSTIFICA | 28 |
@@ -288,6 +292,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | ORIGINA | 28 |
 | PARCHA | 61 |
 | PERTENECE_A | 1 |
+| REALIZADO_POR | 1 |
 | RECIBE | 1 |
 | REGULA | 3 |
 | REGULADO_POR | 5 |
@@ -307,7 +312,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 54 |
-| TOMA | 68 |
+| TOMA | 71 |
 | UNE | 2 |
 | USA | 64 |
 

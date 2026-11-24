@@ -1,6 +1,6 @@
 {
   "proyecto": "SIGEDOC",
-  "actualizado": "2026-11-22",
+  "actualizado": "2026-11-24",
   "nodos": [
     {
       "id": "PRY",
@@ -616,7 +616,7 @@
       "id": "D-22",
       "tipo": "Decision",
       "nombre": "Grafo adelgazado",
-      "descripcion": "5 etiquetas y 16 relaciones; sale todo lo que tiene fuente en PostgreSQL y no se recorre.",
+      "descripcion": "6 etiquetas y 13 relaciones (cifras vigentes tras D-52 y D-69); sale todo lo que tiene fuente en PostgreSQL y no se recorre.",
       "estado": "tomada"
     },
     {
@@ -2087,7 +2087,7 @@
       "id": "D-54",
       "tipo": "Decision",
       "nombre": "Estructura del repositorio según la guía",
-      "descripcion": "El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api/v1 equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.",
+      "descripcion": "El repositorio sigue la organización que sugiere la guía (sección 10), con nombres en español donde no choca con ella: api equivale a controladores, servicios a services y repositorios/relacional|documental|grafo a repositories. El backend va por capas api → servicios → repositorios → infra y solo los repositorios usan drivers.",
       "estado": "tomada"
     },
     {
@@ -2191,6 +2191,29 @@
       "descripcion": "Al atraer un documento (O-23), el área que atrae queda como única responsable: dejan de tenerlo pendiente como responsable todas las demás áreas que lo tenían así, no solo la primera, y el movimiento de atracción las registra como orígenes. Las áreas con el documento solo como conocimiento o apoyo no cambian. Resuelve el caso de dos responsables que puede dejar D-67.",
       "estado": "tomada",
       "supuesto": true
+    },
+    {
+      "id": "D-69",
+      "tipo": "Decision",
+      "nombre": "Relaciones y propiedades del Movimiento en Neo4j",
+      "descripcion": "El nodo Movimiento se une con SOBRE al Documento, con DESDE y HACIA a las áreas de origen y destino y con REALIZADO_POR a la Persona; sin área de origen (registro inicial) no se crea DESDE. Propiedades: id (único), fecha_hora y id_grupo_turno (D-18), tipo, motivo (catálogo D-32), id_area_sugerida (opcional, solo con no_competencia; propiedad y no relación), id_titular_al_turnar (D-31, nulo si el puesto está vacante) y rol. Mantiene las 13 relaciones de D-22 y D-52: parte DESDE_HACIA en DESDE y HACIA y no agrega etiquetas ni relaciones. Se sustituye por el modelo de datos (E-2) cuando este se entregue.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-70",
+      "tipo": "Decision",
+      "nombre": "Regla para unir movimientos con SIGUIENTE",
+      "descripcion": "SIGUIENTE se crea al replicar a Neo4j, no se guarda en PostgreSQL. Al replicar un movimiento M de un documento: si tiene área de origen, se une desde el movimiento más reciente del mismo documento que llegó a esa área (HACIA igual al DESDE de M); con varios orígenes, como en una atracción (D-68), se une uno por cada origen y las ramas se reúnen; un turno a varias áreas crea movimientos con el mismo origen y el mismo predecesor, y así se abren las ramas; el registro inicial no tiene predecesor. Caso límite para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área (D-67) queda unido al último movimiento que llegó a oficialía y no al que dejó el documento en esa área.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-71",
+      "tipo": "Decision",
+      "nombre": "API sin versionado",
+      "descripcion": "La API se expone bajo el prefijo /api, sin /v1, y la carpeta de los controladores es api, sin v1. No hay una segunda versión prevista; el contrato es el OpenAPI exportado a docs/api/openapi.json.",
+      "estado": "tomada"
     },
     {
       "id": "HU-PEN",
@@ -2786,8 +2809,18 @@
     },
     {
       "origen": "K-MOV",
-      "relacion": "DESDE_HACIA",
+      "relacion": "DESDE",
       "destino": "K-ARE"
+    },
+    {
+      "origen": "K-MOV",
+      "relacion": "HACIA",
+      "destino": "K-ARE"
+    },
+    {
+      "origen": "K-MOV",
+      "relacion": "REALIZADO_POR",
+      "destino": "K-PER"
     },
     {
       "origen": "K-PER",
@@ -7083,6 +7116,141 @@
       "origen": "D-68",
       "relacion": "AFECTA",
       "destino": "K-MOV"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-69"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-03"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-09"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-11"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-22"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-31"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-32"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-52"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "DERIVA_DE",
+      "destino": "D-18"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "AFECTA",
+      "destino": "DB-NJ"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "D-69",
+      "relacion": "AFECTA",
+      "destino": "C3"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-70"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "DERIVA_DE",
+      "destino": "D-09"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "DERIVA_DE",
+      "destino": "D-48"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "DERIVA_DE",
+      "destino": "D-67"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "DERIVA_DE",
+      "destino": "D-68"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "DERIVA_DE",
+      "destino": "D-69"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "AFECTA",
+      "destino": "K-MOV"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "AFECTA",
+      "destino": "AG-01"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "AFECTA",
+      "destino": "AG-06"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "AFECTA",
+      "destino": "C1"
+    },
+    {
+      "origen": "D-70",
+      "relacion": "AFECTA",
+      "destino": "E-2"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-71"
+    },
+    {
+      "origen": "D-71",
+      "relacion": "DERIVA_DE",
+      "destino": "D-54"
+    },
+    {
+      "origen": "D-71",
+      "relacion": "AFECTA",
+      "destino": "E-6"
     }
   ]
 }

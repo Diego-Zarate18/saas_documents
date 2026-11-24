@@ -5,9 +5,19 @@
     "datos_tipo": {},
     "referencias_citadas": [],
     "anexos": [],
-    "notas": [],
+    "notas": [
+      {
+        "id": "00000000-0000-4000-8000-000000000742",
+        "tipo": "evidencia_atencion",
+        "texto": "Se entregó el equipamiento de los laboratorios con la requisición interna de Compras.",
+        "id_persona": "00000000-0000-4000-8000-000000000203",
+        "id_area": "00000000-0000-4000-8000-000000000103",
+        "fecha_hora": "2026-03-20T12:00:00-06:00",
+        "id_movimiento": "00000000-0000-4000-8000-000000000741"
+      }
+    ],
     "creado_en": "2026-03-10T10:00:00-06:00",
-    "actualizado_en": "2026-03-10T10:00:00-06:00"
+    "actualizado_en": "2026-03-20T12:00:00-06:00"
   },
   {
     "_id": "00000000-0000-4000-8000-000000001004",

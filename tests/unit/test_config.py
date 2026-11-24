@@ -10,10 +10,11 @@ VARIABLES = [nombre.upper() for nombre in Ajustes.model_fields]
 
 @pytest.fixture
 def entorno(monkeypatch):
-    """Todas las variables con un valor reconocible; POSTGRES_PORT necesita un número."""
+    """Todas las variables con un valor reconocible; las numéricas necesitan un número."""
     for variable in VARIABLES:
         monkeypatch.setenv(variable, VALOR)
-    monkeypatch.setenv('POSTGRES_PORT', '5433')
+    for variable in ('POSTGRES_PORT', 'SESION_MINUTOS_INACTIVIDAD', 'OUTBOX_INTERVALO_MS', 'OUTBOX_MAX_INTENTOS'):
+        monkeypatch.setenv(variable, '5433')
     return monkeypatch
 
 

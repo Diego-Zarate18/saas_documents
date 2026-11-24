@@ -3301,6 +3301,24 @@
       "id_titular_al_turnar": "00000000-0000-4000-8000-000000000204",
       "id_movimiento_corregido": null,
       "fecha_registro": "2026-11-17T12:00:00-06:00"
+    },
+    {
+      "id_movimiento": "00000000-0000-4000-8000-000000000741",
+      "id_documento": "00000000-0000-4000-8000-000000001000",
+      "tipo": "conclusion",
+      "fecha_hora": "2026-03-20T12:00:00-06:00",
+      "id_grupo_turno": null,
+      "id_area_origen": "00000000-0000-4000-8000-000000000103",
+      "id_area_destino": "00000000-0000-4000-8000-000000000103",
+      "rol": "responsable",
+      "instruccion": null,
+      "motivo": null,
+      "id_area_sugerida": null,
+      "forma_conclusion": "atencion_sin_oficio",
+      "id_persona": "00000000-0000-4000-8000-000000000203",
+      "id_titular_al_turnar": null,
+      "id_movimiento_corregido": null,
+      "fecha_registro": "2026-03-20T12:00:00-06:00"
     }
   ],
   "movimiento_origen": [],

@@ -1,4 +1,4 @@
-# SIGEDOC: las tres bases y la API (D-41). Los servicios outbox y web llegan en T-08 y T-17.
+# SIGEDOC: las tres bases, la API y el proceso del outbox (D-41). El servicio web llega después.
 # Todo valor sale de .env (copia de .env.example); aquí no hay credenciales.
 # Los puertos se publican solo en 127.0.0.1 (arquitectura, sección 6).
 # Healthchecks: cada 2 s mientras la base arranca (start_interval) y cada 30 s después.
@@ -67,7 +67,7 @@ services:
   api:
     build: ./backend
     env_file: .env
-    environment:
+    environment: &red_interna
       # Dentro de la red de compose las bases se alcanzan por su nombre de servicio y su puerto interno.
       POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
@@ -75,13 +75,22 @@ services:
       NEO4J_URI: bolt://neo4j:7687
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
-    depends_on:
+    depends_on: &bases_sanas
       postgres:
         condition: service_healthy
       mongo:
         condition: service_healthy
       neo4j:
         condition: service_healthy
+
+  # O-39: lleva a MongoDB y Neo4j lo que PostgreSQL confirmó (D-13, D-48). Un solo proceso.
+  outbox:
+    build: ./backend
+    command: ["/opt/venv/bin/python", "-m", "outbox"]
+    env_file: .env
+    environment: *red_interna
+    depends_on: *bases_sanas
+    restart: unless-stopped
 
 volumes:
   postgres-datos:

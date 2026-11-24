@@ -17,7 +17,8 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.13.9,source=/uv,target=/usr/local/bin/uv
     uv sync --frozen --no-dev --no-install-project
 
 COPY app ./app
-RUN python -m compileall -q app && useradd --system --no-create-home sigedoc
+COPY outbox ./outbox
+RUN python -m compileall -q app outbox && useradd --system --no-create-home sigedoc
 USER sigedoc
 
 EXPOSE 8000

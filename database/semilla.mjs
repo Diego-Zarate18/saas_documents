@@ -28,6 +28,36 @@ const ACTOR_DESTINATARIO = {
 
 // ── PostgreSQL ───────────────────────────────────────────────────────────────
 
+// RI-14: OP-2026-0087 está concluido; Compras, que lo tenía como responsable, lo concluyó sin oficio de respuesta
+// (D-59 atencion_sin_oficio) y dejó la evidencia de atención (D-19).
+const d0087 = documentos.find((d) => d.folio === 'OP-2026-0087')
+const conclusion0087 = {
+  id: uuid(741),
+  id_documento: d0087.id,
+  tipo: 'conclusion',
+  id_corrige: null,
+  id_grupo_turno: null,
+  id_area_origen: areaPorNombre.get('Compras'),
+  id_area_destino: areaPorNombre.get('Compras'),
+  rol: 'responsable',
+  instruccion: null,
+  motivo: null,
+  forma_conclusion: 'atencion_sin_oficio',
+  id_persona: personaPorNombre.get('Ing. Raúl Pérez'),
+  id_titular_al_turnar: null,
+  fecha_hora: '2026-03-20T12:00:00-06:00',
+}
+movimientos.push(conclusion0087)
+d0087.expediente.notas.push({
+  id: uuid(742),
+  tipo: 'evidencia_atencion',
+  area: 'Compras',
+  autor: 'Ing. Raúl Pérez',
+  fecha_hora: conclusion0087.fecha_hora,
+  texto: 'Se entregó el equipamiento de los laboratorios con la requisición interna de Compras.',
+  id_movimiento: conclusion0087.id,
+})
+
 const docsEntrada = documentos.map((d) => {
   // El relleno del simulador marca como externo a «Recursos Humanos»: si el nombre no es de un actor, es del área.
   const interno = d.tipo_emisor === 'area' || !actorPorNombre.has(d.emisor)

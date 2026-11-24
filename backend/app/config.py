@@ -22,7 +22,7 @@ class ErrorConfiguracion(RuntimeError):
 
 
 class Ajustes(BaseSettings):
-    """Variables que la API usa hoy. Las de sesión y outbox se agregan con T-07 y T-08."""
+    """Variables de la API y del proceso del outbox (arquitectura, sección 6)."""
 
     model_config = SettingsConfigDict(env_file_encoding='utf-8', extra='ignore', frozen=True)
 
@@ -42,6 +42,10 @@ class Ajustes(BaseSettings):
     neo4j_password: Secreto
 
     api_cors_origen: Texto
+    sesion_minutos_inactividad: int = 30
+
+    outbox_intervalo_ms: int = 1000
+    outbox_max_intentos: int = 5
 
 
 def cargar_ajustes(archivo_env: Path | None = ARCHIVO_ENV) -> Ajustes:

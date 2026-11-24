@@ -26,7 +26,7 @@ async def test_conectividad_postgres(ajustes):
         await postgres.verificar(pool)
         async with pool.connection() as conexion:
             cursor = await conexion.execute('SHOW server_version')
-            (version,) = await cursor.fetchone()
+            version = (await cursor.fetchone())['server_version']
         assert version.startswith('17.')
     finally:
         await pool.close()

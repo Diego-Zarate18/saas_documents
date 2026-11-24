@@ -4,6 +4,7 @@ Uso, desde backend/:
 
     uv run python -m herramientas.esquemas            # solo esquemas
     uv run python -m herramientas.esquemas --datos    # esquemas y semilla
+    uv run python -m herramientas.esquemas --reiniciar   # vacía los datos y recarga la semilla
 
 Cada script de database/<base>/schema (o validators en MongoDB) se aplica una sola vez y queda en la tabla
 esquema_version de PostgreSQL. La semilla se escribe en las tres bases de forma idempotente (ON CONFLICT DO NOTHING,
@@ -11,11 +12,8 @@ upsert con $setOnInsert y MERGE): correrla otra vez no duplica nada. No pasa por
 """
 
 import argparse
-import base64
-import hashlib
 import json
 import re
-import secrets
 import uuid
 from collections.abc import Iterable
 from datetime import datetime
@@ -29,6 +27,8 @@ from pymongo import MongoClient
 from pymongo.database import Database
 
 from app.config import Ajustes, cargar_ajustes
+from app.repositorios.grafo.replica import SIGUIENTE
+from app.seguridad import contrasenas
 
 DATABASE = Path(__file__).resolve().parents[2] / 'database'
 # Contraseña de todos los usuarios de la semilla (solo desarrollo; está en el README).
@@ -121,14 +121,6 @@ def esquema_neo4j(pg: psycopg.Connection, grafo: Driver) -> list[str]:
 # ── Semilla ────────────────────────────────────────────────────────────────────
 
 
-def hash_contrasena(contrasena: str) -> str:
-    """scrypt de la biblioteca estándar (adaptativo, sin dependencias): scrypt$n$r$p$sal$hash."""
-    n, r, p = 2**14, 8, 1
-    sal = secrets.token_bytes(16)
-    clave = hashlib.scrypt(contrasena.encode(), salt=sal, n=n, r=r, p=p)
-    return f'scrypt${n}${r}${p}${base64.b64encode(sal).decode()}${base64.b64encode(clave).decode()}'
-
-
 def insertar(pg: psycopg.Connection, tabla: str, filas: list[dict]) -> int:
     """INSERT … ON CONFLICT; devuelve las filas nuevas. Tabla y columnas salen de los archivos de la semilla."""
     if not filas:
@@ -148,7 +140,7 @@ def insertar(pg: psycopg.Connection, tabla: str, filas: list[dict]) -> int:
 
 
 def datos_postgres(pg: psycopg.Connection, semilla: dict) -> int:
-    usuarios = [{**u, 'hash_contrasena': hash_contrasena(CONTRASENA_DESARROLLO)} for u in semilla['usuarios']]
+    usuarios = [{**u, 'hash_contrasena': contrasenas.cifrar(CONTRASENA_DESARROLLO)} for u in semilla['usuarios']]
     contadores: dict[tuple[str, int], int] = {}
     for f in semilla['folios']:
         clave = (f['id_area'], f['anio'])
@@ -196,24 +188,6 @@ def datos_mongo(db: Database, expedientes: list[dict]) -> int:
 
 def _sin_nulos(fila: dict, campos: Iterable[str]) -> dict:
     return {c: fila[c] for c in campos if fila.get(c) is not None}
-
-
-# Regla de SIGUIENTE (04-grafo.md, D-70, D-103). Versión probada: el predecesor debe ser anterior (<) para que los
-# movimientos de un mismo turno, que comparten fecha y hora, no se encadenen entre sí.
-SIGUIENTE = """
-UNWIND $ids AS id
-MATCH (m:Movimiento {id: id})-[:SOBRE]->(d:Documento)
-WHERE m.tipo <> 'correccion'
-MATCH (m)-[:DESDE]->(o:Area)
-CALL (m, d, o) {
-  MATCH (p:Movimiento)-[:SOBRE]->(d)
-  WHERE p.id <> m.id AND p.tipo <> 'correccion' AND p.fecha_hora < m.fecha_hora
-  OPTIONAL MATCH (p)-[h:HACIA]->(o)
-  RETURN p ORDER BY h IS NOT NULL DESC, p.fecha_hora DESC
-  LIMIT 1
-}
-MERGE (p)-[:SIGUIENTE]->(m)
-"""
 
 
 def datos_neo4j(grafo: Driver, semilla: dict, propios: dict) -> int:
@@ -318,6 +292,46 @@ def datos_neo4j(grafo: Driver, semilla: dict, propios: dict) -> int:
     return creados
 
 
+# Datos que vacía --reiniciar; los catálogos y esquema_version se conservan.
+TABLAS_DATOS = (
+    'sesion',
+    'usuario',
+    'acuse',
+    'folio',
+    'contador_folio',
+    'movimiento_origen',
+    'movimiento',
+    'documento_destinatario',
+    'documento',
+    'outbox',
+    'persona',
+    'area',
+    'actor_externo',
+)
+
+
+def vaciar_datos(pg: psycopg.Connection, db: Database, grafo: Driver) -> None:
+    """O-41. Vacía los datos de las tres bases (TRUNCATE no dispara los disparadores de fila de la bitácora)."""
+    with pg.transaction():
+        pg.execute(
+            sql.SQL('TRUNCATE {} RESTART IDENTITY CASCADE').format(
+                sql.SQL(', ').join(map(sql.Identifier, TABLAS_DATOS))
+            )
+        )
+    db.expedientes.delete_many({})
+    grafo.execute_query('MATCH (n) DETACH DELETE n')
+
+
+def cargar_semilla(pg: psycopg.Connection, db: Database, grafo: Driver) -> tuple[int, int, int]:
+    """O-41. Escribe la semilla en las tres bases; devuelve lo nuevo en cada una."""
+    semilla = leer('relational/data/semilla.json')
+    return (
+        datos_postgres(pg, semilla),
+        datos_mongo(db, leer('document/data/expedientes.json')),
+        datos_neo4j(grafo, semilla, leer('graph/data/grafo.json')),
+    )
+
+
 def leer(ruta: str) -> dict | list:
     return json.loads((DATABASE / ruta).read_text(encoding='utf-8'))
 
@@ -351,6 +365,9 @@ def conectar(ajustes: Ajustes) -> tuple[psycopg.Connection, MongoClient, Driver]
 def main(argumentos: list[str] | None = None) -> None:
     analizador = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     analizador.add_argument('--datos', action='store_true', help='cargar también la semilla de database/*/data')
+    analizador.add_argument(
+        '--reiniciar', action='store_true', help='vaciar los datos de las tres bases y recargar la semilla'
+    )
     opciones = analizador.parse_args(argumentos)
 
     ajustes = cargar_ajustes()
@@ -363,12 +380,14 @@ def main(argumentos: list[str] | None = None) -> None:
             ('Neo4j', esquema_neo4j(pg, grafo)),
         ):
             print(f'{base}: {len(nuevos)} scripts nuevos{": " + ", ".join(nuevos) if nuevos else ""}')
-        if opciones.datos:
-            semilla = leer('relational/data/semilla.json')
-            print(f'Semilla en PostgreSQL: {datos_postgres(pg, semilla)} filas nuevas')
-            print(f'Semilla en MongoDB: {datos_mongo(db, leer("document/data/expedientes.json"))} expedientes nuevos')
-            nuevos = datos_neo4j(grafo, semilla, leer('graph/data/grafo.json'))
-            print(f'Semilla en Neo4j: {nuevos} nodos y relaciones nuevos')
+        if opciones.reiniciar:
+            vaciar_datos(pg, db, grafo)
+            print('Datos de las tres bases vaciados')
+        if opciones.datos or opciones.reiniciar:
+            filas, expedientes, nodos = cargar_semilla(pg, db, grafo)
+            print(f'Semilla en PostgreSQL: {filas} filas nuevas')
+            print(f'Semilla en MongoDB: {expedientes} expedientes nuevos')
+            print(f'Semilla en Neo4j: {nodos} nodos y relaciones nuevos')
     finally:
         grafo.close()
         mongo.close()

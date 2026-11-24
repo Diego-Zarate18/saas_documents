@@ -41,6 +41,7 @@ Backend, desde `backend/` (Python 3.13 con uv):
 
 ```powershell
 uv sync                                                        # dependencias exactas de uv.lock
+uv run python -m herramientas.esquemas --datos                 # esquemas de las tres bases y semilla (idempotente)
 uv run uvicorn app.main:app --loop asyncio:SelectorEventLoop   # API en http://127.0.0.1:8000; --loop solo en Windows (psycopg)
 uv run ruff check . ../tests                                   # lint (app y pruebas)
 uv run ruff format --check . ../tests                          # formato

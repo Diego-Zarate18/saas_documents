@@ -41,6 +41,21 @@ docker compose down -v                      # borra contenedores y volúmenes (p
 
 Neo4j Browser queda en <http://localhost:7474> (usuario `neo4j` y la contraseña de `.env`).
 
+### Esquemas y datos de prueba
+
+Con las bases arriba, desde `backend/`:
+
+```powershell
+uv run python -m herramientas.esquemas           # aplica lo que falte de los esquemas de las tres bases
+uv run python -m herramientas.esquemas --datos   # además carga la semilla (la misma que usa el modo simulado)
+```
+
+- Los scripts están en `database/relational/schema/`, `database/document/validators/` y `database/graph/schema/`. Cada uno se aplica una sola vez y queda registrado en la tabla `esquema_version` de PostgreSQL. Un script aplicado no se edita: los cambios van en uno nuevo.
+- La semilla (`database/*/data/`) se escribe en las tres bases a la vez; correrla otra vez no duplica nada. Todos los usuarios de la semilla entran con la contraseña de desarrollo `sigedoc-dev`.
+- La semilla se genera de `frontend/src/api/simulado/datos.ts` con `node database/semilla.mjs`, desde la raíz.
+- Para empezar de cero: `docker compose down -v` (borra los volúmenes) y `docker compose up -d postgres mongo neo4j`.
+- `database/*/queries/` tiene consultas de ejemplo para cada base; cada archivo dice cómo correrlo.
+
 ## Backend (API)
 
 Desde `backend/`:

@@ -1,0 +1,246 @@
+{
+  "coleccion": "expedientes",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": [
+        "_id",
+        "tipo",
+        "datos_tipo",
+        "referencias_citadas",
+        "anexos",
+        "notas",
+        "creado_en",
+        "actualizado_en"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "tipo": {
+          "enum": [
+            "oficio",
+            "solicitud_material_pago",
+            "requerimiento_auditoria",
+            "solicitud_transparencia",
+            "memorandum",
+            "circular",
+            "informe"
+          ]
+        },
+        "datos_tipo": {
+          "bsonType": "object"
+        },
+        "referencias_citadas": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "minLength": 1
+          }
+        },
+        "anexos": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "required": [
+              "id",
+              "titulo",
+              "hojas",
+              "ubicacion",
+              "id_persona",
+              "fecha_hora"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "bsonType": "string"
+              },
+              "titulo": {
+                "bsonType": "string",
+                "minLength": 1
+              },
+              "hojas": {
+                "bsonType": "int",
+                "minimum": 1
+              },
+              "ubicacion": {
+                "bsonType": "string",
+                "minLength": 1
+              },
+              "id_persona": {
+                "bsonType": "string"
+              },
+              "fecha_hora": {
+                "bsonType": "date"
+              }
+            }
+          }
+        },
+        "notas": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "required": [
+              "id",
+              "tipo",
+              "texto",
+              "id_persona",
+              "id_area",
+              "fecha_hora"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "bsonType": "string"
+              },
+              "tipo": {
+                "enum": [
+                  "general",
+                  "evidencia_atencion"
+                ]
+              },
+              "texto": {
+                "bsonType": "string",
+                "minLength": 1
+              },
+              "id_persona": {
+                "bsonType": "string"
+              },
+              "id_area": {
+                "bsonType": "string"
+              },
+              "fecha_hora": {
+                "bsonType": "date"
+              },
+              "id_movimiento": {
+                "bsonType": "string"
+              }
+            },
+            "oneOf": [
+              {
+                "properties": {
+                  "tipo": {
+                    "enum": [
+                      "general"
+                    ]
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "tipo": {
+                    "enum": [
+                      "evidencia_atencion"
+                    ]
+                  }
+                },
+                "required": [
+                  "id_movimiento"
+                ]
+              }
+            ]
+          }
+        },
+        "creado_en": {
+          "bsonType": "date"
+        },
+        "actualizado_en": {
+          "bsonType": "date"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "tipo": {
+              "enum": [
+                "requerimiento_auditoria"
+              ]
+            },
+            "datos_tipo": {
+              "bsonType": "object",
+              "required": [
+                "ente_auditor"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "ente_auditor": {
+                  "bsonType": "string",
+                  "minLength": 1
+                },
+                "puntos": {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "tipo": {
+              "enum": [
+                "solicitud_transparencia"
+              ]
+            },
+            "datos_tipo": {
+              "bsonType": "object",
+              "required": [
+                "solicitante"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "solicitante": {
+                  "bsonType": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "tipo": {
+              "enum": [
+                "solicitud_material_pago"
+              ]
+            },
+            "datos_tipo": {
+              "bsonType": "object",
+              "additionalProperties": false,
+              "properties": {
+                "concepto": {
+                  "bsonType": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "tipo": {
+              "enum": [
+                "oficio",
+                "memorandum",
+                "circular",
+                "informe"
+              ]
+            },
+            "datos_tipo": {
+              "bsonType": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        }
+      ]
+    }
+  },
+  "validationLevel": "strict",
+  "validationAction": "error"
+}

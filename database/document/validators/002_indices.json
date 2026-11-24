@@ -1,0 +1,31 @@
+{
+  "coleccion": "expedientes",
+  "indices": [
+    {
+      "keys": {
+        "datos_tipo.ente_auditor": 1
+      },
+      "name": "ix_ente_auditor",
+      "partialFilterExpression": {
+        "tipo": "requerimiento_auditoria"
+      },
+      "collation": {
+        "locale": "es",
+        "strength": 1
+      }
+    },
+    {
+      "keys": {
+        "datos_tipo.solicitante": 1
+      },
+      "name": "ix_solicitante",
+      "partialFilterExpression": {
+        "tipo": "solicitud_transparencia"
+      },
+      "collation": {
+        "locale": "es",
+        "strength": 1
+      }
+    }
+  ]
+}

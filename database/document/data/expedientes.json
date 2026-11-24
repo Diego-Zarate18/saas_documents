@@ -1,0 +1,487 @@
+[
+  {
+    "_id": "00000000-0000-4000-8000-000000001000",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-03-10T10:00:00-06:00",
+    "actualizado_en": "2026-03-10T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001004",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {
+      "concepto": "Equipo de cómputo de escritorio (12 piezas)"
+    },
+    "referencias_citadas": [],
+    "anexos": [
+      {
+        "id": "00000000-0000-4000-8000-000000000301",
+        "titulo": "Cotización de proveedor",
+        "hojas": 4,
+        "ubicacion": "Archivo de oficialía, gaveta 2",
+        "id_persona": "00000000-0000-4000-8000-000000000201",
+        "fecha_hora": "2026-11-18T09:12:00-06:00"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000302",
+        "titulo": "Ficha técnica de los equipos",
+        "hojas": 2,
+        "ubicacion": "Archivo de oficialía, gaveta 2",
+        "id_persona": "00000000-0000-4000-8000-000000000201",
+        "fecha_hora": "2026-11-18T09:12:00-06:00"
+      }
+    ],
+    "notas": [
+      {
+        "id": "00000000-0000-4000-8000-000000000311",
+        "tipo": "general",
+        "texto": "Se devuelve: falta la cotización firmada por el proveedor. Las demás hojas están completas.",
+        "id_persona": "00000000-0000-4000-8000-000000000203",
+        "id_area": "00000000-0000-4000-8000-000000000103",
+        "fecha_hora": "2026-11-21T10:05:00-06:00"
+      }
+    ],
+    "creado_en": "2026-11-18T09:12:00-06:00",
+    "actualizado_en": "2026-11-21T10:05:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001010",
+    "tipo": "requerimiento_auditoria",
+    "datos_tipo": {
+      "ente_auditor": "Órgano Interno de Control",
+      "puntos": [
+        "Contratos de servicios generales 2025"
+      ]
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-22T08:30:00-06:00",
+    "actualizado_en": "2026-11-22T08:30:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001012",
+    "tipo": "solicitud_transparencia",
+    "datos_tipo": {
+      "solicitante": "Ciudadano"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-21T13:20:00-06:00",
+    "actualizado_en": "2026-11-21T13:20:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001014",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-16T10:00:00-06:00",
+    "actualizado_en": "2026-11-16T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001022",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-12T11:00:00-06:00",
+    "actualizado_en": "2026-11-12T11:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001027",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-20T09:10:00-06:00",
+    "actualizado_en": "2026-11-20T09:10:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001031",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-18T12:00:00-06:00",
+    "actualizado_en": "2026-11-18T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001038",
+    "tipo": "requerimiento_auditoria",
+    "datos_tipo": {
+      "ente_auditor": "Órgano Interno de Control"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001044",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-10T10:00:00-06:00",
+    "actualizado_en": "2026-11-10T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001049",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-02T10:00:00-06:00",
+    "actualizado_en": "2026-11-02T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001059",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-04T10:00:00-06:00",
+    "actualizado_en": "2026-11-04T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001070",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-09T10:00:00-06:00",
+    "actualizado_en": "2026-11-09T10:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001074",
+    "tipo": "solicitud_transparencia",
+    "datos_tipo": {
+      "solicitante": "Ciudadano"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-21T08:30:00-06:00",
+    "actualizado_en": "2026-11-21T08:30:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001078",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-10T09:00:00-06:00",
+    "actualizado_en": "2026-11-10T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001080",
+    "tipo": "solicitud_transparencia",
+    "datos_tipo": {
+      "solicitante": "Ciudadano"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-10T09:00:00-06:00",
+    "actualizado_en": "2026-11-10T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001082",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-10T09:00:00-06:00",
+    "actualizado_en": "2026-11-10T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001084",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-11T09:00:00-06:00",
+    "actualizado_en": "2026-11-11T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001086",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-11T09:00:00-06:00",
+    "actualizado_en": "2026-11-11T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001088",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-11T09:00:00-06:00",
+    "actualizado_en": "2026-11-11T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001090",
+    "tipo": "solicitud_transparencia",
+    "datos_tipo": {
+      "solicitante": "Ciudadano"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-12T09:00:00-06:00",
+    "actualizado_en": "2026-11-12T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001092",
+    "tipo": "requerimiento_auditoria",
+    "datos_tipo": {
+      "ente_auditor": "Órgano Interno de Control"
+    },
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-12T09:00:00-06:00",
+    "actualizado_en": "2026-11-12T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001094",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001096",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001098",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001100",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-14T09:00:00-06:00",
+    "actualizado_en": "2026-11-14T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001102",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-11T09:00:00-06:00",
+    "actualizado_en": "2026-11-11T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001109",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-11T09:00:00-06:00",
+    "actualizado_en": "2026-11-11T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001116",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-12T09:00:00-06:00",
+    "actualizado_en": "2026-11-12T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001123",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-12T09:00:00-06:00",
+    "actualizado_en": "2026-11-12T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001130",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-10T09:00:00-06:00",
+    "actualizado_en": "2026-11-10T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001137",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001141",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001145",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001149",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-13T09:00:00-06:00",
+    "actualizado_en": "2026-11-13T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001153",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-17T09:00:00-06:00",
+    "actualizado_en": "2026-11-17T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000001157",
+    "tipo": "solicitud_material_pago",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-17T09:00:00-06:00",
+    "actualizado_en": "2026-11-17T09:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000501",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-20T12:00:00-06:00",
+    "actualizado_en": "2026-11-20T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000502",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-20T12:00:00-06:00",
+    "actualizado_en": "2026-11-20T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000503",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-20T12:00:00-06:00",
+    "actualizado_en": "2026-11-20T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000504",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-22T12:00:00-06:00",
+    "actualizado_en": "2026-11-22T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000505",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-17T12:00:00-06:00",
+    "actualizado_en": "2026-11-17T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000506",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-19T12:00:00-06:00",
+    "actualizado_en": "2026-11-19T12:00:00-06:00"
+  },
+  {
+    "_id": "00000000-0000-4000-8000-000000000507",
+    "tipo": "oficio",
+    "datos_tipo": {},
+    "referencias_citadas": [],
+    "anexos": [],
+    "notas": [],
+    "creado_en": "2026-11-19T12:00:00-06:00",
+    "actualizado_en": "2026-11-19T12:00:00-06:00"
+  }
+]

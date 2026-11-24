@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 291 nodos y 1080 relaciones
+## Contenido: 292 nodos y 1085 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 80 | Decisiones de diseño tomadas |
+| Decision | 81 | Decisiones de diseño tomadas |
 | Hueco | 55 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -271,6 +271,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-105 | Tablas y columnas del núcleo en PostgreSQL * | — | Diecisiete tablas: area, persona, usuario, sesion, actor_externo, tipo_documento, motivo_devolucion, forma_conclusion, documento, documento_destinatario, folio, contador_folio, acuse, movimiento, movimiento_origen, outbox y esquema_version (D-55). Tipos de documento, motivos y formas son catálogos con marca de activo (O-31); las listas cerradas (D-72) son CHECK. La fecha límite de D-60 no se modela, porque D-06 retiró los plazos y D-66 excluye fechas por tipo. documento agrega estado_previo (el estado antes de SUSTITUYE_A, para que O-18 lo devuelva, D-14), duplicado_de (O-26 y la forma duplicado) y motivo_cancelacion (O-24). usuario se separa de persona: una persona puede no tener cuenta, y el bloqueo por intentos fallidos de O-36 vive en usuario. |
 | D-106 | Rutas de la API del Apéndice A * | — | Las rutas, cuerpos, salidas y errores de la API son los del inventario del contrato (Apéndice A de la guía del backend), incluidos los ajustes y endpoints nuevos que propuso T-02c: GET /asuntos, borrar una referencia por número y emisor, acuses bajo /salidas y el selector de documentos. La paginación es la del contrato (pagina, tamano y respuesta elementos y total); el recorrido de un documento no se pagina. Cierra lo que quedaba por decidir antes de implementar las operaciones. |
 | D-107 | Bloqueo de sesión por intentos fallidos * | — | O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40). |
+| D-108 | Cliente de la API escrito a mano y sin simulador * | — | El cliente de la API del frontend se escribe a mano en src/api/real.ts e implementa ApiSigedoc con fetch y los tipos de tipos.ts, en lugar de generarse del OpenAPI como decían D-38 y D-63: la frontera ya está tipada y un generador sería una dependencia más a un día de la entrega. El simulador se retira por completo; la aplicación solo funciona contra la API real. |
 
 ## Tipos de relación
 
@@ -278,12 +279,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 198 |
+| AFECTA | 199 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 80 |
+| DERIVA_DE | 83 |
 | DESCRIBE | 2 |
 | DESDE | 1 |
 | DOCUMENTA | 116 |
@@ -322,7 +323,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 55 |
-| TOMA | 80 |
+| TOMA | 81 |
 | UNE | 2 |
 | USA | 64 |
 

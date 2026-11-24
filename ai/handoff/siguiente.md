@@ -1,33 +1,31 @@
-# T-07: Referencias, asuntos, consultas, búsqueda, administración y salidas
+# T-08: Interfaz conectada a la API real y retiro del simulador
 
 - Asignada: 2026-11-24
-- Depende de: T-06 (`8246571`)
-- Entrega: miércoles 25. Solo las pruebas que se piden aquí. Con esta tarea el backend queda completo.
+- Depende de: T-07 (`5cef832`)
+- Entrega: miércoles 25. La aplicación debe funcionar de punta a punta con las tres bases; no queda ningún dato simulado.
 
 ## Fuentes
 
-- `docs/guia-implementacion-backend.md`, Apéndice A, para cada función de abajo (D-106).
-- `docs/modelos/` y el catálogo: O-07, O-08, O-18, O-20, O-21, O-27, O-30 a O-35; consultas C2, C3, C5; patrones AG-02 a AG-05, AG-07 a AG-09, AD-07; decisiones D-14, D-29, D-30, D-32, D-33, D-46, D-47, D-50, D-58, D-61, D-101.
+- `frontend/src/api/contrato.ts` (`ApiSigedoc`), `tipos.ts` e `index.ts`: la frontera que se conecta.
+- `docs/api/openapi.json` o `GET /openapi.json` del backend: rutas reales (D-106).
+- D-36, D-38, D-63, D-108.
 
 ## Alcance
 
-1. **Ajustes a la ficha** (respuesta a las dudas de T-06):
-   - Con acceso restringido, el registro trae solo folio, tipo, estado y ubicación actual; número, emisor, fechas y canal van en `null` (D-29, igual que O-30).
-   - Las relaciones incluyen las que llegan al documento, no solo las que salen (AG-05), con su sentido.
-2. **Referencias** (O-07, O-18): crear y quitar las cuatro relaciones, con DocumentoNoRegistrado por número y emisor (D-33). SUSTITUYE_A solo entre registrados: escribe en Neo4j y deja al otro `sin_efecto` con `estado_previo` en PostgreSQL; quitarla lo devuelve (D-14).
-3. **Asuntos** (O-27, O-08, O-18): crear (con `id_documento` opcional), listar (`GET /asuntos`), asignar y sacar documentos.
-4. **Consultas de grafo**: C2 hilo (`/asuntos/{id}/hilo`, hasta 6 saltos), C5 alcance y C3 rebotes, con la regla de D-32 y anclas de D-50.
-5. **Búsqueda** (O-30): `GET /documentos` con todos los filtros, paginada; el filtro por campo del tipo consulta MongoDB y filtra la visibilidad en PostgreSQL (D-46). `GET /consultas/selector-documentos`.
-6. **Administración** (O-32 a O-35): áreas (sin ciclos con consulta recursiva, D-47; siglas inmutables con folios, D-61; no desactivar con pendientes), personas y usuarios (baja lógica; si era titular, el área queda vacante) y actores externos. Cada cambio de área o persona encola su réplica a Neo4j.
-7. **Salidas y acuses** (O-20, O-21): `POST /salidas`, `GET /salidas`, `POST /salidas/{id}/acuses`, `GET /consultas/acuses` (D-58, D-101).
+1. **Cliente real**: `src/api/real.ts` implementa `ApiSigedoc` con `fetch` sobre `/api` (proxy de Vite), `credentials: 'include'`, y convierte los errores RFC 9457 al mismo error con `codigo` que hoy usan las páginas. Se escribe a mano con los tipos de `tipos.ts` (D-108); no se agrega generador.
+2. **Retiro del simulador**: `index.ts` usa solo el cliente real. Se borran `src/api/simulado/`, `VITE_API_MODO`, `API_DISPONIBLE`, `AvisoApiReal` y `usuariosDePrueba` (V-01 queda con correo y contraseña). El indicador de salud de T-03 se conserva solo si sigue teniendo sentido sin el modo simulado; si no, se borra.
+3. **Pruebas del frontend**: las que dependen del simulador se borran; las que prueban componentes o reglas puras (`reglas.ts`) se quedan. No se escriben pruebas nuevas.
+4. **Semilla**: se borra `database/semilla.mjs`, que leía `datos.ts`; los JSON generados quedan como fuente de la semilla.
+5. **Recorrido de las pantallas** con la API real, usuario por rol (contraseña `sigedoc-dev`): iniciar sesión, bandeja, registrar, turnar, devolver, atraer, concluir, ficha, relacionar, asuntos e hilo, búsqueda, rebotes, salidas y acuse, administración. Corrige lo que falle por diferencias entre el contrato y la API; si la diferencia está en el backend, corrígela ahí.
+6. `README.md` y `CLAUDE.md`: comandos sin el modo simulado.
 
 ## Fuera de alcance
 
-Conectar el frontend, reconciliación, respaldo y evidencia (T-08).
+Reconciliación, respaldo, servicio `web`, mediciones y evidencia (T-09).
 
 ## Criterios de aceptación
 
-1. `uv run pytest ../tests` y `uv run ruff check . ../tests` en verde.
-2. Pruebas nuevas, solo estas: `test_o07_no_registrado_y_sustitucion_reversible`, `test_c2_hilo_de_un_asunto`, `test_c3_rebotes`, `test_o30_busqueda_por_campo_del_tipo_con_visibilidad`, `test_o33_area_sin_ciclos` y `test_o21_acuse_aparece_al_area_responsable`.
-3. Toda función del Apéndice A, salvo `usuariosPrueba`, tiene su endpoint. Anota en el reporte cualquier función que no tenga endpoint y por qué.
-4. Un solo commit `T-07: …` sin coautoría.
+1. `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` en verde; `uv run pytest ../tests` en verde.
+2. `grep -ri "simulad" frontend/src` no devuelve nada.
+3. En el reporte, una tabla con cada pantalla del punto 5: funciona o qué se corrigió. Sin capturas.
+4. Un solo commit `T-08: …` sin coautoría.

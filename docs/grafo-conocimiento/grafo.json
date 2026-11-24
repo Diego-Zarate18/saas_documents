@@ -2397,6 +2397,14 @@
       "descripcion": "O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40).",
       "estado": "tomada",
       "supuesto": true
+    },
+    {
+      "id": "D-108",
+      "tipo": "Decision",
+      "nombre": "Cliente de la API escrito a mano y sin simulador",
+      "descripcion": "El cliente de la API del frontend se escribe a mano en src/api/real.ts e implementa ApiSigedoc con fetch y los tipos de tipos.ts, en lugar de generarse del OpenAPI como decían D-38 y D-63: la frontera ya está tipada y un generador sería una dependencia más a un día de la entrega. El simulador se retira por completo; la aplicación solo funciona contra la API real.",
+      "estado": "tomada",
+      "supuesto": true
     }
   ],
   "relaciones": [
@@ -7799,6 +7807,31 @@
       "origen": "D-107",
       "relacion": "AFECTA",
       "destino": "E-6"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-108"
+    },
+    {
+      "origen": "D-108",
+      "relacion": "DERIVA_DE",
+      "destino": "D-38"
+    },
+    {
+      "origen": "D-108",
+      "relacion": "DERIVA_DE",
+      "destino": "D-63"
+    },
+    {
+      "origen": "D-108",
+      "relacion": "DERIVA_DE",
+      "destino": "D-106"
+    },
+    {
+      "origen": "D-108",
+      "relacion": "AFECTA",
+      "destino": "E-7"
     }
   ]
 }

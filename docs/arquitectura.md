@@ -246,7 +246,7 @@ SPA con React, Vite y TypeScript estricto. Estado del servidor con TanStack Quer
 
 ## 10. Plan de tareas para Claude Code
 
-Una tarea a la vez; cada una deja sus pruebas en verde y un commit. La evidencia para la guía se junta en T-08. El detalle llega en `ai/handoff/siguiente.md`.
+Una tarea a la vez; cada una deja sus pruebas en verde y un commit. La evidencia para la guía se junta en T-09. El detalle llega en `ai/handoff/siguiente.md`.
 
 | Tarea | Contenido | Depende de |
 | --- | --- | --- |
@@ -259,7 +259,8 @@ Una tarea a la vez; cada una deja sus pruebas en verde y un commit. La evidencia
 | T-05 | Sesiones, roles y visibilidad (O-36 a O-38); registro O-01 con folio y outbox O-39; turnos, devoluciones, atracción y bandeja (O-03, O-22, O-23, O-14) | T-04 |
 | T-06 | Ficha O-11 con C1 y expediente (O-09, O-17, O-28, O-29); conclusión, cancelación, corrección, duplicados y segunda recepción (O-05, O-24, O-25, O-26, O-19) | T-05 |
 | T-07 | Referencias y asuntos (O-07, O-08, O-18, O-27), C2, C3, C5; búsqueda, catálogos, organización, administración y salidas (O-30 a O-35, O-20, O-21) | T-06 |
-| T-08 | Interfaz conectada a la API y retiro del simulador; reconciliación O-40 y respaldo O-41; servicio `web` en el compose; README de instalación; una prueba por tipo de la guía y evidencia en `docs/pruebas/evidencia.md`; `docs/api/openapi.json` | T-07 |
+| T-08 | Interfaz conectada a la API real con cliente escrito a mano (D-108) y retiro del simulador | T-07 |
+| T-09 | Cierre: reconciliación O-40, respaldo O-41, servicio `web`, README de instalación, `docs/api/openapi.json` y mediciones por tipo de prueba en `docs/pruebas/evidencia.md` | T-08 |
 
 ## 11. Trazabilidad con la guía
 

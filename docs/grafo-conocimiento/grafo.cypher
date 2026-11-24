@@ -294,6 +294,7 @@ MERGE (n:Nodo:`Decision` {id: 'D-105'}) SET n += {nombre: 'Tablas y columnas del
 MERGE (n:Nodo:`Hueco` {id: 'HU-DEST'}) SET n += {nombre: 'Destinatarios internos sin captura', descripcion: 'D-04 y D-100 conservan DIRIGIDO_A y COPIA_A con la tabla documento_destinatario, pero O-01 no recibe destinatarios y el contrato del frontend no los captura. Falta decidir si O-01 los captura o si las dos relaciones salen del modelo.', estado: 'abierto'};
 MERGE (n:Nodo:`Decision` {id: 'D-106'}) SET n += {nombre: 'Rutas de la API del Apéndice A', descripcion: 'Las rutas, cuerpos, salidas y errores de la API son los del inventario del contrato (Apéndice A de la guía del backend), incluidos los ajustes y endpoints nuevos que propuso T-02c: GET /asuntos, borrar una referencia por número y emisor, acuses bajo /salidas y el selector de documentos. La paginación es la del contrato (pagina, tamano y respuesta elementos y total); el recorrido de un documento no se pagina. Cierra lo que quedaba por decidir antes de implementar las operaciones.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Decision` {id: 'D-107'}) SET n += {nombre: 'Bloqueo de sesión por intentos fallidos', descripcion: 'O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40).', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-108'}) SET n += {nombre: 'Cliente de la API escrito a mano y sin simulador', descripcion: 'El cliente de la API del frontend se escribe a mano en src/api/real.ts e implementa ApiSigedoc con fetch y los tipos de tipos.ts, en lugar de generarse del OpenAPI como decían D-38 y D-63: la frontera ya está tipada y un generador sería una dependencia más a un día de la entrega. El simulador se retira por completo; la aplicación solo funciona contra la API real.', estado: 'tomada', supuesto: true};
 
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-01'}) MERGE (a)-[:`SE_BASA_EN`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-02'}) MERGE (a)-[:`SE_RIGE_POR`]->(b);
@@ -1375,6 +1376,11 @@ MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-107'}) MERGE (a)-[:`TOMA`]->(b);
 MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'D-49'}) MERGE (a)-[:`DERIVA_DE`]->(b);
 MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'O-36'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-108'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-108'}), (b:Nodo {id: 'D-38'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-108'}), (b:Nodo {id: 'D-63'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-108'}), (b:Nodo {id: 'D-106'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-108'}), (b:Nodo {id: 'E-7'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

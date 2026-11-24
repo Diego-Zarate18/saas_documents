@@ -292,6 +292,8 @@ MERGE (n:Nodo:`Decision` {id: 'D-103'}) SET n += {nombre: 'Caso límite al unir 
 MERGE (n:Nodo:`Decision` {id: 'D-104'}) SET n += {nombre: 'Estructura del expediente en MongoDB', descripcion: 'Colección expedientes con _id (el id_documento), tipo, datos_tipo (los campos de D-66), referencias_citadas (lista de textos, solo informativa, AD-01), anexos, notas, creado_en y actualizado_en. Anexo: id, titulo (la descripción de O-28), hojas, ubicacion, id_persona y fecha_hora; el autor hace posible la regla de O-17. Nota: id, tipo (general o evidencia_atencion), texto, id_persona, id_area, fecha_hora e id_movimiento, obligatorio en evidencia_atencion (D-19). Validación con $jsonSchema y oneOf por tipo, sin control de versión optimista.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Decision` {id: 'D-105'}) SET n += {nombre: 'Tablas y columnas del núcleo en PostgreSQL', descripcion: 'Diecisiete tablas: area, persona, usuario, sesion, actor_externo, tipo_documento, motivo_devolucion, forma_conclusion, documento, documento_destinatario, folio, contador_folio, acuse, movimiento, movimiento_origen, outbox y esquema_version (D-55). Tipos de documento, motivos y formas son catálogos con marca de activo (O-31); las listas cerradas (D-72) son CHECK. La fecha límite de D-60 no se modela, porque D-06 retiró los plazos y D-66 excluye fechas por tipo. documento agrega estado_previo (el estado antes de SUSTITUYE_A, para que O-18 lo devuelva, D-14), duplicado_de (O-26 y la forma duplicado) y motivo_cancelacion (O-24). usuario se separa de persona: una persona puede no tener cuenta, y el bloqueo por intentos fallidos de O-36 vive en usuario.', estado: 'tomada', supuesto: true};
 MERGE (n:Nodo:`Hueco` {id: 'HU-DEST'}) SET n += {nombre: 'Destinatarios internos sin captura', descripcion: 'D-04 y D-100 conservan DIRIGIDO_A y COPIA_A con la tabla documento_destinatario, pero O-01 no recibe destinatarios y el contrato del frontend no los captura. Falta decidir si O-01 los captura o si las dos relaciones salen del modelo.', estado: 'abierto'};
+MERGE (n:Nodo:`Decision` {id: 'D-106'}) SET n += {nombre: 'Rutas de la API del Apéndice A', descripcion: 'Las rutas, cuerpos, salidas y errores de la API son los del inventario del contrato (Apéndice A de la guía del backend), incluidos los ajustes y endpoints nuevos que propuso T-02c: GET /asuntos, borrar una referencia por número y emisor, acuses bajo /salidas y el selector de documentos. La paginación es la del contrato (pagina, tamano y respuesta elementos y total); el recorrido de un documento no se pagina. Cierra lo que quedaba por decidir antes de implementar las operaciones.', estado: 'tomada', supuesto: true};
+MERGE (n:Nodo:`Decision` {id: 'D-107'}) SET n += {nombre: 'Bloqueo de sesión por intentos fallidos', descripcion: 'O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40).', estado: 'tomada', supuesto: true};
 
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-01'}) MERGE (a)-[:`SE_BASA_EN`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'CTX-02'}) MERGE (a)-[:`SE_RIGE_POR`]->(b);
@@ -1361,6 +1363,18 @@ MATCH (a:Nodo {id: 'D-105'}), (b:Nodo {id: 'O-31'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'D-105'}), (b:Nodo {id: 'O-36'}) MERGE (a)-[:`AFECTA`]->(b);
 MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'HU-DEST'}) MERGE (a)-[:`TIENE_HUECO`]->(b);
 MATCH (a:Nodo {id: 'HU-DEST'}), (b:Nodo {id: 'O-01'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-106'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'D-39'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'D-63'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'D-71'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'O-18'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'O-21'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'O-30'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-106'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'PRY'}), (b:Nodo {id: 'D-107'}) MERGE (a)-[:`TOMA`]->(b);
+MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'D-49'}) MERGE (a)-[:`DERIVA_DE`]->(b);
+MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'O-36'}) MERGE (a)-[:`AFECTA`]->(b);
+MATCH (a:Nodo {id: 'D-107'}), (b:Nodo {id: 'E-6'}) MERGE (a)-[:`AFECTA`]->(b);
 
 // ---------- Consultas de ejemplo ----------
 

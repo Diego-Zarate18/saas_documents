@@ -16,7 +16,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | `visor.html` | Plantilla del visor (paneles ajustables y ocultables); `generar.py` la necesita en la misma carpeta. |
 | `README.md` | Este resumen. |
 
-## Contenido: 289 nodos y 1068 relaciones
+## Contenido: 291 nodos y 1080 relaciones
 
 | Tipo de nodo | Cantidad | Qué representa |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Este grafo reúne el contexto de la problemática, la solución con tres bases d
 | Base | 3 | Los tres motores |
 | Concepto | 10 | Conceptos del dominio y su fuente de verdad |
 | Regla | 3 | Reglas de integridad y dónde se imponen |
-| Decision | 78 | Decisiones de diseño tomadas |
+| Decision | 80 | Decisiones de diseño tomadas |
 | Hueco | 55 | Huecos técnicos detectados y su estado |
 | DeudaTecnica | 19 | Compromisos aceptados o mitigados |
 | Alcance | 1 | Lo que queda fuera y las limitaciones declaradas |
@@ -269,6 +269,8 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | D-103 | Caso límite al unir movimientos con SIGUIENTE * | — | Se confirma el caso que D-70 dejó para E-2: un turno de oficialía o dirección sobre un documento pendiente en otra área se une al último movimiento que llegó al área que turna, y la rama de la otra área sigue abierta (D-67). Si ningún movimiento llegó antes al área de origen, como cuando dirección turna un documento que no recibió, se une desde el movimiento más reciente del documento que no sea corrección. Las correcciones no se unen con SIGUIENTE. |
 | D-104 | Estructura del expediente en MongoDB * | — | Colección expedientes con _id (el id_documento), tipo, datos_tipo (los campos de D-66), referencias_citadas (lista de textos, solo informativa, AD-01), anexos, notas, creado_en y actualizado_en. Anexo: id, titulo (la descripción de O-28), hojas, ubicacion, id_persona y fecha_hora; el autor hace posible la regla de O-17. Nota: id, tipo (general o evidencia_atencion), texto, id_persona, id_area, fecha_hora e id_movimiento, obligatorio en evidencia_atencion (D-19). Validación con $jsonSchema y oneOf por tipo, sin control de versión optimista. |
 | D-105 | Tablas y columnas del núcleo en PostgreSQL * | — | Diecisiete tablas: area, persona, usuario, sesion, actor_externo, tipo_documento, motivo_devolucion, forma_conclusion, documento, documento_destinatario, folio, contador_folio, acuse, movimiento, movimiento_origen, outbox y esquema_version (D-55). Tipos de documento, motivos y formas son catálogos con marca de activo (O-31); las listas cerradas (D-72) son CHECK. La fecha límite de D-60 no se modela, porque D-06 retiró los plazos y D-66 excluye fechas por tipo. documento agrega estado_previo (el estado antes de SUSTITUYE_A, para que O-18 lo devuelva, D-14), duplicado_de (O-26 y la forma duplicado) y motivo_cancelacion (O-24). usuario se separa de persona: una persona puede no tener cuenta, y el bloqueo por intentos fallidos de O-36 vive en usuario. |
+| D-106 | Rutas de la API del Apéndice A * | — | Las rutas, cuerpos, salidas y errores de la API son los del inventario del contrato (Apéndice A de la guía del backend), incluidos los ajustes y endpoints nuevos que propuso T-02c: GET /asuntos, borrar una referencia por número y emisor, acuses bajo /salidas y el selector de documentos. La paginación es la del contrato (pagina, tamano y respuesta elementos y total); el recorrido de un documento no se pagina. Cierra lo que quedaba por decidir antes de implementar las operaciones. |
+| D-107 | Bloqueo de sesión por intentos fallidos * | — | O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40). |
 
 ## Tipos de relación
 
@@ -276,12 +278,12 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | --- | --- |
 | ACEPTA | 5 |
 | ADSCRITA_A | 1 |
-| AFECTA | 192 |
+| AFECTA | 198 |
 | ATIENDE | 15 |
 | CONTRIBUYE_A | 16 |
 | DEFINE_ROL | 5 |
 | DELIMITA | 1 |
-| DERIVA_DE | 76 |
+| DERIVA_DE | 80 |
 | DESCRIBE | 2 |
 | DESDE | 1 |
 | DOCUMENTA | 116 |
@@ -320,7 +322,7 @@ Las marcadas con * son supuestos declarados, pendientes de validar con direcció
 | TIENE | 1 |
 | TIENE_DEUDA | 19 |
 | TIENE_HUECO | 55 |
-| TOMA | 78 |
+| TOMA | 80 |
 | UNE | 2 |
 | USA | 64 |
 

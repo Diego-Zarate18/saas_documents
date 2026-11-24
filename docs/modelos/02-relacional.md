@@ -195,7 +195,7 @@ Fuera del diagrama, por no tener llaves foráneas: `outbox` y `esquema_version`.
 |---|---|---|---|---|
 | id_persona | uuid | no | PK, FK → persona | |
 | rol | char(2) | no | CHECK IN ('OF','DI','TI','PE','AD') | D-44 |
-| hash_contrasena | text | no | | Hash adaptativo (Argon2 o bcrypt) |
+| hash_contrasena | text | no | | scrypt de la biblioteca estándar (D-107) |
 | intentos_fallidos | smallint | no | DEFAULT 0, CHECK ≥ 0 | Bloqueo temporal de O-36 |
 | bloqueado_hasta | timestamptz | sí | | |
 

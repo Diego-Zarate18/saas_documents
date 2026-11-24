@@ -95,7 +95,7 @@ WHERE m.tipo <> 'correccion'
 MATCH (m)-[:DESDE]->(o:Area)
 CALL (m, d, o) {
   MATCH (p:Movimiento)-[:SOBRE]->(d)
-  WHERE p.id <> m.id AND p.tipo <> 'correccion' AND p.fecha_hora <= m.fecha_hora
+  WHERE p.id <> m.id AND p.tipo <> 'correccion' AND p.fecha_hora < m.fecha_hora
   OPTIONAL MATCH (p)-[h:HACIA]->(o)
   RETURN p ORDER BY h IS NOT NULL DESC, p.fecha_hora DESC
   LIMIT 1

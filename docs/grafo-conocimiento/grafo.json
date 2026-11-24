@@ -2381,6 +2381,22 @@
       "nombre": "Destinatarios internos sin captura",
       "descripcion": "D-04 y D-100 conservan DIRIGIDO_A y COPIA_A con la tabla documento_destinatario, pero O-01 no recibe destinatarios y el contrato del frontend no los captura. Falta decidir si O-01 los captura o si las dos relaciones salen del modelo.",
       "estado": "abierto"
+    },
+    {
+      "id": "D-106",
+      "tipo": "Decision",
+      "nombre": "Rutas de la API del Apéndice A",
+      "descripcion": "Las rutas, cuerpos, salidas y errores de la API son los del inventario del contrato (Apéndice A de la guía del backend), incluidos los ajustes y endpoints nuevos que propuso T-02c: GET /asuntos, borrar una referencia por número y emisor, acuses bajo /salidas y el selector de documentos. La paginación es la del contrato (pagina, tamano y respuesta elementos y total); el recorrido de un documento no se pagina. Cierra lo que quedaba por decidir antes de implementar las operaciones.",
+      "estado": "tomada",
+      "supuesto": true
+    },
+    {
+      "id": "D-107",
+      "tipo": "Decision",
+      "nombre": "Bloqueo de sesión por intentos fallidos",
+      "descripcion": "O-36 bloquea la cuenta 15 minutos tras 5 intentos fallidos seguidos; un inicio correcto reinicia el contador. Las contraseñas se guardan con scrypt de la biblioteca estándar de Python, para no agregar dependencias (D-40).",
+      "estado": "tomada",
+      "supuesto": true
     }
   ],
   "relaciones": [
@@ -7723,6 +7739,66 @@
       "origen": "HU-DEST",
       "relacion": "AFECTA",
       "destino": "O-01"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-106"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "DERIVA_DE",
+      "destino": "D-39"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "DERIVA_DE",
+      "destino": "D-63"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "DERIVA_DE",
+      "destino": "D-71"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "AFECTA",
+      "destino": "O-18"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "AFECTA",
+      "destino": "O-21"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "AFECTA",
+      "destino": "O-30"
+    },
+    {
+      "origen": "D-106",
+      "relacion": "AFECTA",
+      "destino": "E-6"
+    },
+    {
+      "origen": "PRY",
+      "relacion": "TOMA",
+      "destino": "D-107"
+    },
+    {
+      "origen": "D-107",
+      "relacion": "DERIVA_DE",
+      "destino": "D-49"
+    },
+    {
+      "origen": "D-107",
+      "relacion": "AFECTA",
+      "destino": "O-36"
+    },
+    {
+      "origen": "D-107",
+      "relacion": "AFECTA",
+      "destino": "E-6"
     }
   ]
 }

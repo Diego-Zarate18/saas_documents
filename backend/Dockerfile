@@ -12,9 +12,9 @@ WORKDIR /app
 
 # Primero las dependencias, en su propia capa: se reutiliza mientras uv.lock no cambie. uv solo se monta para
 # instalar; no queda en la imagen.
+COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /usr/local/bin/uv
 COPY pyproject.toml uv.lock .python-version ./
-RUN --mount=from=ghcr.io/astral-sh/uv:0.13.9,source=/uv,target=/usr/local/bin/uv \
-    uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project && rm -f /usr/local/bin/uv
 
 COPY app ./app
 COPY outbox ./outbox

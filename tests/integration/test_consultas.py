@@ -1,7 +1,7 @@
 """T-07: referencias, hilo de un asunto, rebotes, búsqueda, áreas sin ciclos y acuses, por la API."""
 
 import pytest
-from apoyo_api import CO, JU, OP, OP_0139, entrar, id_por_folio, nuevo, vaciar_outbox
+from apoyo_api import CO, JU, OP, OP_0139, bandeja, entrar, id_por_folio, nuevo, vaciar_outbox
 
 pytestmark = [pytest.mark.integracion, pytest.mark.asyncio(loop_scope='module')]
 
@@ -266,3 +266,126 @@ async def test_o21_acuse_aparece_al_area_responsable(api, semilla):
     assert esperado not in (await api.get('/api/consultas/acuses', headers=finanzas)).json()['elementos']
     con_acuse = (await api.get('/api/salidas', params={'acuse': 'con'}, headers=oficialia)).json()['elementos']
     assert 'CO-2026-0050' in {s['folio'] for s in con_acuse}
+
+
+async def test_c4_pendientes_por_responsable(api):
+    oficialia, compras, finanzas, admin = [await entrar(api, u) for u in ('mflores', 'rperez', 'ediaz', 'lgomez')]
+    doc = (
+        await api.post(
+            '/api/documentos',
+            json=nuevo('Documento con dos ramas C4'),
+            headers=oficialia,
+        )
+    ).json()
+    assert (
+        await api.post(
+            f'/api/documentos/{doc["id"]}/turnos',
+            json={
+                'destinos': [
+                    {'id_area': CO, 'rol': 'responsable'},
+                    {'id_area': '00000000-0000-4000-8000-000000000104', 'rol': 'apoyo'},
+                ]
+            },
+            headers=oficialia,
+        )
+    ).status_code == 201
+
+    # Normal y límite: aparece en la bandeja de ambas áreas con su rol respectivo.
+    b_co = await bandeja(api, compras, CO)
+    b_fi = await bandeja(api, finanzas, '00000000-0000-4000-8000-000000000104')
+    assert b_co[doc['id']]['rol'] == 'responsable'
+    assert b_fi[doc['id']]['rol'] == 'apoyo'
+
+    # Error / visibilidad: administrador no tiene bandeja (403); Compras no ve otra área (403).
+    assert (await api.get('/api/bandeja', headers=admin)).status_code == 403
+    assert (await api.get('/api/bandeja', params={'id_area': OP}, headers=compras)).status_code == 403
+
+
+async def test_c5_alcance_de_asunto_y_visibilidad(api, semilla):
+    import uuid
+
+    oficialia, servicios, compras = [await entrar(api, u) for u in ('mflores', 'pmena', 'rperez')]
+    # Normal: asunto ASF 2025.
+    alcance = (await api.get('/api/asuntos/00000000-0000-4000-8000-000000000403/alcance', headers=oficialia)).json()
+    assert {a['area'] for a in alcance['areas']} >= {'Oficialía de partes', 'Compras', 'Dirección General'}
+    assert 'Marta Flores' in alcance['personas']
+
+    # Visibilidad: asunto con documento confidencial de Compras (OP-2026-0124) no revela personas a Servicios Generales.
+    d0124 = id_por_folio(semilla, 'OP-2026-0124')
+    asu = (
+        await api.post(
+            '/api/asuntos',
+            json={'nombre': 'Asunto reservado C5', 'descripcion': 'Solo CO', 'id_documento': d0124},
+            headers=compras,
+        )
+    ).json()
+    alc_sg = (await api.get(f'/api/asuntos/{asu["id"]}/alcance', headers=servicios)).json()
+    assert 'Compras' in {a['area'] for a in alc_sg['areas']}
+    assert alc_sg['personas'] == []
+
+    # Error: asunto inexistente.
+    assert (await api.get(f'/api/asuntos/{uuid.uuid4()}/alcance', headers=oficialia)).status_code == 404
+
+
+async def test_o20_salidas_limite_y_error(api):
+    import uuid
+
+    oficialia = await entrar(api, 'mflores')
+    # Límite: salida sin id_responde_a.
+    r = await api.post(
+        '/api/salidas',
+        json={
+            'tipo': 'oficio',
+            'numero': 'CO/SINRESP/2026',
+            'id_area_emisora': CO,
+            'destinatario': 'Proveedor externo',
+            'sintesis': 'Salida autónoma O-20',
+            'id_responde_a': None,
+        },
+        headers=oficialia,
+    )
+    assert r.status_code == 201
+
+    # Error: área emisora inexistente y destinatario vacío.
+    mal_area = await api.post(
+        '/api/salidas',
+        json={
+            'tipo': 'oficio',
+            'numero': 'X/1',
+            'id_area_emisora': str(uuid.uuid4()),
+            'destinatario': 'Proveedor externo',
+            'sintesis': 'S',
+        },
+        headers=oficialia,
+    )
+    assert (mal_area.status_code, mal_area.json()['title']) == (422, 'Elige el área emisora.')
+    sin_dest = await api.post(
+        '/api/salidas',
+        json={
+            'tipo': 'oficio',
+            'numero': 'X/2',
+            'id_area_emisora': CO,
+            'destinatario': '',
+            'sintesis': 'S',
+        },
+        headers=oficialia,
+    )
+    assert (sin_dest.status_code, sin_dest.json()['title']) == (422, 'Elige el destinatario externo.')
+
+
+async def test_o27_asuntos_limite_y_error(api):
+    compras = await entrar(api, 'rperez')
+    # Límite: nombre con espacios alrededor y acentos.
+    r = await api.post(
+        '/api/asuntos',
+        json={'nombre': '  Gestión Jurídica 2026  ', 'descripcion': 'Con acentos y espacios'},
+        headers=compras,
+    )
+    assert r.status_code == 201
+    assert r.json()['nombre'] == 'Gestión Jurídica 2026'
+
+    # Error: nombre vacío o descripción vacía.
+    sin_nom = await api.post('/api/asuntos', json={'nombre': '   ', 'descripcion': 'Desc'}, headers=compras)
+    assert (sin_nom.status_code, sin_nom.json()['title']) == (422, 'Escribe el nombre del asunto.')
+    sin_desc = await api.post('/api/asuntos', json={'nombre': 'Nombre', 'descripcion': ''}, headers=compras)
+    assert (sin_desc.status_code, sin_desc.json()['title']) == (422, 'Escribe la descripción del asunto.')

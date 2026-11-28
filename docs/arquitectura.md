@@ -1,6 +1,6 @@
 # Arquitectura de SIGEDOC
 
-Actualizado: 2026-11-21 · Decisiones de origen: D-10 a D-16, D-29, D-36 a D-64 (grafo de conocimiento).
+Actualizado: 2026-11-27 · Decisiones de origen: D-10 a D-16, D-29, D-36 a D-64 (grafo de conocimiento).
 
 Está diseñado contra la guía del proyecto (`docs/guia/`); la sección 11 muestra dónde se cubre cada requisito y qué falta.
 
@@ -41,7 +41,7 @@ saas_documents/
 ├── .claude/                      permisos y skills del proyecto
 ├── docs/
 │   ├── LEEME.md                  índice: qué entregable vive dónde
-│   ├── propuesta.md              E-1
+│   ├── Informe_Final_SIGEDOC.docx   informe final (incluye la propuesta, E-1)
 │   ├── modelos/                  E-2 (conceptual, relacional, documental, grafo, diccionario)
 │   ├── arquitectura.md           E-3 (este documento)
 │   ├── decisiones-tecnologicas.md   E-3 (matriz de comparación del stack)
@@ -208,7 +208,7 @@ Las bases publican sus puertos solo en `127.0.0.1`.
 
 ## 7. Pruebas (D-56, guía sección 9)
 
-Ubicación: `tests/unit`, `tests/integration` y `tests/e2e`; consultas y pruebas propias de cada base en `database/*/queries` y `database/graph/tests`. Los resultados y la evidencia de ejecución se guardan en `docs/pruebas/` (guía 12: no basta con scripts sin evidencia de ejecución).
+Ubicación: `tests/unit` y `tests/integration`; consultas propias de cada base en `database/*/queries`. Los resultados y la evidencia de ejecución se guardan en `docs/pruebas/` (guía 12: no basta con scripts sin evidencia de ejecución).
 
 | Tipo de la guía | Cómo se cubre | Cuándo |
 | --- | --- | --- |
@@ -222,7 +222,7 @@ Ubicación: `tests/unit`, `tests/integration` y `tests/e2e`; consultas y pruebas
 | Rendimiento | Flujos prioritarios (O-01, O-14, O-30, O-11, C1) con volumen de semilla de temporada alta (unos 300 documentos por semana, D-35) y entorno descrito | T-08 |
 | Visibilidad | Toda consulta que lee documentos: un usuario sin visibilidad no ve el contenido (DT-13) | T-08 |
 
-Calidad: `uv run ruff check`, `uv run ruff format --check`, `uv run pytest ../tests`; en el frontend, `npm run lint`, `npm run typecheck`, `npm test` y `npm run build`. Las pruebas de integración usan bases de prueba aisladas (`sigedoc_test`) que se limpian entre pruebas. La matriz de pruebas (qué se probó, cómo y con qué resultado) vive en `docs/pruebas/matriz.md`.
+Calidad: `uv run ruff check`, `uv run ruff format --check`, `uv run pytest ../tests`; en el frontend, `npm run lint`, `npm run typecheck`, `npm test` y `npm run build`. Las pruebas de integración usan bases de prueba aisladas (`sigedoc_test`) que se limpian entre pruebas. Los resultados medidos de cada tipo de prueba están en `docs/pruebas/evidencia.md`.
 
 ## 8. Frontend (D-38, D-63, D-64)
 
@@ -266,16 +266,16 @@ Una tarea a la vez; cada una deja sus pruebas en verde y un commit. La evidencia
 
 | Guía | Requisito | Dónde se cubre | Estado |
 | --- | --- | --- | --- |
-| 2.4, 8 | Interfaz → API → servicios → repositorios → tres bases; sin acceso directo | Secciones 1 y 3; regla 2 del handoff | Diseñado |
-| 5.2 | Fuente de verdad, replicación, sincronización, consistencia | Sección 5 (matriz) y 3.1 a 3.4 | Diseñado; evidencia en T-08 |
-| 7.1 | E-1 Propuesta | `docs/propuesta.md` | De Diego (en revisión) |
-| 7.2 | E-2 Modelado de datos | `docs/modelos/` | De Diego (en revisión); debe reconciliarse con D-42 a D-57 antes de T-04 |
-| 7.3 | E-3 Arquitectura y stack | Este documento y `decisiones-tecnologicas.md` | Redactado; falta la figura del diagrama |
-| 7.4 | E-4 Tres bases: scripts, carga, consultas y pruebas | `database/` | T-04 |
-| 7.5 | E-5 Catálogo con casos y evidencia | `docs/operaciones/` y `docs/pruebas/` | Catálogo hecho; casos y evidencia en T-08 |
-| 7.6 | E-6 Backend y API, contrato documentado | `backend/app` y `docs/api/openapi.json` | T-05 a T-07; exportación en T-08 |
-| 7.7 | E-7 Interfaz y flujo integrado (O-11) | `frontend/` | T-01 y T-02 (simulada); T-08 (integrada) |
-| 7.8 | E-8 Pruebas, rendimiento, instalación | `tests/`, `docs/pruebas/`, `README.md`, `.env.example` | T-01 a T-08 |
-| 9 | Siete tipos de prueba de integración | Sección 7 | Planeado |
+| 2.4, 8 | Interfaz → API → servicios → repositorios → tres bases; sin acceso directo | Secciones 1 y 3 | Implementado |
+| 5.2 | Fuente de verdad, replicación, sincronización, consistencia | Sección 5 (matriz) y 3.1 a 3.4 | Implementado; medido en `docs/pruebas/evidencia.md` (integración, consistencia y errores) |
+| 7.1 | E-1 Propuesta | `docs/Informe_Final_SIGEDOC.docx` (capítulos 2 a 5) | Terminado |
+| 7.2 | E-2 Modelado de datos | `docs/modelos/` | Terminado |
+| 7.3 | E-3 Arquitectura y stack | Este documento y `decisiones-tecnologicas.md`; diagrama en el informe final (figura 5) | Terminado |
+| 7.4 | E-4 Tres bases: scripts, carga, consultas y pruebas | `database/` y pruebas de integridad en `tests/integration` | Implementado |
+| 7.5 | E-5 Catálogo con casos y evidencia | `docs/operaciones/`, `docs/pruebas/evidencia.md` e informe final (sección 14.4 y anexo A) | Catálogo terminado; casos normal, límite y de error documentados para las operaciones del núcleo |
+| 7.6 | E-6 Backend y API, contrato documentado | `backend/app` y `docs/api/openapi.json` | Implementado; contrato exportado |
+| 7.7 | E-7 Interfaz y flujo integrado (O-11) | `frontend/` | Implementado, conectado a la API real y desplegado en Vercel |
+| 7.8 | E-8 Pruebas, rendimiento, instalación | `tests/`, `docs/pruebas/`, `README.md`, `.env.example` | Implementado; 41 de 41 pruebas del backend y 10 de 10 de la interfaz |
+| 9 | Siete tipos de prueba de integración | Sección 7 y `docs/pruebas/evidencia.md` | Ejecutados y medidos |
 | 10 | Organización del repositorio | Sección 2 | Adaptada con equivalencias |
-| 12 | Evitar scripts sin evidencia de ejecución y documentación al final | La evidencia se junta y se ejecuta en T-08 | Método |
+| 12 | Evitar scripts sin evidencia de ejecución y documentación al final | `docs/pruebas/evidencia.md` | Cumplido: cada resultado sale de una ejecución medida |

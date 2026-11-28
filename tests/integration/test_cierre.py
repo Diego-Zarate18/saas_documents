@@ -238,3 +238,173 @@ async def test_d29_confidencial_oculto(api, semilla):
     assert (await bandeja(api, personal, CO))[d0124]['asunto'] == 'Inconformidad de proveedor en licitación'
     assert (await bandeja(api, direccion, CO))[d0124]['asunto'] is None
     assert (await bandeja(api, direccion, JU))[d0109]['asunto'] is None
+
+
+async def test_o19_segunda_recepcion(api, semilla):
+    from apoyo_api import nuevo
+
+    oficialia = await entrar(api, 'mflores')
+    doc = (
+        await api.post(
+            '/api/documentos',
+            json=nuevo('Por correo para O-19', canal='correo', fecha_recepcion='2026-11-24T09:00:00-06:00'),
+            headers=oficialia,
+        )
+    ).json()
+
+    # Normal y límite: segunda recepción en papel fija fecha_recepcion_oficial y no cambia el folio (D-28).
+    r = await api.post(
+        f'/api/documentos/{doc["id"]}/recepciones',
+        json={'canal': 'papel', 'fecha_recepcion': '2026-11-25T11:30:00-06:00'},
+        headers=oficialia,
+    )
+    assert r.status_code == 204
+    fila = semilla.execute(
+        'SELECT fecha_recepcion_oficial, canal_segunda FROM documento WHERE id_documento = %s', (doc['id'],)
+    ).fetchone()
+    assert (str(fila[0]), fila[1]) == ('2026-11-25', 'papel')
+    ficha = (await api.get(f'/api/documentos/{doc["id"]}', headers=oficialia)).json()
+    assert ficha['registro']['folio'] == doc['folio']
+
+    # Error: repetir recepción por cualquier canal ya registrado.
+    repetida = await api.post(
+        f'/api/documentos/{doc["id"]}/recepciones',
+        json={'canal': 'papel', 'fecha_recepcion': '2026-11-25T12:00:00-06:00'},
+        headers=oficialia,
+    )
+    assert (repetida.status_code, repetida.json()['codigo']) == (409, 'CONFLICTO')
+
+
+async def test_o24_cancelar_documento(api, semilla):
+    oficialia = await entrar(api, 'mflores')
+    doc = await registrar(api, oficialia, 'Para cancelar con movimientos O-24')
+    assert (
+        await api.post(
+            f'/api/documentos/{doc["id"]}/turnos',
+            json={'destinos': [{'id_area': CO, 'rol': 'responsable'}]},
+            headers=oficialia,
+        )
+    ).status_code == 201
+
+    # Normal y límite: cancelar con movimientos los conserva en bitácora, sale de bandeja y llega a Neo4j.
+    r = await api.post(
+        f'/api/documentos/{doc["id"]}/cancelacion',
+        json={'motivo': 'Cancelación de prueba O-24'},
+        headers=oficialia,
+    )
+    assert r.status_code == 204
+    movs = semilla.execute('SELECT count(*) FROM movimiento WHERE id_documento = %s', (doc['id'],)).fetchone()[0]
+    assert movs == 2
+    assert doc['id'] not in await bandeja(api, oficialia, CO)
+
+    from app.main import app
+
+    await vaciar_outbox(app)
+    ajustes = cargar_ajustes()
+    grafo = neo4j.crear_driver(ajustes)
+    try:
+        reg, _, _ = await grafo.execute_query('MATCH (d:Documento {id: $id}) RETURN d.estado AS estado', id=doc['id'])
+        assert reg[0]['estado'] == 'cancelado'
+    finally:
+        await grafo.close()
+
+    # Error: cancelar documento ya cancelado.
+    otra = await api.post(f'/api/documentos/{doc["id"]}/cancelacion', json={'motivo': 'Reintento'}, headers=oficialia)
+    assert (otra.status_code, otra.json()['codigo']) == (409, 'ESTADO_INVALIDO')
+
+
+async def test_o28_y_o29_anexos_y_notas(api):
+    oficialia, direccion = await entrar(api, 'mflores'), await entrar(api, 'alopez')
+    doc = await registrar(api, oficialia, 'Para anexos y notas O-28 y O-29')
+    from app.main import app
+
+    await vaciar_outbox(app)
+
+    # O-28 Normal
+    r_anexo = await api.post(
+        f'/api/documentos/{doc["id"]}/expediente/anexos',
+        json={'titulo': 'Carpeta técnica', 'hojas': 5, 'ubicacion': 'Estante 2'},
+        headers=oficialia,
+    )
+    assert r_anexo.status_code == 204
+
+    # O-28 Límite / Error: sin hojas (obligatorio >= 1), sin descripción y rol sin permiso (DI).
+    sin_hojas = await api.post(
+        f'/api/documentos/{doc["id"]}/expediente/anexos',
+        json={'titulo': 'Sin hojas', 'ubicacion': 'Estante 2'},
+        headers=oficialia,
+    )
+    assert (sin_hojas.status_code, sin_hojas.json()['title']) == (422, 'El número de hojas debe ser 1 o más.')
+    sin_desc = await api.post(
+        f'/api/documentos/{doc["id"]}/expediente/anexos',
+        json={'titulo': '', 'hojas': 2, 'ubicacion': 'Estante 2'},
+        headers=oficialia,
+    )
+    assert (sin_desc.status_code, sin_desc.json()['codigo']) == (422, 'VALIDACION')
+    di_anexo = await api.post(
+        f'/api/documentos/{doc["id"]}/expediente/anexos',
+        json={'titulo': 'DI', 'hojas': 1, 'ubicacion': 'X'},
+        headers=direccion,
+    )
+    assert di_anexo.status_code == 403
+
+    # O-29 Normal y Límite: servidor fija autor, fecha y siempre tipo='general' (ignora tipo='evidencia_atencion').
+    r_nota = await api.post(
+        f'/api/documentos/{doc["id"]}/expediente/notas',
+        json={'tipo': 'evidencia_atencion', 'texto': 'Nota O-29'},
+        headers=direccion,
+    )
+    assert r_nota.status_code == 204
+    exp = (await api.get(f'/api/documentos/{doc["id"]}/expediente', headers=oficialia)).json()
+    assert len(exp['anexos']) == 1 and exp['anexos'][0]['hojas'] == 5
+    assert exp['notas'][0]['tipo'] == 'general'
+    assert exp['notas'][0]['autor'] == 'Lic. Ana López'
+
+    # O-29 Error: texto vacío.
+    vacia = await api.post(f'/api/documentos/{doc["id"]}/expediente/notas', json={'texto': '   '}, headers=direccion)
+    assert (vacia.status_code, vacia.json()['codigo']) == (422, 'VALIDACION')
+
+
+async def test_o40_reconciliar_sustitucion_a_medias(api, semilla):
+    import uuid
+
+    from app.main import app
+    from herramientas import esquemas
+    from herramientas.reconciliar import reconciliar
+
+    await vaciar_outbox(app)
+    oficialia = await entrar(api, 'mflores')
+    d1 = (await registrar(api, oficialia, 'Reconciliar sustitución 1'))['id']
+    d2 = (await registrar(api, oficialia, 'Reconciliar sustitución 2'))['id']
+    d3 = (await registrar(api, oficialia, 'Reconciliar sustitución 3'))['id']
+    await vaciar_outbox(app)
+    ajustes = cargar_ajustes()
+    pg_sync, mongo_sync, grafo_sync = esquemas.conectar(ajustes)
+    try:
+        # Mitad 1: SUSTITUYE_A en Neo4j sin estado 'sin_efecto' en PostgreSQL.
+        grafo_sync.execute_query(
+            """MATCH (o:Documento {id: $o}), (d:Documento {id: $d})
+               MERGE (o)-[:SUSTITUYE_A {id: $id}]->(d)""",
+            o=d1,
+            d=d2,
+            id=str(uuid.uuid4()),
+        )
+        # Mitad 2: estado 'sin_efecto' en PostgreSQL sin SUSTITUYE_A en Neo4j.
+        pg_sync.execute(
+            "UPDATE documento SET estado_previo = estado, estado = 'sin_efecto' WHERE id_documento = %s",
+            (d3,),
+        )
+        pg_sync.commit()
+
+        res = reconciliar(pg_sync, mongo_sync[ajustes.mongo_db], grafo_sync)
+        assert d2 in res['detalle'].get('sustitucion_a_medias', [])
+        assert d3 in res['detalle'].get('sin_efecto_sin_sustitucion', [])
+
+        e2 = pg_sync.execute('SELECT estado FROM documento WHERE id_documento = %s', (d2,)).fetchone()[0]
+        e3 = pg_sync.execute('SELECT estado, estado_previo FROM documento WHERE id_documento = %s', (d3,)).fetchone()
+        assert e2 == 'sin_efecto'
+        assert e3 == ('en_tramite', None)
+    finally:
+        grafo_sync.close()
+        mongo_sync.close()
+        pg_sync.close()

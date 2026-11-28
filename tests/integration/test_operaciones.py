@@ -8,7 +8,20 @@ import uuid
 
 import psycopg
 import pytest
-from apoyo_api import CO, CONTRASENA, FI, OP, OP_0139, SG, bandeja, entrar, nuevo, registrar, vaciar_outbox
+from apoyo_api import (
+    CO,
+    CONTRASENA,
+    FI,
+    OP,
+    OP_0139,
+    SG,
+    bandeja,
+    entrar,
+    id_por_folio,
+    nuevo,
+    registrar,
+    vaciar_outbox,
+)
 
 from app.config import cargar_ajustes
 from app.infra import mongo, neo4j
@@ -178,3 +191,220 @@ async def test_o14_bandeja_refleja_el_turno(api):
     # Compras no ve la bandeja de otra área (D-29).
     ajena = await api.get('/api/bandeja', params={'id_area': OP}, headers=compras)
     assert (ajena.status_code, ajena.json()['codigo']) == (403, 'SIN_PERMISO')
+
+
+async def test_o22_devolver_y_returnar(api, semilla):
+    oficialia, direccion, compras, finanzas = [await entrar(api, u) for u in ('mflores', 'alopez', 'rperez', 'ediaz')]
+    documento = await registrar(api, oficialia, 'Para devolución y returno O-22')
+    doc_id = documento['id']
+    assert (
+        await api.post(
+            f'/api/documentos/{doc_id}/turnos',
+            json={'destinos': [{'id_area': CO, 'rol': 'responsable'}]},
+            headers=oficialia,
+        )
+    ).status_code == 201
+
+    # Normal: devolver con motivo del catálogo regresa a Oficialía y sale de Compras.
+    dev = await api.post(
+        f'/api/documentos/{doc_id}/devoluciones',
+        json={'motivo': 'falta_informacion', 'nota': 'Falta anexo técnico'},
+        headers=compras,
+    )
+    assert dev.status_code == 201
+    assert doc_id not in await bandeja(api, compras, CO)
+    assert doc_id in await bandeja(api, oficialia, OP)
+
+    # Error: sin motivo se rechaza; sugerir área con motivo distinto a no_competencia se rechaza.
+    assert (
+        await api.post(
+            f'/api/documentos/{doc_id}/turnos',
+            json={'destinos': [{'id_area': CO, 'rol': 'responsable'}]},
+            headers=oficialia,
+        )
+    ).status_code == 201
+    sin_motivo = await api.post(f'/api/documentos/{doc_id}/devoluciones', json={'motivo': ''}, headers=compras)
+    assert (sin_motivo.status_code, sin_motivo.json()['title']) == (422, 'Elige el motivo del catálogo.')
+    otro_motivo = await api.post(
+        f'/api/documentos/{doc_id}/devoluciones',
+        json={'motivo': 'falta_firma', 'id_area_sugerida': FI},
+        headers=compras,
+    )
+    assert (otro_motivo.status_code, otro_motivo.json()['title']) == (
+        422,
+        'Solo se sugiere otra área cuando no es de su competencia.',
+    )
+
+    # Límite: no_competencia CON área sugerida returna directo a Finanzas.
+    returno = await api.post(
+        f'/api/documentos/{doc_id}/devoluciones',
+        json={'motivo': 'no_competencia', 'id_area_sugerida': FI, 'nota': 'Corresponde a Finanzas'},
+        headers=compras,
+    )
+    assert returno.status_code == 201
+    assert doc_id not in await bandeja(api, compras, CO)
+    assert doc_id in await bandeja(api, finanzas, FI)
+
+    # no_competencia SIN área sugerida se acepta, vuelve a Oficialía y aparece en C3 como rebote.
+    rebote = await api.post(
+        f'/api/documentos/{doc_id}/devoluciones',
+        json={'motivo': 'no_competencia'},
+        headers=finanzas,
+    )
+    assert rebote.status_code == 201
+    from app.main import app
+
+    await vaciar_outbox(app)
+    rebotes = (await api.get('/api/consultas/rebotes', params={'periodo': '2026-11'}, headers=direccion)).json()[
+        'elementos'
+    ]
+    por_id = {r['id_documento']: r for r in rebotes}
+    assert 'no_competencia_sin_area' in por_id[doc_id]['reglas']
+
+
+async def test_o08_asignar_documento_a_asunto(api, semilla):
+    oficialia, compras, sg_pe = await entrar(api, 'mflores'), await entrar(api, 'rperez'), await entrar(api, 'pmena')
+    asunto_1 = '00000000-0000-4000-8000-000000000401'
+    doc = await registrar(api, oficialia, 'Documento para asignar a múltiples asuntos')
+    assert (
+        await api.post(
+            f'/api/documentos/{doc["id"]}/turnos',
+            json={'destinos': [{'id_area': CO, 'rol': 'responsable'}]},
+            headers=oficialia,
+        )
+    ).status_code == 201
+    from app.main import app
+
+    await vaciar_outbox(app)
+
+    # Normal: asignar documento a asunto existente aparece en su hilo C2.
+    r1 = await api.post(f'/api/asuntos/{asunto_1}/documentos', json={'id_documento': doc['id']}, headers=compras)
+    assert r1.status_code == 204
+    hilo_1 = (await api.get(f'/api/asuntos/{asunto_1}/hilo', headers=compras)).json()
+    assert doc['id'] in {n['id_documento'] for n in hilo_1['nodos']}
+
+    # Límite: el mismo documento puede pertenecer a dos asuntos distintos.
+    asunto_2 = (
+        await api.post(
+            '/api/asuntos',
+            json={'nombre': 'Segundo asunto O-08', 'descripcion': 'Prueba D-30'},
+            headers=compras,
+        )
+    ).json()['id']
+    r2 = await api.post(f'/api/asuntos/{asunto_2}/documentos', json={'id_documento': doc['id']}, headers=compras)
+    assert r2.status_code == 204
+    hilo_2 = (await api.get(f'/api/asuntos/{asunto_2}/hilo', headers=compras)).json()
+    assert doc['id'] in {n['id_documento'] for n in hilo_2['nodos']}
+
+    # Error: asignación repetida, asunto inexistente y documento sin visibilidad.
+    repetida = await api.post(f'/api/asuntos/{asunto_1}/documentos', json={'id_documento': doc['id']}, headers=compras)
+    assert (repetida.status_code, repetida.json()['codigo']) == (409, 'CONFLICTO')
+    no_existe = await api.post(
+        f'/api/asuntos/{uuid.uuid4()}/documentos', json={'id_documento': doc['id']}, headers=compras
+    )
+    assert no_existe.status_code == 404
+    d0109 = id_por_folio(semilla, 'OP-2026-0109')
+    sin_vis = await api.post(f'/api/asuntos/{asunto_1}/documentos', json={'id_documento': d0109}, headers=sg_pe)
+    assert sin_vis.status_code == 403
+
+
+async def test_o09_actualizar_expediente(api):
+    oficialia = await entrar(api, 'mflores')
+    aud = (
+        await api.post(
+            '/api/documentos',
+            json=nuevo(
+                'Auditoría para O-09',
+                tipo='requerimiento_auditoria',
+                datos_tipo={'ente_auditor': 'ASF', 'puntos': ['Punto 1']},
+            ),
+            headers=oficialia,
+        )
+    ).json()
+    from app.main import app
+
+    await vaciar_outbox(app)
+
+    # Normal: actualizar campos propios del tipo se refleja en GET .../expediente.
+    act = await api.patch(
+        f'/api/documentos/{aud["id"]}/expediente',
+        json={'datos_tipo': {'ente_auditor': 'OIC Actualizado', 'puntos': ['Punto A', 'Punto B']}},
+        headers=oficialia,
+    )
+    assert act.status_code == 200
+    exp = (await api.get(f'/api/documentos/{aud["id"]}/expediente', headers=oficialia)).json()
+    assert exp['datos_tipo'] == {'ente_auditor': 'OIC Actualizado', 'puntos': ['Punto A', 'Punto B']}
+
+    # Error: quitar campo obligatorio del tipo se rechaza; enviar 'tipo' distinto no modifica el tipo en MongoDB (D-26).
+    sin_req = await api.patch(f'/api/documentos/{aud["id"]}/expediente', json={'datos_tipo': {}}, headers=oficialia)
+    assert (sin_req.status_code, sin_req.json()['codigo']) == (422, 'VALIDACION')
+    cambio_tipo = await api.patch(
+        f'/api/documentos/{aud["id"]}/expediente',
+        json={'tipo': 'oficio', 'datos_tipo': {'ente_auditor': 'OIC Intacto'}},
+        headers=oficialia,
+    )
+    assert cambio_tipo.status_code == 200
+    ficha = (await api.get(f'/api/documentos/{aud["id"]}', headers=oficialia)).json()
+    assert ficha['registro']['tipo'] == 'requerimiento_auditoria'
+
+    # Límite: documento cancelado es de solo lectura.
+    assert (
+        await api.post(f'/api/documentos/{aud["id"]}/cancelacion', json={'motivo': 'Prueba O-09'}, headers=oficialia)
+    ).status_code == 204
+    sobre_cancelado = await api.patch(
+        f'/api/documentos/{aud["id"]}/expediente',
+        json={'datos_tipo': {'ente_auditor': 'No debe'}},
+        headers=oficialia,
+    )
+    assert (sobre_cancelado.status_code, sobre_cancelado.json()['codigo']) == (409, 'ESTADO_INVALIDO')
+
+
+async def test_o39_error_destino_inalcanzable_detiene_mismo_doc(api, semilla, monkeypatch):
+    from app.main import app
+    from outbox import procesador
+
+    await vaciar_outbox(app)
+    oficialia = await entrar(api, 'mflores')
+    doc1 = await registrar(api, oficialia, 'Doc 1 con fallo en Neo4j')
+    assert (
+        await api.post(
+            f'/api/documentos/{doc1["id"]}/turnos',
+            json={'destinos': [{'id_area': CO, 'rol': 'responsable'}]},
+            headers=oficialia,
+        )
+    ).status_code == 201
+    doc2 = await registrar(api, oficialia, 'Doc 2 debe entregarse')
+
+    real_entregar = procesador.entregar
+
+    async def entregar_con_fallo(evento, db, grafo):
+        if evento['destino'] == 'neo4j' and evento['datos'].get('id_documento') == doc1['id']:
+            raise ConnectionError('Neo4j simulado inalcanzable para doc1')
+        await real_entregar(evento, db, grafo)
+
+    monkeypatch.setattr(procesador, 'entregar', entregar_con_fallo)
+    ajustes = cargar_ajustes()
+    cliente, grafo = mongo.crear_cliente(ajustes), neo4j.crear_driver(ajustes)
+    try:
+        # max_intentos=1: doc1 queda en 'error' (deteniendo su movimiento) y doc2 avanza hasta enviarse.
+        await procesador.procesar_todo(app.state.pool, cliente[ajustes.mongo_db], grafo, max_intentos=1)
+    finally:
+        await grafo.close()
+        await cliente.close()
+
+    filas = semilla.execute(
+        """SELECT tipo_evento, destino, estado, intentos, ultimo_error
+           FROM outbox WHERE datos->>'id_documento' = %s ORDER BY id""",
+        (doc1['id'],),
+    ).fetchall()
+    neo_doc1 = [f for f in filas if f[1] == 'neo4j']
+    assert neo_doc1[0][0] == 'documento' and neo_doc1[0][2] == 'error' and neo_doc1[0][3] == 1
+    assert 'ConnectionError' in neo_doc1[0][4]
+    # El movimiento posterior del mismo documento en neo4j queda detenido en 'pendiente'.
+    assert neo_doc1[1][0] == 'movimiento' and neo_doc1[1][2] == 'pendiente'
+
+    # Mientras tanto, los eventos de doc2 sí se entregan correctamente.
+    estados_doc2 = semilla.execute(
+        "SELECT estado FROM outbox WHERE datos->>'id_documento' = %s", (doc2['id'],)
+    ).fetchall()
+    assert all(e[0] == 'enviado' for e in estados_doc2)
